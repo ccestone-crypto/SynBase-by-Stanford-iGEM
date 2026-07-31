@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4: Inserting DNA Into Cells — SiBRP Academy</title>
+<link rel="stylesheet" href="../css/style.css?v=6">
+</head>
+<body>
+
+<header class="site-header" id="site-header"></header>
+<section class="module-hero" id="module-hero"></section>
+<div id="video-block"></div>
+
+<main class="container narrow" id="topic-sections"></main>
+
+<div class="container narrow">
+  <div class="module-footer-nav" id="module-footer-nav"></div>
+</div>
+
+<footer class="site-footer">
+  Adapted from Stanford iGEM SiBRP Session 2. Figures from Biorender, Eppendorf, and cited research sources.
+</footer>
+
+<script src="../js/modules-meta.js?v=6"></script>
+<script src="../js/progress.js?v=6"></script>
+<script src="../js/quiz-engine.js?v=6"></script>
+<script>
+const MODULE = {
+  id: "module4",
+  number: 4,
+  title: "Inserting DNA Into Cells",
+  lede: "Editing biological function almost always involves getting foreign DNA or RNA into a cell. This module covers why we insert genetic material, the tools used to deliver it, and how plasmids make the job easier.",
+  sections: [
+    {
+      id: "4.1",
+      title: "Why Insert Foreign DNA Into Cells?",
+      img: "../assets/img/module4/inserting-foreign-dna.png",
+      imgAlt: "Diagram of foreign DNA being inserted into a cell",
+      caption: "Synthetic biology often involves editing damaged DNA or adding new genetic features to a cell. (Image from Biorender)",
+      html: `
+        <p>Synthetic biology often starts with a simple goal: fix something broken, or add something new. That might mean editing damaged DNA that's causing a disease, or adding an entirely new feature to a cell that it didn't have before — like resistance to a chemical, or the ability to produce a useful protein.</p>
+        <p>To make either kind of edit, foreign genetic material — DNA or RNA — usually has to be inserted into the cell from outside. The rest of this module covers how scientists actually get that genetic material in.</p>
+      `,
+      question: {
+        prompt: "According to this module, what is one common motivation for inserting foreign genetic material into a cell?",
+        options: [
+          { text: "To remove all DNA from the cell", correct: false },
+          { text: "To edit damaged DNA or add new genetic features/functions to the cell", correct: true },
+          { text: "To convert the cell into a virus", correct: false },
+          { text: "To prevent the cell from ever dividing", correct: false }
+        ],
+        explanation: "Synthetic biology often involves editing damaged DNA or adding new cell features — both of which typically require inserting foreign genetic material (DNA/RNA) into the cell."
+      }
+    },
+    {
+      id: "4.2",
+      title: "Tools to Deliver Genetic Material Into Cells",
+      img: "../assets/img/module4/delivery-tools.png",
+      imgAlt: "Diagram of viral vectors, lipid nanoparticles, lipofection, and electroporation",
+      caption: "Viral vectors, lipid nanoparticles, lipofection, and electroporation are four common tools for delivering genetic material into cells. (Image from Biorender)",
+      html: `
+        <p>Getting DNA or RNA safely across a cell membrane is a real engineering challenge. Four common tools include:</p>
+        <ul>
+          <li><strong>Viral vectors:</strong> harmless viruses repurposed to "infect" cells and insert genetic material.</li>
+          <li><strong>Lipid nanoparticles:</strong> microscopic fat bubbles that encapsulate and deliver genetic material into cells.</li>
+          <li><strong>Lipofection:</strong> tiny fat bubbles that fuse directly with the cell membrane to deliver genetic material.</li>
+          <li><strong>Electroporation:</strong> electrical pulses that temporarily poke holes in the cell membrane so genetic material can travel inside.</li>
+        </ul>
+        <p>Each tool takes a different route through (or around) the phospholipid bilayer we studied in Module 1 — which is exactly why understanding membrane structure matters for delivering genetic material.</p>
+      `,
+      question: {
+        prompt: "Which delivery tool uses electrical pulses to temporarily create holes in the cell membrane?",
+        options: [
+          { text: "Viral vectors", correct: false },
+          { text: "Lipid nanoparticles", correct: false },
+          { text: "Electroporation", correct: true },
+          { text: "Lipofection", correct: false }
+        ],
+        explanation: "Electroporation uses electrical pulses to poke temporary holes in the cell membrane, allowing genetic material to enter. Viral vectors, lipid nanoparticles, and lipofection all use different (non-electrical) delivery mechanisms."
+      }
+    },
+    {
+      id: "4.3",
+      title: "Stable vs. Transient Expression",
+      img: "../assets/img/module4/stable-vs-transient.png",
+      imgAlt: "Diagram comparing stable and transient gene expression",
+      caption: "Stable expression integrates foreign DNA into the host genome long-term; transient expression does not, and is temporary. (Image from Eppendorf)",
+      html: `
+        <p>Once foreign genetic material is inside a cell, it can behave in one of two ways:</p>
+        <ul>
+          <li><strong>Transient expression</strong> (temporary): foreign genetic material does NOT integrate into the host cell's genome. Advantage: rapid protein production (24–96 hours). Disadvantage: expression is short-lived, since nucleases degrade the foreign material over time.</li>
+          <li><strong>Stable expression</strong> (long-term): foreign genetic material DOES integrate into the host cell's genome. Advantage: sustained expression suitable for large-scale production. Disadvantage: experimentally challenging — precise conditions are needed for the foreign DNA to integrate successfully.</li>
+        </ul>
+        <p>Choosing between the two is a tradeoff between speed and durability, and it depends entirely on what the experiment or therapy needs.</p>
+      `,
+      question: {
+        prompt: "What is the key difference between stable and transient expression?",
+        options: [
+          { text: "Stable expression integrates foreign DNA into the host genome for long-term expression; transient expression does not integrate and is temporary.", correct: true },
+          { text: "Transient expression always lasts longer than stable expression.", correct: false },
+          { text: "Stable expression never requires any foreign DNA.", correct: false },
+          { text: "There is no meaningful difference between the two.", correct: false }
+        ],
+        explanation: "Stable expression integrates foreign genetic material into the host cell's genome for sustained, long-term expression. Transient expression does not integrate, giving rapid but short-lived protein production."
+      }
+    },
+    {
+      id: "4.4",
+      title: "Plasmids: Easy-to-Insert Circular DNA",
+      img: "../assets/img/module4/plasmids.png",
+      imgAlt: "Diagram of circular plasmid DNA",
+      caption: "Circular plasmid DNA has no exposed ends and is compact, making it easier to insert into cells. (Image from Biorender)",
+      html: `
+        <p>Recall from Module 1 that bacterial cells naturally carry small loops of DNA called <strong>plasmids</strong>. That same circular structure makes plasmids one of the most convenient tools for inserting foreign DNA into cells, for two main reasons:</p>
+        <ul>
+          <li>Circular DNA has no exposed ends, which protects it from degradation.</li>
+          <li>Circular DNA is compact, making it easier to package and deliver.</li>
+        </ul>
+        <p>Both factors make plasmids easier to insert into cells than long, linear stretches of DNA — which is why they're a workhorse tool across synthetic biology and bioengineering labs.</p>
+      `,
+      question: {
+        prompt: "Why are circular plasmids easier to insert into cells than linear DNA?",
+        options: [
+          { text: "Because they have exposed ends that help them attach to the cell membrane.", correct: false },
+          { text: "Because they have no exposed ends (protecting them from degradation) and are compact.", correct: true },
+          { text: "Because they are much larger than linear DNA.", correct: false },
+          { text: "Because they cannot be replicated inside cells.", correct: false }
+        ],
+        explanation: "Circular DNA like plasmids has no exposed ends, protecting it from degradation, and is compact — both of which make it easier to insert into cells than linear DNA."
+      }
+    },
+    {
+      id: "4.5",
+      title: "Real-World Applications: Fluorescence and BioART",
+      img: "../assets/img/module4/fluorescence-example.png",
+      imgAlt: "Fluorescence microscope image of HEK 293T cells expressing green fluorescent protein",
+      caption: "Inserting foreign DNA can produce visible biological changes, like green fluorescence in HEK 293T cells. (Image from Chu et al., 2015)",
+      html: `
+        <p>Inserting foreign DNA into cells isn't just a lab technique — it can create striking, visible results. In one example, foreign DNA inserted into HEK 293T cells induced green fluorescence, visibly demonstrating that the new genetic material was successfully taken up and expressed.</p>
+        <p>This same principle — inserting engineered DNA to produce a visible, designed outcome — has even been extended into an art form known as <strong>BioART</strong>, where synthetic biology techniques are used to create living, glowing, or patterned works of art.</p>
+      `,
+      question: {
+        prompt: "Which of the following is FALSE about synthetic biology?",
+        options: [
+          { text: "Foreign DNA can be inserted into cells, but foreign RNA cannot.", correct: true },
+          { text: "Viral vectors, lipid nanoparticles, and electroporation are all valid methods to insert genetic material into cells.", correct: false },
+          { text: "Stable expression involves incorporating foreign DNA into the cell's genome.", correct: false },
+          { text: "Circular loops of DNA (plasmids) are easier to insert into the cell due to the lack of exposed ends.", correct: false }
+        ],
+        explanation: "This statement is false — foreign RNA can also be inserted into cells (for example, mRNA vaccines and RNAi drugs from Module 3). Both foreign DNA and RNA can be delivered into cells using tools like viral vectors, lipid nanoparticles, lipofection, and electroporation."
+      }
+    }
+  ]
+};
+
+(async () => {
+  const user = await bootstrapAuthAndProgress(false);
+  if (!user) return;
+  renderModulePage(MODULE);
+})();
+</script>
+</body>
+</html>

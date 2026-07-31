@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1: Biology of Cells — SiBRP Academy</title>
+<link rel="stylesheet" href="../css/style.css?v=6">
+</head>
+<body>
+
+<header class="site-header" id="site-header"></header>
+<section class="module-hero" id="module-hero"></section>
+<div id="video-block"></div>
+
+<main class="container narrow" id="topic-sections"></main>
+
+<div class="container narrow">
+  <div class="module-footer-nav" id="module-footer-nav"></div>
+</div>
+
+<footer class="site-footer">
+  Adapted from Stanford iGEM SiBRP Session 2. Figures from Biorender and LibreTexts.
+</footer>
+
+<script src="../js/modules-meta.js?v=6"></script>
+<script src="../js/progress.js?v=6"></script>
+<script src="../js/quiz-engine.js?v=6"></script>
+<script>
+const MODULE = {
+  id: "module1",
+  number: 1,
+  title: "Biology of Cells",
+  lede: "Cells are the building blocks of biological life. Before diving into DNA, RNA, and engineering, this module covers what cells are, how they're categorized, and the parts that make them work.",
+  sections: [
+    {
+      id: "1.1",
+      title: "Cells: The Building Blocks of Life",
+      img: "../assets/img/module1/cells-building-blocks.png",
+      imgAlt: "Illustration of cells as the building blocks of biological life",
+      caption: "Cells are the fundamental building blocks of biological life. (Image from Biorender)",
+      html: `
+        <p>Every living organism — from a single bacterium to a human being — is built from <strong>cells</strong>, the smallest unit that can carry out the functions of life. Just as bricks combine to form a building, cells combine and specialize to form tissues, organs, and entire organisms.</p>
+        <p>Inside nearly every cell is a molecule called <strong>DNA (deoxyribonucleic acid)</strong>, which acts as an instructional manual for the cell. DNA doesn't just make an organism function — it makes that organism uniquely itself, since the instructions encoded in DNA are passed down from parent to offspring.</p>
+        <p>Life is also far more diverse than a single "typical" cell. Bacteria, plants, fungi, and animals all package their DNA differently, which is the next idea we'll explore.</p>
+      `,
+      question: {
+        prompt: "What best describes the relationship between cells and DNA?",
+        options: [
+          { text: "DNA is found outside of cells, in the extracellular matrix.", correct: false },
+          { text: "Cells are the building blocks of life, and DNA inside them acts as an instructional manual.", correct: true },
+          { text: "Cells are made of DNA, but DNA does not control the cell's function.", correct: false },
+          { text: "Only bacterial cells contain DNA.", correct: false }
+        ],
+        explanation: "Cells are the basic building blocks of biological life, and the DNA housed inside them stores the instructions that make each organism — and each of us — unique."
+      }
+    },
+    {
+      id: "1.2",
+      title: "DNA Is Housed Within Cells",
+      img: "../assets/img/module1/dna-housed-in-cells.png",
+      imgAlt: "Diagram showing DNA housed within a cell",
+      caption: "DNA is stored inside cells and carries the genetic instructions unique to each organism. (Image from Biorender)",
+      html: `
+        <p>DNA doesn't float freely in the environment — it is packaged and housed within cells, protected from the outside world. This genetic material contains the complete set of instructions for building and operating an organism.</p>
+        <p>Because DNA is passed from parent to offspring and varies slightly between individuals, it's responsible for the traits that make each person — and each species — distinct. Understanding where DNA lives inside the cell is the foundation for everything else in this curriculum, from transcription and translation to modern gene-editing technology.</p>
+        <p>Biology, however, doesn't stop at one generic cell. Life is organized into broad categories of cells, each with a different way of storing and using their DNA — which is what we'll look at next.</p>
+      `,
+      question: {
+        prompt: "Why is it significant that DNA is housed within cells rather than floating freely in the environment?",
+        options: [
+          { text: "Being housed inside the cell protects DNA and keeps each organism's genetic instructions organized and functional.", correct: true },
+          { text: "DNA housed inside cells cannot be copied or read.", correct: false },
+          { text: "DNA is only housed inside cells in bacteria.", correct: false },
+          { text: "Housing DNA inside cells prevents it from controlling the organism's traits.", correct: false }
+        ],
+        explanation: "DNA is housed inside cells, which protects the genetic material and keeps the instructions for building and running the organism organized and accessible."
+      }
+    },
+    {
+      id: "1.3",
+      title: "The Three Domains of Life",
+      img: "../assets/img/module1/three-domains-of-life.png",
+      imgAlt: "Diagram of the three domains of life: Eukarya, Bacteria, and Archaea",
+      caption: "Eukarya, Bacteria, and Archaea are the three domains of life, distinguished by their membranes and cell walls. (Images from Biorender, LibreTexts)",
+      html: `
+        <p>All known life fits into three broad domains: <strong>Eukarya</strong>, <strong>Bacteria</strong>, and <strong>Archaea</strong>. These domains are distinguished largely by the structure of their cell membranes and, in some cases, their cell walls.</p>
+        <ul>
+          <li><strong>Eukarya</strong> have a nuclear membrane enclosing their DNA, in addition to a cell membrane.</li>
+          <li><strong>Bacteria</strong> have no nuclear membrane, but have a cell membrane plus a cell wall built from peptidoglycan.</li>
+          <li><strong>Archaea</strong> also lack a nuclear membrane and have a cell membrane; some have cell walls, but without peptidoglycan.</li>
+        </ul>
+        <p>These structural differences determine which lab tools and techniques work on which organisms — a theme that becomes important later in this curriculum.</p>
+      `,
+      question: {
+        prompt: "Which feature distinguishes Bacteria from Eukarya?",
+        options: [
+          { text: "Bacteria have a nuclear membrane; Eukarya do not.", correct: false },
+          { text: "Bacteria lack a nuclear membrane and have peptidoglycan in their cell wall; Eukarya have a nuclear membrane.", correct: true },
+          { text: "Bacteria and Eukarya have identical membrane structures.", correct: false },
+          { text: "Only Eukarya contain DNA.", correct: false }
+        ],
+        explanation: "Eukarya have a nuclear membrane surrounding their DNA. Bacteria lack a nuclear membrane but have a cell wall containing peptidoglycan — a feature Archaea cell walls lack."
+      }
+    },
+    {
+      id: "1.4",
+      title: "Model Organisms in Bioengineering",
+      img: "../assets/img/module1/model-organisms.png",
+      imgAlt: "Bacterial, mammalian, and plant model organism cells",
+      caption: "Bacterial (E. coli), mammalian (HEK 293), and plant (BY-2) cells are common model organisms in bioengineering. (Image from Biorender)",
+      html: `
+        <p>Bioengineers rely heavily on a small set of <strong>model organisms</strong> — organisms with relatively simple, well-understood cell structures that still share key features with more complex life. Three of the most common are:</p>
+        <ul>
+          <li><strong>Bacterial cells</strong>, such as <em>E. coli</em></li>
+          <li><strong>Mammalian cells</strong>, such as HEK 293 (human embryonic kidney cells)</li>
+          <li><strong>Plant cells</strong>, such as BY-2 (tobacco) cells</li>
+        </ul>
+        <p>Because these organisms are easy to grow, well-characterized, and genetically manipulable, they make experimentation faster and more reliable — which is why they show up again and again in later modules on engineering DNA, RNA, and proteins.</p>
+      `,
+      question: {
+        prompt: "Why do bioengineers frequently use model organisms like E. coli or HEK 293 cells?",
+        options: [
+          { text: "Because they have simpler, well-understood cell structures while sharing key features with more complex organisms, making experimentation easier.", correct: true },
+          { text: "Because they are the only cells that contain DNA.", correct: false },
+          { text: "Because they cannot be genetically modified, making them safe to study.", correct: false },
+          { text: "Because they are identical in structure to human cells.", correct: false }
+        ],
+        explanation: "Model organisms like E. coli, HEK 293, and BY-2 cells have simpler cell structures but share enough similarity with more complex organisms to make them convenient and reliable for experimentation."
+      }
+    },
+    {
+      id: "1.5",
+      title: "Anatomy of a Bacterial Cell",
+      img: "../assets/img/module1/bacterial-cell-parts.png",
+      imgAlt: "Labeled diagram of a bacterial cell's parts",
+      caption: "Key parts of a bacterial cell: nucleoid, cytoplasm, ribosomes, plasmid, and cell wall. (Image from Biorender)",
+      html: `
+        <p>Bacterial cells package several important structures inside a protective cell wall:</p>
+        <ul>
+          <li><strong>Nucleoid:</strong> hosts the cell's genetic material as circular DNA — note that bacteria have no nuclear membrane.</li>
+          <li><strong>Cytoplasm:</strong> the gel-like fluid enclosed by the cell membrane, where cellular reactions happen.</li>
+          <li><strong>Plasmid:</strong> a small, circular piece of DNA separate from the main chromosome, often carrying antibiotic-resistance genes.</li>
+          <li><strong>Ribosomes:</strong> synthesize proteins from genetic material.</li>
+          <li><strong>Cell wall:</strong> protects the cell and maintains its shape.</li>
+        </ul>
+        <p>Plasmids in particular will come back later in this curriculum — their small, circular, easy-to-insert structure makes them one of the most important tools for inserting foreign DNA into cells.</p>
+      `,
+      question: {
+        prompt: "Which bacterial structure is a small, circular piece of DNA separate from the main chromosome, often carrying antibiotic-resistance genes?",
+        options: [
+          { text: "Nucleoid", correct: false },
+          { text: "Ribosome", correct: false },
+          { text: "Plasmid", correct: true },
+          { text: "Cell wall", correct: false }
+        ],
+        explanation: "The plasmid is a small, circular DNA molecule distinct from the main chromosomal DNA in the nucleoid. Plasmids often carry antibiotic-resistance genes and are easy to insert into cells."
+      }
+    },
+    {
+      id: "1.6",
+      title: "Anatomy of a Eukaryotic Cell",
+      img: "../assets/img/module1/eukaryotic-cell-parts.png",
+      imgAlt: "Labeled diagram of a eukaryotic cell's parts",
+      caption: "Key parts of a eukaryotic cell: nucleus, ribosomes, cell membrane, and cytoplasm. (Image from Biorender)",
+      html: `
+        <p>Eukaryotic cells — found in plants, animals, and fungi — organize their contents differently from bacteria:</p>
+        <ul>
+          <li><strong>Nucleus:</strong> hosts the cell's genetic material (DNA), enclosed by its own nuclear membrane.</li>
+          <li><strong>Ribosomes:</strong> synthesize proteins from genetic material, just as in bacteria.</li>
+          <li><strong>Cell membrane:</strong> regulates what moves into and out of the cell.</li>
+          <li><strong>Cytoplasm:</strong> the gel-like fluid enclosed by the cell membrane.</li>
+        </ul>
+        <p>The key structural difference from bacteria is the nucleus: eukaryotic DNA is enclosed by a dedicated nuclear membrane, whereas bacterial DNA sits in the nucleoid with no such membrane.</p>
+      `,
+      question: {
+        prompt: "Which part of the cell is known for storing the body's main genetic DNA?",
+        options: [
+          { text: "The Cell Membrane", correct: false },
+          { text: "The Nucleus", correct: true },
+          { text: "The Extracellular Matrix", correct: false },
+          { text: "Ribosomes", correct: false }
+        ],
+        explanation: "The nucleus hosts the cell's long-term genetic material (DNA), enclosed by a nuclear membrane — a defining feature of eukaryotic cells."
+      }
+    },
+    {
+      id: "1.7",
+      title: "The Extracellular Matrix",
+      img: "../assets/img/module1/extracellular-matrix.png",
+      imgAlt: "Diagram of the extracellular matrix surrounding cells",
+      caption: "Collagen, a common ECM protein, provides structure and strength to skin, muscle, and bone. (Image from Biorender)",
+      html: `
+        <p>Not everything important to a cell's function happens inside it. The <strong>extracellular matrix (ECM)</strong> is a network of proteins and molecules found outside the cell that provides structural support to tissues.</p>
+        <p><strong>Collagen</strong> is one of the most common ECM proteins. It gives structure and strength to skin, muscles, and bones, and is a good example of how biology extends beyond the boundaries of a single cell to build entire tissues and organs.</p>
+      `,
+      question: {
+        prompt: "What is the extracellular matrix (ECM) primarily responsible for?",
+        options: [
+          { text: "Storing genetic material outside the cell.", correct: false },
+          { text: "Providing structural support, like collagen does for skin, muscle, and bone.", correct: true },
+          { text: "Producing proteins from RNA.", correct: false },
+          { text: "Separating bacterial cells from Eukarya.", correct: false }
+        ],
+        explanation: "The ECM is a network found outside the cell — collagen, a common ECM protein, provides structure and strength to tissues like skin, muscle, and bone."
+      }
+    },
+    {
+      id: "1.8",
+      title: "The Cell Membrane and the Phospholipid Bilayer",
+      img: "../assets/img/module1/phospholipid-bilayer-full.png",
+      imgAlt: "Diagram of the phospholipid bilayer with protein channels and integral proteins",
+      caption: "The phospholipid bilayer, with protein channels and integral proteins embedded in it. (Image from Biorender)",
+      html: `
+        <p>The <strong>cell membrane</strong> is the gate that separates the cell from its environment. Its foundation is the <strong>phospholipid bilayer</strong>: each phospholipid has a hydrophilic (water-loving) phosphate head and hydrophobic (water-fearing) hydrocarbon tails. In water, the hydrophilic heads face outward toward the extracellular and intracellular spaces, while the hydrophobic tails face each other in the middle — following the principle that "like dissolves with like."</p>
+        <p>This arrangement makes the membrane <strong>semipermeable</strong>: small, nonpolar molecules can slip through unassisted, but larger or charged/polar molecules cannot cross on their own. To handle those, the membrane relies on:</p>
+        <ul>
+          <li><strong>Protein channels:</strong> allow movement of large or hydrophilic molecules.</li>
+          <li><strong>Integral proteins:</strong> help the cell communicate with its environment (e.g., receptors, cell adhesion molecules).</li>
+        </ul>
+      `,
+      question: {
+        prompt: "What molecules can pass through the phospholipid bilayer unassisted?",
+        options: [
+          { text: "Glucose", correct: false },
+          { text: "K+", correct: false },
+          { text: "CO2", correct: true },
+          { text: "Na+", correct: false }
+        ],
+        explanation: "Small, nonpolar molecules like CO2 can diffuse directly through the hydrophobic core of the phospholipid bilayer. Charged ions (K+, Na+) and larger polar molecules (glucose) need protein channels to cross."
+      }
+    }
+  ]
+};
+
+(async () => {
+  const user = await bootstrapAuthAndProgress(false);
+  if (!user) return;
+  renderModulePage(MODULE);
+})();
+</script>
+</body>
+</html>

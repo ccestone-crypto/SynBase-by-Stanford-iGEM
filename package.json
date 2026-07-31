@@ -1,0 +1,20 @@
+{
+  "name": "sibrp-academy",
+  "version": "1.0.0",
+  "private": true,
+  "description": "SiBRP Academy curriculum site with account-based progress tracking",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.6",
+    "dotenv": "^17.4.2",
+    "express": "^4.19.2",
+    "express-rate-limit": "^8.6.1",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^2.2.0",
+    "nodemailer": "^9.0.3"
+  }
+}

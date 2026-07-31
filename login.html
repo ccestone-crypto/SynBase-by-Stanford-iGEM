@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Log In — SiBRP Academy</title>
+<link rel="stylesheet" href="css/style.css?v=6">
+</head>
+<body>
+
+<div class="auth-page">
+  <div class="auth-card">
+    <div class="auth-brand"><span class="dot"></span> SiBRP Academy</div>
+    <p class="auth-subtitle">Log in to continue your curriculum progress.</p>
+
+    <div class="auth-error" id="auth-error"></div>
+    <div class="auth-success" id="auth-success"></div>
+
+    <form id="login-form" novalidate>
+      <div class="auth-field">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" autocomplete="email" required>
+      </div>
+      <div class="auth-field">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" autocomplete="current-password" required>
+      </div>
+      <button type="submit" class="btn auth-submit" id="submit-btn">Log In</button>
+    </form>
+
+    <div class="auth-switch"><a href="forgot-password.html">Forgot password?</a></div>
+    <div class="auth-switch">Don't have an account? <a href="signup.html">Sign up</a></div>
+  </div>
+</div>
+
+<script>
+  function getParam(name) {
+    return new URLSearchParams(location.search).get(name);
+  }
+
+  const form = document.getElementById("login-form");
+  const errorEl = document.getElementById("auth-error");
+  const submitBtn = document.getElementById("submit-btn");
+
+  function showError(msg) {
+    errorEl.textContent = msg;
+    errorEl.classList.add("show");
+  }
+
+  if (getParam("reset") === "success") {
+    const successEl = document.getElementById("auth-success");
+    successEl.textContent = "Your password has been reset. Log in with your new password.";
+    successEl.classList.add("show");
+  }
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    errorEl.classList.remove("show");
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Logging in…";
+
+    try {
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: document.getElementById("email").value,
+          password: document.getElementById("password").value
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        showError(data.error || "Something went wrong. Please try again.");
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Log In";
+        return;
+      }
+      const next = getParam("next");
+      location.href = next && next.startsWith("/") ? next : "index.html";
+    } catch (err) {
+      showError("Could not reach the server. Please try again.");
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Log In";
+    }
+  });
+</script>
+</body>
+</html>

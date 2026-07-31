@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Beyond SiBRP — SiBRP Academy</title>
+<link rel="stylesheet" href="css/style.css?v=8">
+</head>
+<body>
+
+<header class="site-header" id="site-header"></header>
+
+<section class="page-hero">
+  <div class="container">
+    <div id="brand-mark-mount"></div>
+    <h1>Beyond SiBRP</h1>
+    <p class="lede">A showcase of what past students have gone on to build, research, and present after completing this curriculum. Click into a story to read more.</p>
+  </div>
+</section>
+
+<main class="container">
+  <div class="portfolio-grid" id="portfolio-grid"></div>
+</main>
+
+<footer class="site-footer">
+  Adapted from Stanford iGEM Bioengineering Research Program (SiBRP), Session 2 — July 15th, 2026.
+</footer>
+
+<script src="js/portfolio-data.js?v=1"></script>
+<script src="js/progress.js?v=6"></script>
+<script>
+function renderProjects(mountEl) {
+  if (!PROJECTS.length) {
+    mountEl.outerHTML = `<div class="portfolio-empty">No projects added yet — check back soon.</div>`;
+    return;
+  }
+  mountEl.innerHTML = PROJECTS.map(p => `
+    <a class="portfolio-card" href="project.html?id=${encodeURIComponent(p.id)}">
+      <div class="portfolio-thumb chip-${p.accent}">${p.image ? `<img src="${p.image}" alt="${p.title}" loading="lazy">` : initials(p.student)}</div>
+      <div class="portfolio-body">
+        <span class="portfolio-tag chip-${p.accent}">${p.tag}${p.year ? " &middot; " + p.year : ""}</span>
+        <h3>${p.title}</h3>
+        <div class="portfolio-student">${p.student}</div>
+        <p>${p.shortDescription}</p>
+      </div>
+    </a>
+  `).join("");
+}
+
+(async () => {
+  await renderPublicHeader(document.getElementById("site-header"), true);
+  document.getElementById("brand-mark-mount").outerHTML = BRAND_MARK;
+  renderProjects(document.getElementById("portfolio-grid"));
+})();
+</script>
+</body>
+</html>

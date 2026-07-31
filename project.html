@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Story — SiBRP Academy</title>
+<link rel="stylesheet" href="css/style.css?v=8">
+</head>
+<body>
+
+<header class="site-header" id="site-header"></header>
+
+<main class="container narrow" id="story-main" style="padding-top:26px;"></main>
+
+<footer class="site-footer">
+  Adapted from Stanford iGEM Bioengineering Research Program (SiBRP), Session 2 — July 15th, 2026.
+</footer>
+
+<script src="js/portfolio-data.js?v=1"></script>
+<script src="js/progress.js?v=6"></script>
+<script>
+function escapeHtml(str) {
+  const div = document.createElement("div");
+  div.textContent = str == null ? "" : str;
+  return div.innerHTML;
+}
+
+function renderStory(mountEl, project) {
+  document.title = `${project.title} — SiBRP Academy`;
+
+  mountEl.innerHTML = `
+    <div class="story-back"><a href="beyond-sibrp.html">&larr; Beyond SiBRP</a></div>
+
+    <div class="story-thumb chip-${project.accent}">
+      ${project.image ? `<img src="${project.image}" alt="${escapeHtml(project.title)}">` : `<span class="story-thumb-initials">${initials(project.student)}</span>`}
+    </div>
+
+    <span class="portfolio-tag chip-${project.accent}">${escapeHtml(project.tag)}${project.year ? " &middot; " + escapeHtml(project.year) : ""}</span>
+    <h1 class="story-title">${escapeHtml(project.title)}</h1>
+    <div class="story-student">${escapeHtml(project.student)}</div>
+
+    <p class="story-lede">${escapeHtml(project.shortDescription)}</p>
+
+    <div class="story-body">${project.fullStory}</div>
+
+    <div class="quote-card story-anecdote">
+      <div class="quote-mark">&ldquo;</div>
+      <p class="quote-text">${escapeHtml(project.anecdote)}</p>
+      <div class="quote-attribution">${escapeHtml(project.student)}</div>
+    </div>
+
+    ${project.link ? `<a class="btn" href="${project.link}" target="_blank" rel="noopener">View Full Project &rarr;</a>` : ""}
+  `;
+}
+
+function renderNotFound(mountEl) {
+  document.title = "Story Not Found — SiBRP Academy";
+  mountEl.innerHTML = `
+    <div class="locked-panel">
+      <h2>Story not found</h2>
+      <p>This project may have been removed or the link is incorrect.</p>
+      <a class="btn" href="beyond-sibrp.html">Back to Beyond SiBRP</a>
+    </div>
+  `;
+}
+
+(async () => {
+  await renderPublicHeader(document.getElementById("site-header"), true);
+  const id = new URLSearchParams(location.search).get("id");
+  const project = id ? findProjectById(id) : null;
+  const mountEl = document.getElementById("story-main");
+  if (project) {
+    renderStory(mountEl, project);
+  } else {
+    renderNotFound(mountEl);
+  }
+})();
+</script>
+</body>
+</html>

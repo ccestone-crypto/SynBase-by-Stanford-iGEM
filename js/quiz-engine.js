@@ -1,0 +1,245 @@
+// Renders a full module page (video block, topic articles, quizzes, nav)
+// from a plain-data MODULE object defined inline in each modules/moduleN.html.
+//
+// MODULE shape:
+// {
+//   id, number, title, lede,
+//   sections: [
+//     {
+//       id, title,
+//       img, imgAlt, caption,
+//       html: "<p>...</p>",              // article body, already-safe static HTML
+//       question: {
+//         prompt: "...",
+//         options: [{ text: "...", correct: true|false }, ...],
+//         explanation: "..."
+//       }
+//     }, ...
+//   ]
+// }
+
+function renderModulePage(MODULE) {
+  const headerMount = document.getElementById("site-header");
+  renderHeader(headerMount, false);
+
+  const meta = MODULES_META.find(m => m.id === MODULE.id);
+
+  if (!isModuleUnlocked(MODULE.id)) {
+    renderLockedModule(MODULE);
+    document.title = `Locked — ${MODULE.title} — SiBRP Academy`;
+    return;
+  }
+
+  renderModuleHero(MODULE, meta);
+  renderVideoBlock(MODULE);
+  renderSections(MODULE);
+  renderFooterNav(MODULE);
+
+  document.title = `${MODULE.title} — SiBRP Academy`;
+}
+
+function renderLockedModule(MODULE) {
+  const { prev, prevProgress } = lockedModuleInfo(MODULE.id);
+
+  document.getElementById("module-hero").innerHTML = `
+    <div class="container">
+      ${BRAND_MARK}
+      <div class="breadcrumb"><a href="../index.html">Home</a> &rsaquo; Module ${MODULE.number}</div>
+      <div class="module-chip-row">
+        <span class="module-chip chip-locked">${MODULE.number}</span>
+        <h1 style="margin:0">Module ${MODULE.number}: ${MODULE.title}</h1>
+      </div>
+    </div>
+  `;
+  document.getElementById("video-block").innerHTML = "";
+  document.getElementById("topic-sections").innerHTML = `
+    <div class="locked-panel">
+      <div class="locked-icon">${LOCK_ICON}</div>
+      <h2>This module is locked</h2>
+      <p>Finish <strong>Module ${prev.number}: ${prev.title}</strong> (currently ${prevProgress.pct}% complete) to unlock Module ${MODULE.number}.</p>
+      <a class="btn" href="${prev.id}.html">Go to Module ${prev.number}</a>
+    </div>
+  `;
+  document.getElementById("module-footer-nav").innerHTML = `
+    <div><a class="btn secondary" href="${prev.id}.html">&larr; Module ${prev.number}: ${prev.title}</a></div>
+    <div><a class="btn secondary" href="../index.html">Back to Home &rarr;</a></div>
+  `;
+}
+
+function refreshModuleProgressBar(MODULE, meta) {
+  const p = moduleProgress(MODULE.id, meta.sectionCount);
+  const bar = document.getElementById("module-progress-fill");
+  const pct = document.getElementById("module-progress-pct");
+  const count = document.getElementById("module-progress-count");
+  if (bar) bar.style.width = p.pct + "%";
+  if (pct) pct.textContent = p.pct + "%";
+  if (count) count.textContent = `${p.completed}/${p.total} complete`;
+  // keep the header's overall pill in sync too
+  const headerMount = document.getElementById("site-header");
+  if (headerMount) renderHeader(headerMount, false);
+}
+
+function renderModuleHero(MODULE, meta) {
+  const el = document.getElementById("module-hero");
+  el.innerHTML = `
+    <div class="container">
+      ${BRAND_MARK}
+      <div class="breadcrumb"><a href="../index.html">Home</a> &rsaquo; Module ${MODULE.number}</div>
+      <div class="module-chip-row">
+        <span class="module-chip chip-${moduleAccentClass(MODULE.number)}">${MODULE.number}</span>
+        <h1 style="margin:0">Module ${MODULE.number}: ${MODULE.title}</h1>
+      </div>
+      <p class="lede">${MODULE.lede}</p>
+      <div class="module-progress-bar-wrap">
+        <div class="progress-track"><div class="fill" id="module-progress-fill" style="width:0%"></div></div>
+        <span class="pct" id="module-progress-pct">0%</span>
+      </div>
+      <p style="margin:8px 0 0;font-size:0.82rem;color:var(--ink-soft)" id="module-progress-count"></p>
+    </div>
+  `;
+  refreshModuleProgressBar(MODULE, meta);
+}
+
+function renderVideoBlock(MODULE) {
+  const el = document.getElementById("video-block");
+  const watched = isVideoWatched(MODULE.id);
+  el.innerHTML = `
+    <div class="container narrow">
+      <div class="video-block">
+        <h2>Preliminary Teaching Video</h2>
+        <p class="hint">Insert this module's teaching video here before class. Drop a file at
+          <code>assets/video/${MODULE.id}.mp4</code> and it will play automatically instead of this placeholder.</p>
+        <div class="video-placeholder">
+          <div class="icon">&#9654;</div>
+          <div><strong>No video uploaded yet</strong></div>
+          <div>Place a file named <code>${MODULE.id}.mp4</code> in <code>assets/video/</code></div>
+        </div>
+        <label class="watched-toggle">
+          <input type="checkbox" id="video-watched-checkbox" ${watched ? "checked" : ""}>
+          I watched the teaching video for this module
+        </label>
+      </div>
+    </div>
+  `;
+
+  // If a real video file exists, swap the placeholder for a <video> element.
+  const probe = new Image();
+  const videoSrc = `../assets/video/${MODULE.id}.mp4`;
+  fetch(videoSrc, { method: "HEAD" }).then(res => {
+    if (res.ok) {
+      const placeholder = el.querySelector(".video-placeholder");
+      placeholder.outerHTML = `<video controls src="${videoSrc}"></video>`;
+    }
+  }).catch(() => {});
+
+  const checkbox = document.getElementById("video-watched-checkbox");
+  checkbox.addEventListener("change", () => {
+    setVideoWatched(MODULE.id, checkbox.checked);
+    const meta = MODULES_META.find(m => m.id === MODULE.id);
+    refreshModuleProgressBar(MODULE, meta);
+  });
+}
+
+function renderSections(MODULE) {
+  const el = document.getElementById("topic-sections");
+  el.innerHTML = MODULE.sections.map((section, i) => sectionTemplate(MODULE, section, i)).join("");
+
+  MODULE.sections.forEach(section => {
+    wireQuiz(MODULE, section);
+  });
+}
+
+function sectionTemplate(MODULE, section, index) {
+  const complete = isSectionComplete(MODULE.id, section.id);
+  const tint = moduleAccentClass(MODULE.number);
+  return `
+    <article class="topic-article ${complete ? "is-complete" : ""}" id="section-${section.id}" data-section-id="${section.id}">
+      <div class="topic-article-header">
+        <span class="topic-index tint-${tint}">${complete ? "&#10003;" : index + 1}</span>
+        <h2>${section.title}</h2>
+      </div>
+      <div class="topic-body">
+        <figure class="topic-figure">
+          <img src="${section.img}" alt="${section.imgAlt}" loading="lazy">
+          <figcaption>${section.caption}</figcaption>
+        </figure>
+        <div class="topic-text">${section.html}</div>
+        ${section.question ? quizTemplate(section) : ""}
+      </div>
+    </article>
+  `;
+}
+
+function quizTemplate(section) {
+  const q = section.question;
+  return `
+    <div class="quiz-box" data-quiz-for="${section.id}">
+      <div class="quiz-label">Check Your Understanding</div>
+      <p class="quiz-question">${q.prompt}</p>
+      <div class="quiz-options">
+        ${q.options.map((opt, i) => `
+          <label class="quiz-option" data-option-index="${i}">
+            <input type="radio" name="quiz-${section.id}" value="${i}">
+            <span>${opt.text}</span>
+          </label>
+        `).join("")}
+      </div>
+      <div class="quiz-actions">
+        <button class="btn small" data-check-btn>Check Answer</button>
+        <span class="quiz-feedback" data-feedback></span>
+      </div>
+      <div class="quiz-explanation" data-explanation>${q.explanation}</div>
+    </div>
+  `;
+}
+
+function wireQuiz(MODULE, section) {
+  if (!section.question) return;
+  const box = document.querySelector(`.quiz-box[data-quiz-for="${section.id}"]`);
+  if (!box) return;
+  const checkBtn = box.querySelector("[data-check-btn]");
+  const feedback = box.querySelector("[data-feedback]");
+  const explanation = box.querySelector("[data-explanation]");
+  const options = Array.from(box.querySelectorAll(".quiz-option"));
+
+  checkBtn.addEventListener("click", () => {
+    const selected = box.querySelector("input[type=radio]:checked");
+    if (!selected) {
+      feedback.textContent = "Select an answer first.";
+      feedback.className = "quiz-feedback incorrect";
+      return;
+    }
+    const idx = Number(selected.value);
+    const isCorrect = !!section.question.options[idx].correct;
+
+    options.forEach((opt, i) => {
+      opt.classList.remove("correct", "incorrect");
+      if (section.question.options[i].correct) opt.classList.add("correct");
+      else if (i === idx) opt.classList.add("incorrect");
+    });
+
+    feedback.textContent = isCorrect ? "Correct!" : "Not quite — see the explanation below.";
+    feedback.className = "quiz-feedback " + (isCorrect ? "correct" : "incorrect");
+    explanation.classList.add("show");
+
+    if (isCorrect) {
+      markSectionComplete(MODULE.id, section.id);
+      const articleEl = document.getElementById(`section-${section.id}`);
+      articleEl.classList.add("is-complete");
+      articleEl.querySelector(".topic-index").innerHTML = "&#10003;";
+      const meta = MODULES_META.find(m => m.id === MODULE.id);
+      refreshModuleProgressBar(MODULE, meta);
+    }
+  });
+}
+
+function renderFooterNav(MODULE) {
+  const el = document.getElementById("module-footer-nav");
+  const idx = MODULES_META.findIndex(m => m.id === MODULE.id);
+  const prev = MODULES_META[idx - 1];
+  const next = MODULES_META[idx + 1];
+  el.innerHTML = `
+    <div>${prev ? `<a class="btn secondary" href="${prev.id}.html">&larr; Module ${prev.number}: ${prev.title}</a>` : `<a class="btn secondary" href="../index.html">&larr; Home</a>`}</div>
+    <div>${next ? `<a class="btn" href="${next.id}.html">Module ${next.number}: ${next.title} &rarr;</a>` : `<a class="btn" href="../index.html">Back to Home &rarr;</a>`}</div>
+  `;
+}

@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — SiBRP Academy</title>
+<link rel="stylesheet" href="css/style.css?v=6">
+</head>
+<body>
+
+<header class="site-header" id="site-header"></header>
+
+<section class="page-hero">
+  <div class="container">
+    <div id="brand-mark-mount"></div>
+    <h1>Admin Dashboard</h1>
+    <p class="lede">Every account on this deployment, with per-module and overall progress. Resetting a student clears all of their saved progress.</p>
+  </div>
+</section>
+
+<main class="container">
+  <div class="admin-table-wrap">
+    <table class="admin-table" id="admin-table">
+      <thead>
+        <tr>
+          <th>Student</th>
+          <th>Joined</th>
+          <th>Module 1</th>
+          <th>Module 2</th>
+          <th>Module 3</th>
+          <th>Module 4</th>
+          <th>Module 5</th>
+          <th>Overall</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="admin-table-body"></tbody>
+    </table>
+  </div>
+</main>
+
+<main class="container narrow">
+  <div class="content-card">
+    <h2>Application Questions</h2>
+    <p style="color:var(--ink-soft);font-size:0.9rem;margin:0 0 8px;">
+      Students see these once they've finished every module. Changes apply immediately.
+    </p>
+    <div class="auth-error" id="question-error"></div>
+    <div id="question-list"></div>
+    <div class="add-question-form">
+      <div class="form-field">
+        <label for="new-question-prompt">New question</label>
+        <input type="text" id="new-question-prompt" placeholder="e.g. Why do you want to join?">
+      </div>
+      <select id="new-question-type">
+        <option value="short">Short answer</option>
+        <option value="long">Long answer</option>
+      </select>
+      <button class="btn small" id="add-question-btn">Add</button>
+    </div>
+  </div>
+</main>
+
+<main class="container">
+  <div class="section-label" style="margin-top:0">Applications Received</div>
+  <div id="applications-list"></div>
+</main>
+
+<footer class="site-footer">
+  Adapted from Stanford iGEM Bioengineering Research Program (SiBRP), Session 2 — July 15th, 2026.
+</footer>
+
+<script src="js/modules-meta.js?v=6"></script>
+<script src="js/progress.js?v=6"></script>
+<script>
+function calcModuleProgress(progress, moduleId, sectionCount) {
+  const mod = (progress && progress[moduleId]) || { sections: {}, videoWatched: false };
+  const completedSections = Object.keys(mod.sections || {}).filter(k => mod.sections[k]).length;
+  const total = sectionCount + 1;
+  const completed = completedSections + (mod.videoWatched ? 1 : 0);
+  return Math.round((completed / total) * 100);
+}
+
+function calcOverall(progress) {
+  let completed = 0, total = 0;
+  MODULES_META.forEach(m => {
+    const mod = (progress && progress[m.id]) || { sections: {}, videoWatched: false };
+    const completedSections = Object.keys(mod.sections || {}).filter(k => mod.sections[k]).length;
+    total += m.sectionCount + 1;
+    completed += completedSections + (mod.videoWatched ? 1 : 0);
+  });
+  return total ? Math.round((completed / total) * 100) : 0;
+}
+
+function pctCell(pct) {
+  return `
+    <span class="admin-pct-cell">
+      <span class="progress-track light"><span class="fill" style="width:${pct}%"></span></span>
+      ${pct}%
+    </span>
+  `;
+}
+
+async function loadUsers() {
+  const res = await fetch("/api/admin/users");
+  if (!res.ok) {
+    document.getElementById("admin-table-body").innerHTML = `<tr><td colspan="9">Could not load users.</td></tr>`;
+    return;
+  }
+  const data = await res.json();
+  renderUsers(data.users);
+}
+
+function renderUsers(users) {
+  const body = document.getElementById("admin-table-body");
+  if (!users.length) {
+    body.innerHTML = `<tr><td colspan="9">No accounts yet.</td></tr>`;
+    return;
+  }
+  body.innerHTML = users.map(u => {
+    const joined = new Date(u.createdAt).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+    const modCells = MODULES_META.map(m => `<td>${pctCell(calcModuleProgress(u.progress, m.id, m.sectionCount))}</td>`).join("");
+    return `
+      <tr data-user-id="${u.id}">
+        <td>
+          <div class="admin-name">${u.name}${u.isAdmin ? '<span class="admin-badge">Admin</span>' : ""}</div>
+          <div class="admin-email">${u.email}</div>
+        </td>
+        <td>${joined}</td>
+        ${modCells}
+        <td class="admin-overall">${calcOverall(u.progress)}%</td>
+        <td><button class="btn small secondary admin-reset-btn" data-reset-user="${u.id}" data-reset-name="${u.name}">Reset</button></td>
+      </tr>
+    `;
+  }).join("");
+
+  body.querySelectorAll("[data-reset-user]").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const userId = btn.getAttribute("data-reset-user");
+      const name = btn.getAttribute("data-reset-name");
+      if (!confirm(`Reset all progress for ${name}? This can't be undone.`)) return;
+      btn.disabled = true;
+      btn.textContent = "Resetting…";
+      try {
+        const res = await fetch("/api/admin/reset-progress", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId })
+        });
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          alert(data.error || `Could not reset progress (HTTP ${res.status}).`);
+        }
+      } catch (err) {
+        alert("Could not reach the server. Please try again.");
+      }
+      loadUsers();
+    });
+  });
+}
+
+function escapeHtml(str) {
+  const div = document.createElement("div");
+  div.textContent = str == null ? "" : str;
+  return div.innerHTML;
+}
+
+// ---------- Application questions ----------
+async function loadQuestions() {
+  const res = await fetch("/api/admin/application-questions");
+  const data = await res.json();
+  renderQuestions(data.questions || []);
+}
+
+function renderQuestions(questions) {
+  const listEl = document.getElementById("question-list");
+  listEl.innerHTML = questions.length
+    ? questions.map(q => `
+        <div class="question-row" data-question-id="${q.id}">
+          <div class="question-row-main">
+            <div class="question-row-prompt">${escapeHtml(q.prompt)}</div>
+            <span class="question-row-type">${q.type === "long" ? "Long answer" : "Short answer"}</span>
+          </div>
+          <div class="question-row-actions">
+            <button class="btn small secondary" data-delete-question="${q.id}">Delete</button>
+          </div>
+        </div>
+      `).join("")
+    : `<p style="color:var(--ink-soft);font-size:0.9rem;margin:0;">No questions yet — add one below.</p>`;
+
+  listEl.querySelectorAll("[data-delete-question]").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      if (!confirm("Delete this question?")) return;
+      const errorEl = document.getElementById("question-error");
+      errorEl.classList.remove("show");
+      try {
+        const res = await fetch(`/api/admin/application-questions/${btn.getAttribute("data-delete-question")}`, {
+          method: "DELETE"
+        });
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          errorEl.textContent = data.error || `Could not delete that question (HTTP ${res.status}).`;
+          errorEl.classList.add("show");
+          return;
+        }
+      } catch (err) {
+        errorEl.textContent = "Could not reach the server. Please try again.";
+        errorEl.classList.add("show");
+        return;
+      }
+      loadQuestions();
+    });
+  });
+}
+
+document.getElementById("add-question-btn").addEventListener("click", async () => {
+  const promptInput = document.getElementById("new-question-prompt");
+  const typeSelect = document.getElementById("new-question-type");
+  const btn = document.getElementById("add-question-btn");
+  const errorEl = document.getElementById("question-error");
+  errorEl.classList.remove("show");
+
+  const prompt = promptInput.value.trim();
+  if (!prompt) {
+    errorEl.textContent = "Enter question text before adding.";
+    errorEl.classList.add("show");
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = "Adding…";
+  try {
+    const res = await fetch("/api/admin/application-questions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt, type: typeSelect.value })
+    });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      errorEl.textContent = data.error || `Could not add that question (HTTP ${res.status}).`;
+      errorEl.classList.add("show");
+      return;
+    }
+    promptInput.value = "";
+    loadQuestions();
+  } catch (err) {
+    errorEl.textContent = "Could not reach the server. Please try again.";
+    errorEl.classList.add("show");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Add";
+  }
+});
+
+// ---------- Applications received ----------
+async function loadApplications() {
+  const res = await fetch("/api/admin/applications");
+  const data = await res.json();
+  renderApplications(data.applications || [], data.questions || []);
+}
+
+function renderApplications(applications, questions) {
+  const listEl = document.getElementById("applications-list");
+  if (!applications.length) {
+    listEl.innerHTML = `<div class="content-card"><p style="margin:0;color:var(--ink-soft);">No applications submitted yet.</p></div>`;
+    return;
+  }
+
+  const promptById = {};
+  questions.forEach(q => { promptById[q.id] = q.prompt; });
+
+  listEl.innerHTML = applications.map((a, i) => {
+    const submitted = new Date(a.submittedAt).toLocaleString();
+    const blocks = Object.entries(a.answers).map(([qid, answer]) => `
+      <div class="answer-block">
+        <div class="question">${escapeHtml(promptById[qid] || "Question (removed)")}</div>
+        <div class="answer">${escapeHtml(answer)}</div>
+      </div>
+    `).join("");
+    return `
+      <div class="content-card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;">
+          <div>
+            <div class="admin-name">${escapeHtml(a.name)}</div>
+            <div class="admin-email">${escapeHtml(a.email)} &middot; Submitted ${escapeHtml(submitted)}</div>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn small secondary" data-toggle-app="${i}">View Answers</button>
+            <button class="btn small secondary" data-reset-app="${a.userId}" data-reset-app-name="${escapeHtml(a.name)}">Allow Resubmit</button>
+          </div>
+        </div>
+        <div class="app-answers" id="app-answers-${i}" style="display:none;margin-top:16px;">${blocks}</div>
+      </div>
+    `;
+  }).join("");
+
+  listEl.querySelectorAll("[data-toggle-app]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const el = document.getElementById(`app-answers-${btn.getAttribute("data-toggle-app")}`);
+      const showing = el.style.display !== "none";
+      el.style.display = showing ? "none" : "block";
+      btn.textContent = showing ? "View Answers" : "Hide Answers";
+    });
+  });
+
+  listEl.querySelectorAll("[data-reset-app]").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const userId = btn.getAttribute("data-reset-app");
+      const name = btn.getAttribute("data-reset-app-name");
+      if (!confirm(`Allow ${name} to resubmit? This deletes their current application.`)) return;
+      try {
+        const res = await fetch("/api/admin/applications/reset", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId })
+        });
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          alert(data.error || `Could not reset that application (HTTP ${res.status}).`);
+        }
+      } catch (err) {
+        alert("Could not reach the server. Please try again.");
+      }
+      loadApplications();
+    });
+  });
+}
+
+(async () => {
+  const user = await bootstrapAuthAndProgress(true);
+  if (!user) return;
+  if (!user.isAdmin) {
+    location.href = "index.html";
+    return;
+  }
+  renderHeader(document.getElementById("site-header"), true);
+  document.getElementById("brand-mark-mount").outerHTML = BRAND_MARK;
+  loadUsers();
+  loadQuestions();
+  loadApplications();
+})();
+</script>
+</body>
+</html>
