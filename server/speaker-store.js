@@ -1,59 +1,39 @@
 // Metadata store for the optional "Speaker Series" page. Video files live on
-// disk under assets/video/speakers/<id>.<ext>; this file just tracks the
+// disk under assets/video/speakers/<id>.<ext>; SQLite just tracks the
 // title/speaker/description alongside each one so the page can render a list.
 const fs = require("fs");
 const path = require("path");
+const db = require("./db");
 
-const DATA_DIR = path.join(__dirname, "data");
-const TALKS_FILE = path.join(DATA_DIR, "speaker-talks.json");
 const VIDEO_DIR = path.join(__dirname, "..", "assets", "video", "speakers");
+if (!fs.existsSync(VIDEO_DIR)) fs.mkdirSync(VIDEO_DIR, { recursive: true });
 
-function ensureDirs() {
-  if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
-  if (!fs.existsSync(VIDEO_DIR)) fs.mkdirSync(VIDEO_DIR, { recursive: true });
-  if (!fs.existsSync(TALKS_FILE)) fs.writeFileSync(TALKS_FILE, "[]", "utf8");
-}
-ensureDirs();
-
-function readTalks() {
-  try {
-    return JSON.parse(fs.readFileSync(TALKS_FILE, "utf8"));
-  } catch (e) {
-    return [];
-  }
-}
-
-function writeTalks(talks) {
-  fs.writeFileSync(TALKS_FILE, JSON.stringify(talks, null, 2), "utf8");
-}
+const insertTalkStmt = db.prepare(`
+  INSERT INTO speaker_talks (id, title, speakerName, description, filename, uploadedAt)
+  VALUES (?, ?, ?, ?, ?, ?)
+`);
+const listTalksStmt = db.prepare(`SELECT * FROM speaker_talks ORDER BY uploadedAt DESC`);
+const findTalkByIdStmt = db.prepare(`SELECT * FROM speaker_talks WHERE id = ?`);
+const deleteTalkStmt = db.prepare(`DELETE FROM speaker_talks WHERE id = ?`);
 
 function listTalks() {
-  return readTalks().sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt));
+  return listTalksStmt.all();
 }
 
 function findTalkById(id) {
-  return readTalks().find(t => t.id === id) || null;
+  return findTalkByIdStmt.get(id) || null;
 }
 
 function addTalk({ id, title, speakerName, description, filename }) {
-  const talks = readTalks();
-  const talk = {
-    id,
-    title,
-    speakerName,
-    description: description || "",
-    filename,
-    uploadedAt: new Date().toISOString()
-  };
-  talks.push(talk);
-  writeTalks(talks);
-  return talk;
+  const uploadedAt = new Date().toISOString();
+  insertTalkStmt.run(id, title, speakerName, description || "", filename, uploadedAt);
+  return findTalkById(id);
 }
 
 function deleteTalk(id) {
   const talk = findTalkById(id);
   if (!talk) return false;
-  writeTalks(readTalks().filter(t => t.id !== id));
+  deleteTalkStmt.run(id);
   const filePath = path.join(VIDEO_DIR, talk.filename);
   if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
   return true;

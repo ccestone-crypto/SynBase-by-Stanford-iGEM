@@ -1,192 +1,191 @@
-// Tiny flat-file "database" for a small classroom tool — no separate DB engine
-// to install. Users live in data/users.json; each user's progress lives in its
-// own data/progress/<userId>.json file. All access is synchronous, which is
-// fine at this scale (a handful of students, low write frequency).
-const fs = require("fs");
-const path = require("path");
+// SQLite-backed data access. Every exported function name/signature matches
+// the old flat-file version exactly, so server.js's routes didn't need to
+// change (except the progress-write path, which now uses atomic per-field
+// upserts instead of read-modify-write — see markSectionComplete/setVideoWatched).
+const db = require("./db");
 
-const DATA_DIR = path.join(__dirname, "data");
-const USERS_FILE = path.join(DATA_DIR, "users.json");
-const PROGRESS_DIR = path.join(DATA_DIR, "progress");
-const APPLICATION_QUESTIONS_FILE = path.join(DATA_DIR, "application-questions.json");
-const APPLICATIONS_FILE = path.join(DATA_DIR, "applications.json");
+// ---------- Users ----------
+const insertUserStmt = db.prepare(`
+  INSERT INTO users (id, name, email, passwordHash, isAdmin, createdAt)
+  VALUES (@id, @name, @email, @passwordHash, @isAdmin, @createdAt)
+`);
+const findUserByEmailStmt = db.prepare(`SELECT * FROM users WHERE email = ?`);
+const findUserByIdStmt = db.prepare(`SELECT * FROM users WHERE id = ?`);
+const countUsersStmt = db.prepare(`SELECT COUNT(*) AS count FROM users`);
+const listUsersStmt = db.prepare(`SELECT * FROM users ORDER BY createdAt ASC`);
+const setResetTokenStmt = db.prepare(`UPDATE users SET resetTokenHash = ?, resetTokenExpiresAt = ? WHERE id = ?`);
+const findUserByResetTokenHashStmt = db.prepare(`SELECT * FROM users WHERE resetTokenHash = ?`);
+const clearResetTokenStmt = db.prepare(`UPDATE users SET resetTokenHash = NULL, resetTokenExpiresAt = NULL WHERE id = ?`);
+const updatePasswordStmt = db.prepare(`UPDATE users SET passwordHash = ? WHERE id = ?`);
 
-function ensureDirs() {
-  if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
-  if (!fs.existsSync(PROGRESS_DIR)) fs.mkdirSync(PROGRESS_DIR, { recursive: true });
-  if (!fs.existsSync(USERS_FILE)) fs.writeFileSync(USERS_FILE, "[]", "utf8");
-  if (!fs.existsSync(APPLICATION_QUESTIONS_FILE)) fs.writeFileSync(APPLICATION_QUESTIONS_FILE, "[]", "utf8");
-  if (!fs.existsSync(APPLICATIONS_FILE)) fs.writeFileSync(APPLICATIONS_FILE, "[]", "utf8");
-}
-ensureDirs();
-
-function readUsers() {
-  try {
-    return JSON.parse(fs.readFileSync(USERS_FILE, "utf8"));
-  } catch (e) {
-    return [];
-  }
-}
-
-function writeUsers(users) {
-  fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2), "utf8");
+function rowToUser(row) {
+  if (!row) return null;
+  return { ...row, isAdmin: !!row.isAdmin };
 }
 
 function findUserByEmail(email) {
   const norm = String(email || "").trim().toLowerCase();
-  return readUsers().find(u => u.email === norm) || null;
+  return rowToUser(findUserByEmailStmt.get(norm));
 }
 
 function findUserById(id) {
-  return readUsers().find(u => u.id === id) || null;
+  return rowToUser(findUserByIdStmt.get(id));
 }
 
 function countUsers() {
-  return readUsers().length;
+  return countUsersStmt.get().count;
 }
 
 function listUsers() {
-  return readUsers();
+  return listUsersStmt.all().map(rowToUser);
 }
 
+// Throws with a UNIQUE-constraint message if the email is already taken —
+// callers should check findUserByEmail first for the common case, but this
+// stays atomic as a backstop against two simultaneous signups with the same email.
 function createUser({ id, name, email, passwordHash, isAdmin }) {
-  const users = readUsers();
-  const user = {
+  insertUserStmt.run({
     id,
     name,
     email: String(email).trim().toLowerCase(),
     passwordHash,
-    isAdmin: !!isAdmin,
+    isAdmin: isAdmin ? 1 : 0,
     createdAt: new Date().toISOString()
-  };
-  users.push(user);
-  writeUsers(users);
-  return user;
+  });
+  return findUserById(id);
 }
 
-function progressPath(userId) {
-  return path.join(PROGRESS_DIR, `${userId}.json`);
-}
-
-function readProgress(userId) {
-  const file = progressPath(userId);
-  if (!fs.existsSync(file)) return {};
-  try {
-    return JSON.parse(fs.readFileSync(file, "utf8"));
-  } catch (e) {
-    return {};
-  }
-}
-
-function writeProgress(userId, progress) {
-  fs.writeFileSync(progressPath(userId), JSON.stringify(progress, null, 2), "utf8");
-}
-
-function resetProgress(userId) {
-  writeProgress(userId, {});
-}
-
-// ---------- Password reset tokens ----------
-// Only the SHA-256 hash of the reset token is stored (same principle as not
-// storing plaintext passwords) — the raw token only ever exists in the email
-// link and the incoming request that redeems it.
 function setResetToken(userId, tokenHash, expiresAt) {
-  const users = readUsers();
-  const user = users.find(u => u.id === userId);
-  if (!user) return;
-  user.resetTokenHash = tokenHash;
-  user.resetTokenExpiresAt = expiresAt;
-  writeUsers(users);
+  setResetTokenStmt.run(tokenHash, expiresAt, userId);
 }
 
 function findUserByResetTokenHash(tokenHash) {
-  const user = readUsers().find(u => u.resetTokenHash === tokenHash);
-  if (!user) return null;
-  if (!user.resetTokenExpiresAt || Date.now() > user.resetTokenExpiresAt) return null;
-  return user;
+  const row = findUserByResetTokenHashStmt.get(tokenHash);
+  if (!row) return null;
+  if (!row.resetTokenExpiresAt || Date.now() > row.resetTokenExpiresAt) return null;
+  return rowToUser(row);
 }
 
 function clearResetToken(userId) {
-  const users = readUsers();
-  const user = users.find(u => u.id === userId);
-  if (!user) return;
-  delete user.resetTokenHash;
-  delete user.resetTokenExpiresAt;
-  writeUsers(users);
+  clearResetTokenStmt.run(userId);
 }
 
 function updatePassword(userId, passwordHash) {
-  const users = readUsers();
-  const user = users.find(u => u.id === userId);
-  if (!user) return;
-  user.passwordHash = passwordHash;
-  writeUsers(users);
+  updatePasswordStmt.run(passwordHash, userId);
+}
+
+// ---------- Progress ----------
+// Each of these is a single atomic statement — no app-level read-modify-write,
+// so two concurrent requests (even for the same user) can never clobber each
+// other or corrupt data. This is the actual fix for the flat-file race condition.
+const upsertSectionStmt = db.prepare(`
+  INSERT INTO progress_sections (userId, moduleId, sectionId, completed)
+  VALUES (?, ?, ?, 1)
+  ON CONFLICT(userId, moduleId, sectionId) DO UPDATE SET completed = 1
+`);
+const upsertVideoStmt = db.prepare(`
+  INSERT INTO progress_video (userId, moduleId, watched)
+  VALUES (?, ?, ?)
+  ON CONFLICT(userId, moduleId) DO UPDATE SET watched = excluded.watched
+`);
+const sectionsForUserStmt = db.prepare(`SELECT moduleId, sectionId FROM progress_sections WHERE userId = ?`);
+const videoForUserStmt = db.prepare(`SELECT moduleId, watched FROM progress_video WHERE userId = ?`);
+const deleteSectionsForUserStmt = db.prepare(`DELETE FROM progress_sections WHERE userId = ?`);
+const deleteVideoForUserStmt = db.prepare(`DELETE FROM progress_video WHERE userId = ?`);
+
+function markSectionComplete(userId, moduleId, sectionId) {
+  upsertSectionStmt.run(userId, moduleId, sectionId);
+}
+
+function setVideoWatched(userId, moduleId, watched) {
+  upsertVideoStmt.run(userId, moduleId, watched ? 1 : 0);
+}
+
+// Reconstructs the same { module1: { sections: {...}, videoWatched }, ... }
+// shape the rest of the app (and the client) already expects.
+function readProgress(userId) {
+  const progress = {};
+  for (const row of sectionsForUserStmt.all(userId)) {
+    if (!progress[row.moduleId]) progress[row.moduleId] = { sections: {}, videoWatched: false };
+    progress[row.moduleId].sections[row.sectionId] = true;
+  }
+  for (const row of videoForUserStmt.all(userId)) {
+    if (!progress[row.moduleId]) progress[row.moduleId] = { sections: {}, videoWatched: false };
+    progress[row.moduleId].videoWatched = !!row.watched;
+  }
+  return progress;
+}
+
+function resetProgress(userId) {
+  deleteSectionsForUserStmt.run(userId);
+  deleteVideoForUserStmt.run(userId);
 }
 
 // ---------- Application questions (admin-managed) ----------
-function readApplicationQuestions() {
-  try {
-    return JSON.parse(fs.readFileSync(APPLICATION_QUESTIONS_FILE, "utf8"));
-  } catch (e) {
-    return [];
-  }
-}
+const insertQuestionStmt = db.prepare(`INSERT INTO application_questions (id, prompt, type) VALUES (?, ?, ?)`);
+const listQuestionsStmt = db.prepare(`SELECT id, prompt, type FROM application_questions ORDER BY rowid ASC`);
+const findQuestionStmt = db.prepare(`SELECT id, prompt, type FROM application_questions WHERE id = ?`);
+const updateQuestionStmt = db.prepare(`UPDATE application_questions SET prompt = ?, type = ? WHERE id = ?`);
+const deleteQuestionStmt = db.prepare(`DELETE FROM application_questions WHERE id = ?`);
 
-function writeApplicationQuestions(questions) {
-  fs.writeFileSync(APPLICATION_QUESTIONS_FILE, JSON.stringify(questions, null, 2), "utf8");
+function readApplicationQuestions() {
+  return listQuestionsStmt.all();
 }
 
 function addApplicationQuestion({ id, prompt, type }) {
-  const questions = readApplicationQuestions();
-  const question = { id, prompt, type: type === "long" ? "long" : "short" };
-  questions.push(question);
-  writeApplicationQuestions(questions);
-  return question;
+  insertQuestionStmt.run(id, prompt, type === "long" ? "long" : "short");
+  return findQuestionStmt.get(id);
 }
 
 function updateApplicationQuestion(id, { prompt, type }) {
-  const questions = readApplicationQuestions();
-  const question = questions.find(q => q.id === id);
-  if (!question) return null;
-  if (typeof prompt === "string") question.prompt = prompt;
-  if (type) question.type = type === "long" ? "long" : "short";
-  writeApplicationQuestions(questions);
-  return question;
+  const existing = findQuestionStmt.get(id);
+  if (!existing) return null;
+  const nextPrompt = typeof prompt === "string" ? prompt : existing.prompt;
+  const nextType = type ? (type === "long" ? "long" : "short") : existing.type;
+  updateQuestionStmt.run(nextPrompt, nextType, id);
+  return findQuestionStmt.get(id);
 }
 
 function deleteApplicationQuestion(id) {
-  writeApplicationQuestions(readApplicationQuestions().filter(q => q.id !== id));
+  deleteQuestionStmt.run(id);
 }
 
 // ---------- Applications (student submissions) ----------
-function readApplications() {
-  try {
-    return JSON.parse(fs.readFileSync(APPLICATIONS_FILE, "utf8"));
-  } catch (e) {
-    return [];
-  }
-}
+const insertApplicationStmt = db.prepare(`
+  INSERT INTO applications (userId, name, email, answers, submittedAt)
+  VALUES (?, ?, ?, ?, ?)
+`);
+const findApplicationByUserIdStmt = db.prepare(`SELECT * FROM applications WHERE userId = ?`);
+const listApplicationsStmt = db.prepare(`SELECT * FROM applications ORDER BY submittedAt DESC`);
+const deleteApplicationStmt = db.prepare(`DELETE FROM applications WHERE userId = ?`);
 
-function writeApplications(applications) {
-  fs.writeFileSync(APPLICATIONS_FILE, JSON.stringify(applications, null, 2), "utf8");
+function rowToApplication(row) {
+  if (!row) return null;
+  return { ...row, answers: JSON.parse(row.answers) };
 }
 
 function findApplicationByUserId(userId) {
-  return readApplications().find(a => a.userId === userId) || null;
+  return rowToApplication(findApplicationByUserIdStmt.get(userId));
 }
 
+// The primary key on userId makes this atomic: if two submits race, the
+// second INSERT fails on the constraint and we just return the first one —
+// never two rows, never a lost/duplicated submission.
 function saveApplication({ userId, name, email, answers }) {
-  const applications = readApplications();
-  const existing = applications.find(a => a.userId === userId);
-  if (existing) return existing; // one submission per student — see requireNoExistingApplication in server.js
-  const application = { userId, name, email, answers, submittedAt: new Date().toISOString() };
-  applications.push(application);
-  writeApplications(applications);
-  return application;
+  try {
+    insertApplicationStmt.run(userId, name, email, JSON.stringify(answers), new Date().toISOString());
+  } catch (e) {
+    if (!/UNIQUE constraint failed/.test(e.message)) throw e;
+  }
+  return findApplicationByUserId(userId);
+}
+
+function readApplications() {
+  return listApplicationsStmt.all().map(rowToApplication);
 }
 
 function deleteApplication(userId) {
-  writeApplications(readApplications().filter(a => a.userId !== userId));
+  deleteApplicationStmt.run(userId);
 }
 
 module.exports = {
@@ -196,7 +195,8 @@ module.exports = {
   countUsers,
   listUsers,
   readProgress,
-  writeProgress,
+  markSectionComplete,
+  setVideoWatched,
   resetProgress,
   setResetToken,
   findUserByResetTokenHash,

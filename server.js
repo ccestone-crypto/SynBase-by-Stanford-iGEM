@@ -130,13 +130,21 @@ app.post("/api/signup", authLimiter, (req, res) => {
   const isListedAdmin = getAdminEmails().includes(String(email).trim().toLowerCase());
 
   const passwordHash = bcrypt.hashSync(String(password), 10);
-  const user = store.createUser({
-    id: crypto.randomUUID(),
-    name: String(name).trim(),
-    email,
-    passwordHash,
-    isAdmin: isFirstUser || isListedAdmin
-  });
+  let user;
+  try {
+    user = store.createUser({
+      id: crypto.randomUUID(),
+      name: String(name).trim(),
+      email,
+      passwordHash,
+      isAdmin: isFirstUser || isListedAdmin
+    });
+  } catch (e) {
+    if (/UNIQUE constraint failed/.test(e.message)) {
+      return res.status(409).json({ error: "An account with that email already exists." });
+    }
+    throw e;
+  }
 
   issueSession(res, user);
   res.json({ user: { id: user.id, name: user.name, email: user.email, isAdmin: user.isAdmin } });
@@ -229,15 +237,10 @@ app.post("/api/progress", requireAuth, (req, res) => {
   const { moduleId, sectionId, videoWatched } = req.body || {};
   if (!moduleId) return res.status(400).json({ error: "moduleId is required." });
 
-  const progress = store.readProgress(req.user.id);
-  if (!progress[moduleId]) progress[moduleId] = { sections: {}, videoWatched: false };
-  if (!progress[moduleId].sections) progress[moduleId].sections = {};
+  if (sectionId) store.markSectionComplete(req.user.id, moduleId, sectionId);
+  if (typeof videoWatched === "boolean") store.setVideoWatched(req.user.id, moduleId, videoWatched);
 
-  if (sectionId) progress[moduleId].sections[sectionId] = true;
-  if (typeof videoWatched === "boolean") progress[moduleId].videoWatched = videoWatched;
-
-  store.writeProgress(req.user.id, progress);
-  res.json({ progress });
+  res.json({ progress: store.readProgress(req.user.id) });
 });
 
 // ---------- Application API (students) ----------
@@ -408,6 +411,11 @@ app.post("/api/admin/reset-progress", requireAdmin, (req, res) => {
   res.json({ ok: true });
 });
 
+// ---------- Public landing ----------
+// The bare domain shows About (public) instead of the curriculum home, so
+// first-time visitors land on marketing content, not a login wall.
+app.get("/", (req, res) => res.redirect("/about.html"));
+
 // ---------- Protect the curriculum pages themselves ----------
 // Client-side JS already redirects unauthenticated visitors, but this stops
 // the HTML from being served at all without a valid session cookie.
@@ -416,7 +424,7 @@ const PUBLIC_PATHS = new Set([
   "/forgot-password.html", "/reset-password.html"
 ]);
 const ADMIN_PATHS = new Set(["/admin.html"]);
-app.get(/\.html$|^\/$/, (req, res, next) => {
+app.get(/\.html$/, (req, res, next) => {
   if (PUBLIC_PATHS.has(req.path)) return next();
   const user = getUserFromRequest(req);
   if (!user) {

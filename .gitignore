@@ -4,15 +4,12 @@ node_modules/
 # Secrets and environment config
 .env
 
-# Runtime data — accounts, progress, applications, admin config, session secret.
-# This is real student data and a signing secret; it must never be committed.
+# Runtime data — SQLite database (sibrp.db, -wal, -shm), session secret, etc.
+# This is real student data; it must never be committed.
 # On your host, mount a persistent disk/volume over server/data so it survives
 # redeploys instead of relying on git for it.
 server/data/*
 !server/data/.gitkeep
-!server/data/progress/
-server/data/progress/*
-!server/data/progress/.gitkeep
 
 # Uploaded speaker-series videos — large binaries, not source code.
 # Mount a persistent disk/volume here too (see note above) so uploads survive redeploys.
