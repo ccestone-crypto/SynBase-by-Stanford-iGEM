@@ -1,8 +1,8 @@
 {
-  "name": "sibrp-academy",
+  "name": "synbase",
   "version": "1.0.0",
   "private": true,
-  "description": "SiBRP Academy curriculum site with account-based progress tracking",
+  "description": "SynBase curriculum site with account-based progress tracking",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"

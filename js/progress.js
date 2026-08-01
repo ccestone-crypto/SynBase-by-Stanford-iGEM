@@ -126,7 +126,7 @@ function renderHeader(mountEl, fromRoot) {
   const name = CURRENT_USER ? CURRENT_USER.name : "";
   mountEl.innerHTML = `
     <div class="header-inner">
-      <a class="brand" href="${homeHref}"><span class="dot"></span> SiBRP Academy</a>
+      <a class="brand" href="${homeHref}"><span class="dot"></span> SynBase<span class="brand-suffix">by Stanford iGEM</span></a>
       <nav class="header-nav">
         <a href="${homeHref}">Home</a>
         <a href="${prefix}about.html">About</a>
@@ -163,7 +163,7 @@ async function renderPublicHeader(mountEl, fromRoot) {
 
   mountEl.innerHTML = `
     <div class="header-inner">
-      <a class="brand" href="${prefix}about.html"><span class="dot"></span> SiBRP Academy</a>
+      <a class="brand" href="${prefix}about.html"><span class="dot"></span> SynBase<span class="brand-suffix">by Stanford iGEM</span></a>
       <nav class="header-nav">
         <a href="${prefix}about.html">About</a>
         <a href="${prefix}beyond-sibrp.html">Beyond SiBRP</a>

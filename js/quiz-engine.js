@@ -26,7 +26,7 @@ function renderModulePage(MODULE) {
 
   if (!isModuleUnlocked(MODULE.id)) {
     renderLockedModule(MODULE);
-    document.title = `Locked — ${MODULE.title} — SiBRP Academy`;
+    document.title = `Locked — ${MODULE.title} — SynBase`;
     return;
   }
 
@@ -35,7 +35,7 @@ function renderModulePage(MODULE) {
   renderSections(MODULE);
   renderFooterNav(MODULE);
 
-  document.title = `${MODULE.title} — SiBRP Academy`;
+  document.title = `${MODULE.title} — SynBase`;
 }
 
 function renderLockedModule(MODULE) {

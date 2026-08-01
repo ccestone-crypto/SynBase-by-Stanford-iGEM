@@ -67,6 +67,14 @@ a:hover { text-decoration: underline; }
 }
 .brand .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--gold); }
 .brand:hover { text-decoration: none; opacity: 0.9; }
+.brand-suffix, .auth-brand .brand-suffix {
+  font-family: Georgia, "Times New Roman", serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: 0.72em;
+  opacity: 0.72;
+  margin-left: 6px;
+}
 .header-nav { display: flex; align-items: center; gap: 16px; font-size: 0.9rem; flex-wrap: wrap; justify-content: flex-end; }
 .header-nav a { color: #f0dede; }
 .header-nav a:hover { color: #fff; text-decoration: none; }

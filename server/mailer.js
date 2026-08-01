@@ -24,7 +24,7 @@ function getTransporter() {
 
 // Returns true if a real email was sent, false if it just fell back to logging.
 async function sendMail({ to, subject, text, html }) {
-  const from = process.env.SMTP_FROM || "SiBRP Academy <no-reply@sibrp.local>";
+  const from = process.env.SMTP_FROM || "SynBase <no-reply@sibrp.local>";
   const t = getTransporter();
 
   if (!t) {

@@ -13,6 +13,7 @@ const findUserByEmailStmt = db.prepare(`SELECT * FROM users WHERE email = ?`);
 const findUserByIdStmt = db.prepare(`SELECT * FROM users WHERE id = ?`);
 const countUsersStmt = db.prepare(`SELECT COUNT(*) AS count FROM users`);
 const listUsersStmt = db.prepare(`SELECT * FROM users ORDER BY createdAt ASC`);
+const setUserAdminStmt = db.prepare(`UPDATE users SET isAdmin = ? WHERE id = ?`);
 const setResetTokenStmt = db.prepare(`UPDATE users SET resetTokenHash = ?, resetTokenExpiresAt = ? WHERE id = ?`);
 const findUserByResetTokenHashStmt = db.prepare(`SELECT * FROM users WHERE resetTokenHash = ?`);
 const clearResetTokenStmt = db.prepare(`UPDATE users SET resetTokenHash = NULL, resetTokenExpiresAt = NULL WHERE id = ?`);
@@ -53,6 +54,10 @@ function createUser({ id, name, email, passwordHash, isAdmin }) {
     createdAt: new Date().toISOString()
   });
   return findUserById(id);
+}
+
+function setUserAdmin(userId, isAdmin) {
+  setUserAdminStmt.run(isAdmin ? 1 : 0, userId);
 }
 
 function setResetToken(userId, tokenHash, expiresAt) {
@@ -194,6 +199,7 @@ module.exports = {
   createUser,
   countUsers,
   listUsers,
+  setUserAdmin,
   readProgress,
   markSectionComplete,
   setVideoWatched,

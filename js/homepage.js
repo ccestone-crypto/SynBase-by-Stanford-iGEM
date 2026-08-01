@@ -18,7 +18,7 @@ function renderCourseHeader(mountEl) {
   mountEl.innerHTML = `
     <div class="container">
       ${BRAND_MARK}
-      <div class="course-eyebrow">SiBRP Academy &rsaquo; Science</div>
+      <div class="course-eyebrow">SynBase &rsaquo; Science</div>
       <h1>Core Concepts in Molecular and Cellular Biology</h1>
       <div class="course-meta">${MODULES_META.length} MODULES &middot; ${totalLessons} LESSONS &middot; ${overall.pct}% COMPLETE</div>
       <p class="course-intro">A self-paced curriculum adapted from Stanford iGEM's SiBRP Session 2. Work through cells, DNA, engineering applications, and gene delivery — one lesson at a time, with a short check for understanding after each one.</p>

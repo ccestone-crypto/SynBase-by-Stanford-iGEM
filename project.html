@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Story — SiBRP Academy</title>
-<link rel="stylesheet" href="css/style.css?v=8">
+<title>Story — SynBase</title>
+<link rel="stylesheet" href="css/style.css?v=9">
 </head>
 <body>
 
@@ -17,7 +17,7 @@
 </footer>
 
 <script src="js/portfolio-data.js?v=1"></script>
-<script src="js/progress.js?v=6"></script>
+<script src="js/progress.js?v=7"></script>
 <script>
 function escapeHtml(str) {
   const div = document.createElement("div");
@@ -26,7 +26,7 @@ function escapeHtml(str) {
 }
 
 function renderStory(mountEl, project) {
-  document.title = `${project.title} — SiBRP Academy`;
+  document.title = `${project.title} — SynBase`;
 
   mountEl.innerHTML = `
     <div class="story-back"><a href="beyond-sibrp.html">&larr; Beyond SiBRP</a></div>
@@ -54,7 +54,7 @@ function renderStory(mountEl, project) {
 }
 
 function renderNotFound(mountEl) {
-  document.title = "Story Not Found — SiBRP Academy";
+  document.title = "Story Not Found — SynBase";
   mountEl.innerHTML = `
     <div class="locked-panel">
       <h2>Story not found</h2>

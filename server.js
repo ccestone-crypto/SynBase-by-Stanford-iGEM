@@ -20,16 +20,14 @@ const SESSION_SECRET = getSessionSecret();
 const COOKIE_NAME = "sibrp_session";
 const PORT = process.env.PORT || 8420;
 
-// Emails listed here (one per line, in server/data/admin-emails.json) get admin
-// access on signup. The very first account ever created is always made an
-// admin too, so there's at least one admin on a fresh deploy with an empty list.
-const ADMIN_EMAILS_FILE = path.join(__dirname, "server", "data", "admin-emails.json");
+// Only emails listed in the ADMIN_EMAILS env var (comma-separated) get admin
+// access on signup — set this before anyone signs up on a fresh deploy.
+// Additional admins can be granted later from the Admin dashboard itself.
 function getAdminEmails() {
-  try {
-    return JSON.parse(fs.readFileSync(ADMIN_EMAILS_FILE, "utf8")).map(e => String(e).trim().toLowerCase());
-  } catch (e) {
-    return [];
-  }
+  return String(process.env.ADMIN_EMAILS || "")
+    .split(",")
+    .map(e => e.trim().toLowerCase())
+    .filter(Boolean);
 }
 
 const app = express();
@@ -126,7 +124,6 @@ app.post("/api/signup", authLimiter, (req, res) => {
     return res.status(409).json({ error: "An account with that email already exists." });
   }
 
-  const isFirstUser = store.countUsers() === 0;
   const isListedAdmin = getAdminEmails().includes(String(email).trim().toLowerCase());
 
   const passwordHash = bcrypt.hashSync(String(password), 10);
@@ -137,7 +134,7 @@ app.post("/api/signup", authLimiter, (req, res) => {
       name: String(name).trim(),
       email,
       passwordHash,
-      isAdmin: isFirstUser || isListedAdmin
+      isAdmin: isListedAdmin
     });
   } catch (e) {
     if (/UNIQUE constraint failed/.test(e.message)) {
@@ -203,8 +200,8 @@ app.post("/api/forgot-password", forgotPasswordLimiter, async (req, res) => {
 
   const sent = await mailer.sendMail({
     to: user.email,
-    subject: "Reset your SiBRP Academy password",
-    text: `We received a request to reset your SiBRP Academy password.\n\nReset it here (this link expires in 1 hour):\n${resetUrl}\n\nIf you didn't request this, you can ignore this email.`
+    subject: "Reset your SynBase password",
+    text: `We received a request to reset your SynBase password.\n\nReset it here (this link expires in 1 hour):\n${resetUrl}\n\nIf you didn't request this, you can ignore this email.`
   }).catch(() => false);
 
   // Only surfaced when SMTP isn't configured, so local/dev testing works without a real mail server.
@@ -402,6 +399,17 @@ app.get("/api/admin/users", requireAdmin, (req, res) => {
   res.json({ users });
 });
 
+app.post("/api/admin/set-admin", requireAdmin, (req, res) => {
+  const { userId, isAdmin } = req.body || {};
+  const target = store.findUserById(userId);
+  if (!target) return res.status(400).json({ error: "Unknown userId." });
+  if (target.id === req.user.id && !isAdmin) {
+    return res.status(400).json({ error: "You can't remove your own admin access." });
+  }
+  store.setUserAdmin(userId, !!isAdmin);
+  res.json({ ok: true });
+});
+
 app.post("/api/admin/reset-progress", requireAdmin, (req, res) => {
   const { userId } = req.body || {};
   if (!userId || !store.findUserById(userId)) {
@@ -440,5 +448,5 @@ app.get(/\.html$/, (req, res, next) => {
 app.use(express.static(path.join(__dirname), { extensions: ["html"] }));
 
 app.listen(PORT, () => {
-  console.log(`SiBRP Academy running at http://localhost:${PORT}`);
+  console.log(`SynBase running at http://localhost:${PORT}`);
 });
