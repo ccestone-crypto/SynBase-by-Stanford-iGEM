@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin — SynBase</title>
-<link rel="stylesheet" href="css/style.css?v=9">
+<link rel="stylesheet" href="css/style.css?v=10">
 </head>
 <body>
 
@@ -62,7 +62,10 @@
 </main>
 
 <main class="container">
-  <div class="section-label" style="margin-top:0">Applications Received</div>
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+    <div class="section-label" style="margin-top:0">Applications Received</div>
+    <a class="btn small secondary" id="export-csv-link" href="/api/admin/applications/export.csv" download>Export as CSV</a>
+  </div>
   <div id="applications-list"></div>
 </main>
 
@@ -202,26 +205,97 @@ async function loadQuestions() {
   renderQuestions(data.questions || []);
 }
 
+let editingQuestionId = null;
+
 function renderQuestions(questions) {
   const listEl = document.getElementById("question-list");
   listEl.innerHTML = questions.length
-    ? questions.map(q => `
+    ? questions.map(q => {
+        if (q.id === editingQuestionId) {
+          return `
+            <div class="question-row" data-question-id="${q.id}">
+              <div class="question-row-main" style="flex:1;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+                <input type="text" class="edit-question-prompt" value="${escapeHtml(q.prompt)}" style="flex:1;min-width:200px;">
+                <select class="edit-question-type">
+                  <option value="short" ${q.type === "long" ? "" : "selected"}>Short answer</option>
+                  <option value="long" ${q.type === "long" ? "selected" : ""}>Long answer</option>
+                </select>
+              </div>
+              <div class="question-row-actions">
+                <button class="btn small" data-save-question="${q.id}">Save</button>
+                <button class="btn small secondary" data-cancel-edit-question="${q.id}">Cancel</button>
+              </div>
+            </div>
+          `;
+        }
+        return `
         <div class="question-row" data-question-id="${q.id}">
           <div class="question-row-main">
             <div class="question-row-prompt">${escapeHtml(q.prompt)}</div>
             <span class="question-row-type">${q.type === "long" ? "Long answer" : "Short answer"}</span>
           </div>
           <div class="question-row-actions">
+            <button class="btn small secondary" data-edit-question="${q.id}">Edit</button>
             <button class="btn small secondary" data-delete-question="${q.id}">Delete</button>
           </div>
         </div>
-      `).join("")
+      `;
+      }).join("")
     : `<p style="color:var(--ink-soft);font-size:0.9rem;margin:0;">No questions yet — add one below.</p>`;
+
+  const errorEl = document.getElementById("question-error");
+
+  listEl.querySelectorAll("[data-edit-question]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      editingQuestionId = btn.getAttribute("data-edit-question");
+      loadQuestions();
+    });
+  });
+
+  listEl.querySelectorAll("[data-cancel-edit-question]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      editingQuestionId = null;
+      loadQuestions();
+    });
+  });
+
+  listEl.querySelectorAll("[data-save-question]").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const row = btn.closest("[data-question-id]");
+      const prompt = row.querySelector(".edit-question-prompt").value.trim();
+      const type = row.querySelector(".edit-question-type").value;
+      errorEl.classList.remove("show");
+      if (!prompt) {
+        errorEl.textContent = "Question text can't be empty.";
+        errorEl.classList.add("show");
+        return;
+      }
+      btn.disabled = true;
+      try {
+        const res = await fetch(`/api/admin/application-questions/${btn.getAttribute("data-save-question")}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt, type })
+        });
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          errorEl.textContent = data.error || `Could not save that question (HTTP ${res.status}).`;
+          errorEl.classList.add("show");
+          return;
+        }
+        editingQuestionId = null;
+      } catch (err) {
+        errorEl.textContent = "Could not reach the server. Please try again.";
+        errorEl.classList.add("show");
+        return;
+      }
+      loadQuestions();
+    });
+  });
 
   listEl.querySelectorAll("[data-delete-question]").forEach(btn => {
     btn.addEventListener("click", async () => {
       if (!confirm("Delete this question?")) return;
-      const errorEl = document.getElementById("question-error");
       errorEl.classList.remove("show");
       try {
         const res = await fetch(`/api/admin/application-questions/${btn.getAttribute("data-delete-question")}`, {

@@ -380,6 +380,49 @@ app.get("/api/admin/applications", requireAdmin, (req, res) => {
   });
 });
 
+function csvEscape(value) {
+  const str = value == null ? "" : String(value);
+  return /[",\r\n]/.test(str) ? `"${str.replace(/"/g, '""')}"` : str;
+}
+
+app.get("/api/admin/applications/export.csv", requireAdmin, (req, res) => {
+  const questions = store.readApplicationQuestions();
+  const applications = store.readApplications();
+
+  // Column order follows the live question list; any answers left over from
+  // since-deleted questions still get a column so no submitted data is lost.
+  const questionOrder = questions.map(q => q.id);
+  const promptById = {};
+  questions.forEach(q => { promptById[q.id] = q.prompt; });
+  const seen = new Set(questionOrder);
+  applications.forEach(a => {
+    Object.keys(a.answers || {}).forEach(qid => {
+      if (!seen.has(qid)) {
+        seen.add(qid);
+        questionOrder.push(qid);
+      }
+    });
+  });
+
+  const headers = ["Name", "Email", "Submitted At", ...questionOrder.map(qid => promptById[qid] || "Question (removed)")];
+  const lines = [headers.map(csvEscape).join(",")];
+  applications.forEach(a => {
+    const row = [
+      a.name,
+      a.email,
+      new Date(a.submittedAt).toLocaleString(),
+      ...questionOrder.map(qid => (a.answers || {})[qid] || "")
+    ];
+    lines.push(row.map(csvEscape).join(","));
+  });
+
+  const csv = "﻿" + lines.join("\r\n");
+  const filename = `synbase-applications-${new Date().toISOString().slice(0, 10)}.csv`;
+  res.setHeader("Content-Type", "text/csv; charset=utf-8");
+  res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+  res.send(csv);
+});
+
 app.post("/api/admin/applications/reset", requireAdmin, (req, res) => {
   const { userId } = req.body || {};
   if (!userId) return res.status(400).json({ error: "userId is required." });

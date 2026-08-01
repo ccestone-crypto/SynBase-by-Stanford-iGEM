@@ -956,6 +956,14 @@ a:hover { text-decoration: underline; }
   font-family: inherit;
   background: #fff;
 }
+.edit-question-prompt, .edit-question-type {
+  padding: 8px 10px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  background: #fff;
+}
 
 /* ---------- Speaker Series ---------- */
 .optional-badge {
