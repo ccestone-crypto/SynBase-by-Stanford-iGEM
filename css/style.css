@@ -134,7 +134,7 @@ a:hover { text-decoration: underline; }
 .course-header {
   background: var(--cream);
   border-bottom: 1px solid var(--border);
-  padding: 28px 24px 22px;
+  padding: 48px 24px 40px;
   position: relative;
 }
 .course-eyebrow {
@@ -142,18 +142,18 @@ a:hover { text-decoration: underline; }
   font-weight: 700;
   color: var(--ink-soft);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
-  margin-bottom: 8px;
+  letter-spacing: 0.06em;
+  margin-bottom: 10px;
 }
-.course-header h1 { font-size: 1.9rem; margin: 0 0 8px; letter-spacing: -0.5px; color: var(--charcoal); }
+.course-header h1 { font-size: 2.5rem; font-weight: 800; margin: 0 0 12px; letter-spacing: -0.8px; line-height: 1.15; color: var(--charcoal); }
 .course-meta {
   font-size: 0.78rem;
   font-weight: 700;
   letter-spacing: 0.05em;
   color: var(--cardinal);
-  margin-bottom: 14px;
+  margin-bottom: 16px;
 }
-.course-intro { color: var(--ink-soft); max-width: 680px; margin: 0 0 20px; font-size: 0.98rem; }
+.course-intro { color: var(--ink-soft); max-width: 680px; margin: 0 0 26px; font-size: 1.02rem; }
 .jump-row { display: flex; align-items: stretch; gap: 16px; flex-wrap: wrap; }
 .jump-pills { display: flex; flex-wrap: wrap; gap: 8px; align-content: flex-start; flex: 1; }
 .pill {
@@ -353,11 +353,11 @@ a:hover { text-decoration: underline; }
 .module-hero {
   background: #fff;
   border-bottom: 1px solid var(--border);
-  padding: 30px 24px;
+  padding: 40px 24px 34px;
   position: relative;
 }
 .breadcrumb { font-size: 0.82rem; color: var(--ink-soft); margin-bottom: 10px; }
-.module-hero h1 { margin: 0 0 8px; font-size: 1.7rem; color: var(--charcoal); }
+.module-hero h1 { margin: 0 0 10px; font-size: 2.1rem; font-weight: 800; letter-spacing: -0.6px; color: var(--charcoal); }
 .module-hero .module-chip-row { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
 .module-hero .lede { color: var(--ink-soft); max-width: 700px; margin: 0 0 18px; }
 .module-progress-bar-wrap { display: flex; align-items: center; gap: 14px; max-width: 520px; }
@@ -514,7 +514,12 @@ a:hover { text-decoration: underline; }
 .site-footer a { color: var(--ink-soft); text-decoration: underline; }
 
 @media (max-width: 600px) {
-  .course-header h1 { font-size: 1.5rem; }
+  .course-header h1 { font-size: 1.9rem; }
+  .page-hero h1 { font-size: 1.8rem; }
+  .about-hero h1 { font-size: 2rem; }
+  .module-hero h1 { font-size: 1.7rem; }
+  .narrative-section h2, .pillar-heading h2 { font-size: 1.6rem; }
+  .stat-big .num { font-size: 2.4rem; }
   .header-nav { gap: 10px; }
   .header-progress-pill { display: none; }
   .unit-progress { min-width: 0; }
@@ -608,11 +613,11 @@ a:hover { text-decoration: underline; }
 .page-hero {
   background: var(--cream);
   border-bottom: 1px solid var(--border);
-  padding: 36px 24px 30px;
+  padding: 48px 24px 40px;
   position: relative;
 }
-.page-hero h1 { font-size: 1.9rem; margin: 0 0 8px; color: var(--charcoal); letter-spacing: -0.5px; }
-.page-hero p.lede { color: var(--ink-soft); max-width: 680px; margin: 0; font-size: 1rem; }
+.page-hero h1 { font-size: 2.3rem; font-weight: 800; margin: 0 0 12px; color: var(--charcoal); letter-spacing: -0.7px; line-height: 1.15; }
+.page-hero p.lede { color: var(--ink-soft); max-width: 680px; margin: 0; font-size: 1.05rem; }
 
 .content-card {
   background: var(--card);
@@ -765,7 +770,7 @@ a:hover { text-decoration: underline; }
   position: relative;
   text-align: center;
 }
-.about-hero .container { max-width: 780px; }
+.about-hero .container { max-width: 860px; }
 .about-eyebrow {
   font-size: 0.8rem;
   font-weight: 700;
@@ -775,15 +780,16 @@ a:hover { text-decoration: underline; }
   margin: 0 0 14px;
 }
 .about-hero h1 {
-  font-size: 2.4rem;
-  line-height: 1.2;
-  margin: 0 0 16px;
+  font-size: 2.5rem;
+  font-weight: 800;
+  line-height: 1.15;
+  margin: 0 0 18px;
   color: var(--charcoal);
-  letter-spacing: -0.5px;
+  letter-spacing: -0.8px;
 }
-.about-hero .lede { font-size: 1.05rem; color: var(--ink-soft); max-width: 620px; margin: 0 auto; }
+.about-hero .lede { font-size: 1.1rem; color: var(--ink-soft); max-width: 620px; margin: 0 auto; }
 
-.stats-band { background: #fff; border-bottom: 1px solid var(--border); padding: 40px 24px; }
+.stats-band { background: #fff; border-bottom: 1px solid var(--border); padding: 48px 24px; }
 .stats-row {
   display: flex;
   justify-content: center;
@@ -794,7 +800,7 @@ a:hover { text-decoration: underline; }
   text-align: center;
 }
 .stat-big { display: flex; flex-direction: column; gap: 4px; }
-.stat-big .num { font-size: 2.6rem; font-weight: 800; color: var(--cardinal); line-height: 1; }
+.stat-big .num { font-size: 3.4rem; font-weight: 800; color: var(--cardinal); line-height: 1; letter-spacing: -1px; }
 .stat-big .label {
   font-size: 0.78rem;
   font-weight: 700;
@@ -806,7 +812,7 @@ a:hover { text-decoration: underline; }
 .narrative-section { padding: 56px 24px; }
 .narrative-section.tint { background: var(--bg); }
 .narrative-section .container { max-width: 680px; text-align: center; }
-.narrative-section h2 { font-size: 1.7rem; margin: 0 0 18px; color: var(--charcoal); letter-spacing: -0.3px; }
+.narrative-section h2 { font-size: 2rem; font-weight: 800; margin: 0 0 18px; color: var(--charcoal); letter-spacing: -0.5px; }
 .narrative-section p { font-size: 1.02rem; color: var(--ink-soft); margin: 0 0 16px; line-height: 1.65; }
 .narrative-section p:last-child { margin-bottom: 0; }
 .narrative-section .btn { margin-top: 8px; }
@@ -814,7 +820,7 @@ a:hover { text-decoration: underline; }
 .pillar-section { padding: 56px 24px; background: #fff; }
 .pillar-section .container { max-width: 1000px; }
 .pillar-heading { text-align: center; max-width: 640px; margin: 0 auto 40px; }
-.pillar-heading h2 { font-size: 1.7rem; margin: 0 0 12px; color: var(--charcoal); }
+.pillar-heading h2 { font-size: 2rem; font-weight: 800; margin: 0 0 12px; color: var(--charcoal); letter-spacing: -0.5px; }
 .pillar-heading p { color: var(--ink-soft); margin: 0; }
 .pillar-grid {
   display: grid;
