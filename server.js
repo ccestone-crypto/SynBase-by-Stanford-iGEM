@@ -8,7 +8,6 @@ const cookieParser = require("cookie-parser");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const rateLimit = require("express-rate-limit");
-const multer = require("multer");
 
 const store = require("./server/store");
 const mailer = require("./server/mailer");
@@ -370,56 +369,50 @@ app.post("/api/ta-application", requireAuth, (req, res) => {
   res.json({ application });
 });
 
-// ---------- Speaker Series (optional — video uploads, no completion gate) ----------
-const speakerUpload = multer({
-  storage: multer.diskStorage({
-    destination: (req, file, cb) => cb(null, speakerStore.VIDEO_DIR),
-    filename: (req, file, cb) => {
-      const ext = path.extname(file.originalname) || ".mp4";
-      cb(null, `${crypto.randomUUID()}${ext}`);
-    }
-  }),
-  limits: { fileSize: 1024 * 1024 * 1024 }, // 1GB per talk
-  fileFilter: (req, file, cb) => {
-    if (!file.mimetype.startsWith("video/")) {
-      return cb(new Error("Only video files can be uploaded."));
-    }
-    cb(null, true);
-  }
-});
+// ---------- Speaker Series (optional — links out to YouTube, no hosting) ----------
+// Accepts any common YouTube URL shape (or a bare 11-character video ID) and
+// pulls out just the video ID; everything else (thumbnail, watch link) is
+// derived from that ID rather than stored separately.
+function extractYoutubeId(input) {
+  const str = String(input || "").trim();
+  if (/^[a-zA-Z0-9_-]{11}$/.test(str)) return str;
+  const match = str.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+  return match ? match[1] : null;
+}
 
-function talkWithUrl(talk) {
-  return { ...talk, url: `/assets/video/speakers/${talk.filename}` };
+function talkWithUrls(talk) {
+  return {
+    ...talk,
+    watchUrl: `https://www.youtube.com/watch?v=${talk.youtubeId}`,
+    thumbnailUrl: `https://img.youtube.com/vi/${talk.youtubeId}/hqdefault.jpg`
+  };
 }
 
 app.get("/api/speaker-talks", requireAuth, (req, res) => {
-  res.json({ talks: speakerStore.listTalks().map(talkWithUrl) });
+  res.json({ talks: speakerStore.listTalks().map(talkWithUrls) });
 });
 
 app.post("/api/admin/speaker-talks", requireAdmin, (req, res) => {
-  speakerUpload.single("video")(req, res, (err) => {
-    if (err) return res.status(400).json({ error: err.message || "Upload failed." });
+  const { title, speakerName, description, youtubeUrl } = req.body || {};
+  if (!title || !String(title).trim()) {
+    return res.status(400).json({ error: "Title is required." });
+  }
+  if (!speakerName || !String(speakerName).trim()) {
+    return res.status(400).json({ error: "Speaker name is required." });
+  }
+  const youtubeId = extractYoutubeId(youtubeUrl);
+  if (!youtubeId) {
+    return res.status(400).json({ error: "Please enter a valid YouTube link." });
+  }
 
-    const { title, speakerName, description } = req.body || {};
-    if (!title || !String(title).trim()) {
-      return res.status(400).json({ error: "Title is required." });
-    }
-    if (!speakerName || !String(speakerName).trim()) {
-      return res.status(400).json({ error: "Speaker name is required." });
-    }
-    if (!req.file) {
-      return res.status(400).json({ error: "Choose a video file to upload." });
-    }
-
-    const talk = speakerStore.addTalk({
-      id: crypto.randomUUID(),
-      title: String(title).trim(),
-      speakerName: String(speakerName).trim(),
-      description: description ? String(description).trim() : "",
-      filename: req.file.filename
-    });
-    res.json({ talk: talkWithUrl(talk) });
+  const talk = speakerStore.addTalk({
+    id: crypto.randomUUID(),
+    title: String(title).trim(),
+    speakerName: String(speakerName).trim(),
+    description: description ? String(description).trim() : "",
+    youtubeId
   });
+  res.json({ talk: talkWithUrls(talk) });
 });
 
 app.delete("/api/admin/speaker-talks/:id", requireAdmin, (req, res) => {

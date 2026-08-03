@@ -75,12 +75,15 @@ db.exec(`
     closesAt TEXT
   );
 
+  -- Talks link out to YouTube rather than hosting video files — youtubeId is
+  -- the 11-character video ID, used to build both the thumbnail image URL
+  -- and the outbound watch link.
   CREATE TABLE IF NOT EXISTS speaker_talks (
     id TEXT PRIMARY KEY,
     title TEXT NOT NULL,
     speakerName TEXT NOT NULL,
     description TEXT NOT NULL DEFAULT '',
-    filename TEXT NOT NULL,
+    youtubeId TEXT NOT NULL,
     uploadedAt TEXT NOT NULL
   );
 `);
@@ -118,6 +121,24 @@ if (!hasColumn("applications", "kind")) {
     INSERT INTO applications (userId, kind, name, email, answers, submittedAt)
       SELECT userId, 'sibrp', name, email, answers, submittedAt FROM applications_old;
     DROP TABLE applications_old;
+  `);
+}
+
+// speaker_talks moved from hosting an uploaded file (filename column) to
+// linking out to YouTube (youtubeId column) — rebuild the table for anyone
+// migrating from the old version. Any existing rows can't be backfilled with
+// a real video ID, so they're dropped rather than carried over as broken links.
+if (hasColumn("speaker_talks", "filename") && !hasColumn("speaker_talks", "youtubeId")) {
+  db.exec(`DROP TABLE speaker_talks`);
+  db.exec(`
+    CREATE TABLE speaker_talks (
+      id TEXT PRIMARY KEY,
+      title TEXT NOT NULL,
+      speakerName TEXT NOT NULL,
+      description TEXT NOT NULL DEFAULT '',
+      youtubeId TEXT NOT NULL,
+      uploadedAt TEXT NOT NULL
+    );
   `);
 }
 

@@ -11,10 +11,6 @@ node_modules/
 server/data/*
 !server/data/.gitkeep
 
-# Uploaded speaker-series videos — large binaries, not source code.
-# Mount a persistent disk/volume here too (see note above) so uploads survive redeploys.
-assets/video/speakers/*
-!assets/video/speakers/.gitkeep
 
 # Module teaching videos (admin-provided locally, can be large)
 assets/video/*.mp4

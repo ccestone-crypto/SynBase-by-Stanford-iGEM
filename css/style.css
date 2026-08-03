@@ -1044,13 +1044,6 @@ a:hover { text-decoration: underline; }
 }
 .upload-form-grid .form-field { margin-bottom: 0; }
 .upload-form-grid .form-field.full { grid-column: 1 / -1; }
-.upload-progress {
-  display: none;
-  margin-top: 12px;
-  font-size: 0.86rem;
-  color: var(--ink-soft);
-}
-.upload-progress.show { display: block; }
 
 .speaker-grid {
   display: grid;
@@ -1065,14 +1058,28 @@ a:hover { text-decoration: underline; }
   box-shadow: var(--shadow);
   overflow: hidden;
 }
-.speaker-card video {
+.speaker-thumb-link { display: block; }
+.speaker-thumb {
+  position: relative;
   width: 100%;
   aspect-ratio: 16/9;
   background: #000;
-  display: block;
+  overflow: hidden;
 }
+.speaker-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.speaker-play-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  opacity: 0.92;
+  transition: opacity 0.15s, transform 0.15s;
+}
+.speaker-thumb-link:hover .speaker-play-overlay { opacity: 1; transform: translate(-50%, -50%) scale(1.08); }
 .speaker-card-body { padding: 16px 18px 18px; }
 .speaker-card h3 { margin: 0 0 4px; font-size: 1.05rem; color: var(--charcoal); }
+.speaker-title-link:hover h3 { text-decoration: underline; }
 .speaker-card .speaker-name { font-size: 0.85rem; font-weight: 700; color: var(--cardinal); margin-bottom: 8px; }
 .speaker-card p { font-size: 0.9rem; color: var(--ink-soft); margin: 0 0 12px; }
 .speaker-card .speaker-actions { display: flex; justify-content: flex-end; }

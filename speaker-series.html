@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Speaker Series — SynBase</title>
-<link rel="stylesheet" href="css/style.css?v=15">
+<link rel="stylesheet" href="css/style.css?v=16">
 </head>
 <body>
 
@@ -40,7 +40,10 @@ function escapeHtml(str) {
 function renderUploadForm(mountEl) {
   mountEl.innerHTML = `
     <div class="content-card">
-      <h2>Upload a Talk</h2>
+      <h2>Add a Talk</h2>
+      <p style="color:var(--ink-soft);font-size:0.9rem;margin:0 0 8px;">
+        Paste a YouTube link — the site shows the cover image and description here, and clicking through takes students to YouTube to actually watch it.
+      </p>
       <div class="auth-error" id="upload-error"></div>
       <form id="upload-form" novalidate>
         <div class="upload-form-grid">
@@ -53,16 +56,15 @@ function renderUploadForm(mountEl) {
             <input type="text" id="talk-speaker" required>
           </div>
           <div class="form-field full">
+            <label for="talk-youtube-url">YouTube link</label>
+            <input type="url" id="talk-youtube-url" placeholder="https://www.youtube.com/watch?v=..." required>
+          </div>
+          <div class="form-field full">
             <label for="talk-description">Description (optional)</label>
             <textarea id="talk-description"></textarea>
           </div>
-          <div class="form-field full">
-            <label for="talk-file">Video file</label>
-            <input type="file" id="talk-file" accept="video/*" required>
-          </div>
         </div>
-        <button type="submit" class="btn" id="upload-btn" style="margin-top:16px">Upload</button>
-        <div class="upload-progress" id="upload-progress">Uploading — this can take a while for large files, please don't close this tab.</div>
+        <button type="submit" class="btn" id="upload-btn" style="margin-top:16px">Add Talk</button>
       </form>
     </div>
   `;
@@ -70,31 +72,33 @@ function renderUploadForm(mountEl) {
   document.getElementById("upload-form").addEventListener("submit", async (e) => {
     e.preventDefault();
     const errorEl = document.getElementById("upload-error");
-    const progressEl = document.getElementById("upload-progress");
     const btn = document.getElementById("upload-btn");
     errorEl.classList.remove("show");
 
-    const fileInput = document.getElementById("talk-file");
-    if (!fileInput.files.length) {
-      errorEl.textContent = "Choose a video file to upload.";
+    const youtubeUrl = document.getElementById("talk-youtube-url").value.trim();
+    if (!youtubeUrl) {
+      errorEl.textContent = "Paste a YouTube link.";
       errorEl.classList.add("show");
       return;
     }
 
-    const formData = new FormData();
-    formData.append("title", document.getElementById("talk-title").value);
-    formData.append("speakerName", document.getElementById("talk-speaker").value);
-    formData.append("description", document.getElementById("talk-description").value);
-    formData.append("video", fileInput.files[0]);
-
     btn.disabled = true;
-    progressEl.classList.add("show");
+    btn.textContent = "Adding…";
 
     try {
-      const res = await fetch("/api/admin/speaker-talks", { method: "POST", body: formData });
+      const res = await fetch("/api/admin/speaker-talks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: document.getElementById("talk-title").value,
+          speakerName: document.getElementById("talk-speaker").value,
+          description: document.getElementById("talk-description").value,
+          youtubeUrl
+        })
+      });
       const data = await res.json();
       if (!res.ok) {
-        errorEl.textContent = data.error || `Upload failed (HTTP ${res.status}).`;
+        errorEl.textContent = data.error || `Could not add that talk (HTTP ${res.status}).`;
         errorEl.classList.add("show");
         return;
       }
@@ -105,7 +109,7 @@ function renderUploadForm(mountEl) {
       errorEl.classList.add("show");
     } finally {
       btn.disabled = false;
-      progressEl.classList.remove("show");
+      btn.textContent = "Add Talk";
     }
   });
 }
@@ -116,18 +120,25 @@ async function loadTalks() {
   renderTalks(data.talks || []);
 }
 
+const PLAY_ICON = `<svg viewBox="0 0 68 48" width="52" height="36"><path d="M66.5 7.7c-.8-2.9-2.5-5.2-5.4-6C55.8.1 34 .1 34 .1S12.2.1 6.9 1.7c-2.9.8-4.6 3.1-5.4 6C0 13 0 24 0 24s0 11 1.5 16.3c.8 2.9 2.5 5.1 5.4 5.9C12.2 47.9 34 47.9 34 47.9s21.8 0 27.1-1.7c2.9-.8 4.6-3 5.4-5.9C68 35 68 24 68 24s0-11-1.5-16.3z" fill="#212121" fill-opacity="0.8"/><path d="M27 34.5V13.5L45 24z" fill="#fff"/></svg>`;
+
 function renderTalks(talks) {
   const gridEl = document.getElementById("speaker-grid");
   if (!talks.length) {
-    gridEl.innerHTML = `<div class="speaker-empty">No talks uploaded yet. Admins can add one above.</div>`;
+    gridEl.innerHTML = `<div class="speaker-empty">No talks added yet. Admins can add one above.</div>`;
     return;
   }
 
   gridEl.innerHTML = talks.map(t => `
     <div class="speaker-card" data-talk-id="${t.id}">
-      <video controls preload="metadata" src="${t.url}"></video>
+      <a class="speaker-thumb-link" href="${t.watchUrl}" target="_blank" rel="noopener">
+        <div class="speaker-thumb">
+          <img src="${t.thumbnailUrl}" alt="${escapeHtml(t.title)}" loading="lazy">
+          <span class="speaker-play-overlay">${PLAY_ICON}</span>
+        </div>
+      </a>
       <div class="speaker-card-body">
-        <h3>${escapeHtml(t.title)}</h3>
+        <a class="speaker-title-link" href="${t.watchUrl}" target="_blank" rel="noopener"><h3>${escapeHtml(t.title)}</h3></a>
         <div class="speaker-name">${escapeHtml(t.speakerName)}</div>
         ${t.description ? `<p>${escapeHtml(t.description)}</p>` : ""}
         ${CURRENT_USER && CURRENT_USER.isAdmin ? `
@@ -141,7 +152,7 @@ function renderTalks(talks) {
 
   gridEl.querySelectorAll("[data-delete-talk]").forEach(btn => {
     btn.addEventListener("click", async () => {
-      if (!confirm("Delete this talk? The video file will be removed permanently.")) return;
+      if (!confirm("Delete this talk?")) return;
       btn.disabled = true;
       btn.textContent = "Deleting…";
       try {
