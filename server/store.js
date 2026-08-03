@@ -14,6 +14,7 @@ const findUserByIdStmt = db.prepare(`SELECT * FROM users WHERE id = ?`);
 const countUsersStmt = db.prepare(`SELECT COUNT(*) AS count FROM users`);
 const listUsersStmt = db.prepare(`SELECT * FROM users ORDER BY createdAt ASC`);
 const setUserAdminStmt = db.prepare(`UPDATE users SET isAdmin = ? WHERE id = ?`);
+const setTaEligibleStmt = db.prepare(`UPDATE users SET taEligible = ? WHERE id = ?`);
 const setResetTokenStmt = db.prepare(`UPDATE users SET resetTokenHash = ?, resetTokenExpiresAt = ? WHERE id = ?`);
 const findUserByResetTokenHashStmt = db.prepare(`SELECT * FROM users WHERE resetTokenHash = ?`);
 const clearResetTokenStmt = db.prepare(`UPDATE users SET resetTokenHash = NULL, resetTokenExpiresAt = NULL WHERE id = ?`);
@@ -21,7 +22,7 @@ const updatePasswordStmt = db.prepare(`UPDATE users SET passwordHash = ? WHERE i
 
 function rowToUser(row) {
   if (!row) return null;
-  return { ...row, isAdmin: !!row.isAdmin };
+  return { ...row, isAdmin: !!row.isAdmin, taEligible: !!row.taEligible };
 }
 
 function findUserByEmail(email) {
@@ -58,6 +59,10 @@ function createUser({ id, name, email, passwordHash, isAdmin }) {
 
 function setUserAdmin(userId, isAdmin) {
   setUserAdminStmt.run(isAdmin ? 1 : 0, userId);
+}
+
+function setTaEligible(userId, eligible) {
+  setTaEligibleStmt.run(eligible ? 1 : 0, userId);
 }
 
 function setResetToken(userId, tokenHash, expiresAt) {
@@ -127,18 +132,20 @@ function resetProgress(userId) {
 }
 
 // ---------- Application questions (admin-managed) ----------
-const insertQuestionStmt = db.prepare(`INSERT INTO application_questions (id, prompt, type) VALUES (?, ?, ?)`);
-const listQuestionsStmt = db.prepare(`SELECT id, prompt, type FROM application_questions ORDER BY rowid ASC`);
+// "kind" separates independent application tracks (e.g. the SiBRP course
+// application vs a TA application) that otherwise share this exact schema.
+const insertQuestionStmt = db.prepare(`INSERT INTO application_questions (id, kind, prompt, type) VALUES (?, ?, ?, ?)`);
+const listQuestionsStmt = db.prepare(`SELECT id, prompt, type FROM application_questions WHERE kind = ? ORDER BY rowid ASC`);
 const findQuestionStmt = db.prepare(`SELECT id, prompt, type FROM application_questions WHERE id = ?`);
 const updateQuestionStmt = db.prepare(`UPDATE application_questions SET prompt = ?, type = ? WHERE id = ?`);
 const deleteQuestionStmt = db.prepare(`DELETE FROM application_questions WHERE id = ?`);
 
-function readApplicationQuestions() {
-  return listQuestionsStmt.all();
+function readApplicationQuestions(kind = "sibrp") {
+  return listQuestionsStmt.all(kind);
 }
 
-function addApplicationQuestion({ id, prompt, type }) {
-  insertQuestionStmt.run(id, prompt, type === "long" ? "long" : "short");
+function addApplicationQuestion({ id, prompt, type }, kind = "sibrp") {
+  insertQuestionStmt.run(id, kind, prompt, type === "long" ? "long" : "short");
   return findQuestionStmt.get(id);
 }
 
@@ -157,40 +164,57 @@ function deleteApplicationQuestion(id) {
 
 // ---------- Applications (student submissions) ----------
 const insertApplicationStmt = db.prepare(`
-  INSERT INTO applications (userId, name, email, answers, submittedAt)
-  VALUES (?, ?, ?, ?, ?)
+  INSERT INTO applications (userId, kind, name, email, answers, submittedAt)
+  VALUES (?, ?, ?, ?, ?, ?)
 `);
-const findApplicationByUserIdStmt = db.prepare(`SELECT * FROM applications WHERE userId = ?`);
-const listApplicationsStmt = db.prepare(`SELECT * FROM applications ORDER BY submittedAt DESC`);
-const deleteApplicationStmt = db.prepare(`DELETE FROM applications WHERE userId = ?`);
+const findApplicationByUserIdStmt = db.prepare(`SELECT * FROM applications WHERE userId = ? AND kind = ?`);
+const listApplicationsStmt = db.prepare(`SELECT * FROM applications WHERE kind = ? ORDER BY submittedAt DESC`);
+const deleteApplicationStmt = db.prepare(`DELETE FROM applications WHERE userId = ? AND kind = ?`);
 
 function rowToApplication(row) {
   if (!row) return null;
   return { ...row, answers: JSON.parse(row.answers) };
 }
 
-function findApplicationByUserId(userId) {
-  return rowToApplication(findApplicationByUserIdStmt.get(userId));
+function findApplicationByUserId(userId, kind = "sibrp") {
+  return rowToApplication(findApplicationByUserIdStmt.get(userId, kind));
 }
 
-// The primary key on userId makes this atomic: if two submits race, the
-// second INSERT fails on the constraint and we just return the first one —
-// never two rows, never a lost/duplicated submission.
-function saveApplication({ userId, name, email, answers }) {
+// The primary key on (userId, kind) makes this atomic: if two submits race,
+// the second INSERT fails on the constraint and we just return the first one
+// — never two rows, never a lost/duplicated submission. One user can still
+// hold one application per kind (e.g. both a sibrp and a ta application).
+function saveApplication({ userId, name, email, answers }, kind = "sibrp") {
   try {
-    insertApplicationStmt.run(userId, name, email, JSON.stringify(answers), new Date().toISOString());
+    insertApplicationStmt.run(userId, kind, name, email, JSON.stringify(answers), new Date().toISOString());
   } catch (e) {
     if (!/UNIQUE constraint failed/.test(e.message)) throw e;
   }
-  return findApplicationByUserId(userId);
+  return findApplicationByUserId(userId, kind);
 }
 
-function readApplications() {
-  return listApplicationsStmt.all().map(rowToApplication);
+function readApplications(kind = "sibrp") {
+  return listApplicationsStmt.all(kind).map(rowToApplication);
 }
 
-function deleteApplication(userId) {
-  deleteApplicationStmt.run(userId);
+function deleteApplication(userId, kind = "sibrp") {
+  deleteApplicationStmt.run(userId, kind);
+}
+
+// ---------- Application open/close windows (admin-managed, per kind) ----------
+const getWindowStmt = db.prepare(`SELECT opensAt, closesAt FROM application_windows WHERE kind = ?`);
+const upsertWindowStmt = db.prepare(`
+  INSERT INTO application_windows (kind, opensAt, closesAt) VALUES (?, ?, ?)
+  ON CONFLICT(kind) DO UPDATE SET opensAt = excluded.opensAt, closesAt = excluded.closesAt
+`);
+
+function getApplicationWindow(kind = "sibrp") {
+  return getWindowStmt.get(kind) || { opensAt: null, closesAt: null };
+}
+
+function setApplicationWindow(kind, { opensAt, closesAt }) {
+  upsertWindowStmt.run(kind, opensAt || null, closesAt || null);
+  return getApplicationWindow(kind);
 }
 
 module.exports = {
@@ -200,6 +224,7 @@ module.exports = {
   countUsers,
   listUsers,
   setUserAdmin,
+  setTaEligible,
   readProgress,
   markSectionComplete,
   setVideoWatched,
@@ -215,5 +240,7 @@ module.exports = {
   readApplications,
   findApplicationByUserId,
   saveApplication,
-  deleteApplication
+  deleteApplication,
+  getApplicationWindow,
+  setApplicationWindow
 };

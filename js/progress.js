@@ -118,6 +118,36 @@ function moduleAccentClass(number) {
 // Small red-bar/gold-bar mark echoing the corner ornament repeated on every slide.
 const BRAND_MARK = `<div class="brand-mark"><span class="bar1"></span><span class="bar2"></span></div>`;
 
+// ---------- Nav dropdown (groups the SiBRP course + TA applications) ----------
+const CHEVRON_DOWN = `<svg viewBox="0 0 20 20" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8l5 5 5-5"/></svg>`;
+
+function sibrpNavDropdownHtml(prefix, taEligible) {
+  return `
+    <div class="nav-dropdown">
+      <button type="button" class="nav-dropdown-toggle">SiBRP ${CHEVRON_DOWN}</button>
+      <div class="nav-dropdown-menu">
+        <a href="${prefix}application.html">Course Application</a>
+        ${taEligible ? `<a href="${prefix}ta-application.html">TA Application</a>` : ""}
+      </div>
+    </div>
+  `;
+}
+
+function wireNavDropdowns(mountEl) {
+  mountEl.querySelectorAll(".nav-dropdown-toggle").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const dropdown = btn.closest(".nav-dropdown");
+      const wasOpen = dropdown.classList.contains("open");
+      mountEl.querySelectorAll(".nav-dropdown.open").forEach(d => d.classList.remove("open"));
+      if (!wasOpen) dropdown.classList.add("open");
+    });
+  });
+  document.addEventListener("click", () => {
+    mountEl.querySelectorAll(".nav-dropdown.open").forEach(d => d.classList.remove("open"));
+  });
+}
+
 // ---------- Shared header ----------
 function renderHeader(mountEl, fromRoot) {
   const overall = overallProgress();
@@ -131,7 +161,7 @@ function renderHeader(mountEl, fromRoot) {
         <a href="${homeHref}">Home</a>
         <a href="${prefix}about.html">About</a>
         <a href="${prefix}beyond-sibrp.html">Beyond SiBRP</a>
-        <a href="${prefix}application.html">Apply</a>
+        ${sibrpNavDropdownHtml(prefix, CURRENT_USER && CURRENT_USER.taEligible)}
         <a href="${prefix}speaker-series.html">Speaker Series</a>
         ${CURRENT_USER && CURRENT_USER.isAdmin ? `<a href="${prefix}admin.html">Admin</a>` : ""}
         <span class="header-progress-pill">Overall: ${overall.pct}%</span>
@@ -140,6 +170,8 @@ function renderHeader(mountEl, fromRoot) {
       </nav>
     </div>
   `;
+
+  wireNavDropdowns(mountEl);
 
   const logoutLink = mountEl.querySelector("#logout-link");
   logoutLink.addEventListener("click", async (e) => {
@@ -169,7 +201,7 @@ async function renderPublicHeader(mountEl, fromRoot) {
         <a href="${prefix}beyond-sibrp.html">Beyond SiBRP</a>
         ${user ? `
           <a href="${homeHref}">Home</a>
-          <a href="${prefix}application.html">Apply</a>
+          ${sibrpNavDropdownHtml(prefix, user.taEligible)}
           <a href="${prefix}speaker-series.html">Speaker Series</a>
           ${user.isAdmin ? `<a href="${prefix}admin.html">Admin</a>` : ""}
           <span class="header-user">${user.name}</span>
@@ -181,6 +213,8 @@ async function renderPublicHeader(mountEl, fromRoot) {
       </nav>
     </div>
   `;
+
+  wireNavDropdowns(mountEl);
 
   if (user) {
     mountEl.querySelector("#logout-link").addEventListener("click", async (e) => {

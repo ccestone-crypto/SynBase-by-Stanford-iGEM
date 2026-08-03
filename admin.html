@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin — SynBase</title>
-<link rel="stylesheet" href="css/style.css?v=12">
+<link rel="stylesheet" href="css/style.css?v=15">
 </head>
 <body>
 
@@ -45,6 +45,20 @@
     <p style="color:var(--ink-soft);font-size:0.9rem;margin:0 0 8px;">
       Students see these once they've finished every module. Changes apply immediately.
     </p>
+    <div class="window-form">
+      <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
+        <div class="form-field" style="margin-bottom:0;">
+          <label for="window-opens">Opens</label>
+          <input type="datetime-local" id="window-opens">
+        </div>
+        <div class="form-field" style="margin-bottom:0;">
+          <label for="window-closes">Closes</label>
+          <input type="datetime-local" id="window-closes">
+        </div>
+        <button class="btn small secondary" id="window-save-btn">Save Window</button>
+      </div>
+      <p style="color:var(--ink-soft);font-size:0.82rem;margin:8px 0 0;">Leave a field blank for no restriction on that side. Outside this window, students see an "opens/closed" message instead of the form.</p>
+    </div>
     <div class="auth-error" id="question-error"></div>
     <div id="question-list"></div>
     <div class="add-question-form">
@@ -69,12 +83,56 @@
   <div id="applications-list"></div>
 </main>
 
+<main class="container narrow">
+  <div class="content-card">
+    <h2>TA Application Questions</h2>
+    <p style="color:var(--ink-soft);font-size:0.9rem;margin:0 0 8px;">
+      A separate application track — only students you've marked "TA Eligible" in the table above can see or submit this one. Changes apply immediately.
+    </p>
+    <div class="window-form">
+      <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
+        <div class="form-field" style="margin-bottom:0;">
+          <label for="ta-window-opens">Opens</label>
+          <input type="datetime-local" id="ta-window-opens">
+        </div>
+        <div class="form-field" style="margin-bottom:0;">
+          <label for="ta-window-closes">Closes</label>
+          <input type="datetime-local" id="ta-window-closes">
+        </div>
+        <button class="btn small secondary" id="ta-window-save-btn">Save Window</button>
+      </div>
+      <p style="color:var(--ink-soft);font-size:0.82rem;margin:8px 0 0;">Leave a field blank for no restriction on that side. Outside this window, invited students see an "opens/closed" message instead of the form.</p>
+    </div>
+    <div class="auth-error" id="ta-question-error"></div>
+    <div id="ta-question-list"></div>
+    <div class="add-question-form">
+      <div class="form-field">
+        <label for="ta-new-question-prompt">New question</label>
+        <input type="text" id="ta-new-question-prompt" placeholder="e.g. Why do you want to TA?">
+      </div>
+      <select id="ta-new-question-type">
+        <option value="short">Short answer</option>
+        <option value="long">Long answer</option>
+      </select>
+      <button class="btn small" id="ta-add-question-btn">Add</button>
+    </div>
+  </div>
+</main>
+
+<main class="container">
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+    <div class="section-label" style="margin-top:0">TA Applications Received</div>
+    <a class="btn small secondary" href="/api/admin/ta-applications/export.csv" download>Export as CSV</a>
+  </div>
+  <div id="ta-applications-list"></div>
+</main>
+
 <footer class="site-footer">
   Adapted from Stanford iGEM Bioengineering Research Program (SiBRP), Session 2 — July 15th, 2026.
 </footer>
 
 <script src="js/modules-meta.js?v=6"></script>
-<script src="js/progress.js?v=7"></script>
+<script src="js/progress.js?v=8"></script>
 <script>
 function calcModuleProgress(progress, moduleId, sectionCount) {
   const mod = (progress && progress[moduleId]) || { sections: {}, videoWatched: false };
@@ -126,7 +184,7 @@ function renderUsers(users) {
     return `
       <tr data-user-id="${u.id}">
         <td>
-          <div class="admin-name">${u.name}${u.isAdmin ? '<span class="admin-badge">Admin</span>' : ""}</div>
+          <div class="admin-name">${u.name}${u.isAdmin ? '<span class="admin-badge">Admin</span>' : ""}${u.taEligible ? '<span class="admin-badge">TA Eligible</span>' : ""}</div>
           <div class="admin-email">${u.email}</div>
         </td>
         <td>${joined}</td>
@@ -137,6 +195,7 @@ function renderUsers(users) {
           ${u.id === CURRENT_USER.id
             ? ""
             : `<button class="btn small secondary" data-toggle-admin="${u.id}" data-toggle-admin-name="${u.name}" data-toggle-admin-next="${u.isAdmin ? "0" : "1"}">${u.isAdmin ? "Revoke Admin" : "Make Admin"}</button>`}
+          <button class="btn small secondary" data-toggle-ta="${u.id}" data-toggle-ta-name="${u.name}" data-toggle-ta-next="${u.taEligible ? "0" : "1"}">${u.taEligible ? "Revoke TA Eligibility" : "Allow TA Application"}</button>
         </td>
       </tr>
     `;
@@ -159,6 +218,31 @@ function renderUsers(users) {
         if (!res.ok) {
           const data = await res.json().catch(() => ({}));
           alert(data.error || `Could not update admin access (HTTP ${res.status}).`);
+        }
+      } catch (err) {
+        alert("Could not reach the server. Please try again.");
+      }
+      loadUsers();
+    });
+  });
+
+  body.querySelectorAll("[data-toggle-ta]").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const userId = btn.getAttribute("data-toggle-ta");
+      const name = btn.getAttribute("data-toggle-ta-name");
+      const nextEligible = btn.getAttribute("data-toggle-ta-next") === "1";
+      const verb = nextEligible ? "allow" : "revoke TA application access for";
+      if (!confirm(nextEligible ? `Allow ${name} to apply for a TA position?` : `Revoke TA application access for ${name}?`)) return;
+      btn.disabled = true;
+      try {
+        const res = await fetch("/api/admin/set-ta-eligible", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId, eligible: nextEligible })
+        });
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          alert(data.error || `Could not update TA eligibility (HTTP ${res.status}).`);
         }
       } catch (err) {
         alert("Could not reach the server. Please try again.");
@@ -198,237 +282,316 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 
-// ---------- Application questions ----------
-async function loadQuestions() {
-  const res = await fetch("/api/admin/application-questions");
-  const data = await res.json();
-  renderQuestions(data.questions || []);
-}
+// ---------- Application questions + submissions ----------
+// Same interface reused for both the SiBRP course application and the
+// separate TA application — each instance below just points at its own
+// API paths and DOM element ids.
+function createApplicationSection(cfg) {
+  let editingQuestionId = null;
 
-let editingQuestionId = null;
-
-function renderQuestions(questions) {
-  const listEl = document.getElementById("question-list");
-  listEl.innerHTML = questions.length
-    ? questions.map(q => {
-        if (q.id === editingQuestionId) {
-          return `
-            <div class="question-row" data-question-id="${q.id}">
-              <div class="question-row-main" style="flex:1;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-                <input type="text" class="edit-question-prompt" value="${escapeHtml(q.prompt)}" style="flex:1;min-width:200px;">
-                <select class="edit-question-type">
-                  <option value="short" ${q.type === "long" ? "" : "selected"}>Short answer</option>
-                  <option value="long" ${q.type === "long" ? "selected" : ""}>Long answer</option>
-                </select>
-              </div>
-              <div class="question-row-actions">
-                <button class="btn small" data-save-question="${q.id}">Save</button>
-                <button class="btn small secondary" data-cancel-edit-question="${q.id}">Cancel</button>
-              </div>
-            </div>
-          `;
-        }
-        return `
-        <div class="question-row" data-question-id="${q.id}">
-          <div class="question-row-main">
-            <div class="question-row-prompt">${escapeHtml(q.prompt)}</div>
-            <span class="question-row-type">${q.type === "long" ? "Long answer" : "Short answer"}</span>
-          </div>
-          <div class="question-row-actions">
-            <button class="btn small secondary" data-edit-question="${q.id}">Edit</button>
-            <button class="btn small secondary" data-delete-question="${q.id}">Delete</button>
-          </div>
-        </div>
-      `;
-      }).join("")
-    : `<p style="color:var(--ink-soft);font-size:0.9rem;margin:0;">No questions yet — add one below.</p>`;
-
-  const errorEl = document.getElementById("question-error");
-
-  listEl.querySelectorAll("[data-edit-question]").forEach(btn => {
-    btn.addEventListener("click", () => {
-      editingQuestionId = btn.getAttribute("data-edit-question");
-      loadQuestions();
-    });
-  });
-
-  listEl.querySelectorAll("[data-cancel-edit-question]").forEach(btn => {
-    btn.addEventListener("click", () => {
-      editingQuestionId = null;
-      loadQuestions();
-    });
-  });
-
-  listEl.querySelectorAll("[data-save-question]").forEach(btn => {
-    btn.addEventListener("click", async () => {
-      const row = btn.closest("[data-question-id]");
-      const prompt = row.querySelector(".edit-question-prompt").value.trim();
-      const type = row.querySelector(".edit-question-type").value;
-      errorEl.classList.remove("show");
-      if (!prompt) {
-        errorEl.textContent = "Question text can't be empty.";
-        errorEl.classList.add("show");
-        return;
-      }
-      btn.disabled = true;
-      try {
-        const res = await fetch(`/api/admin/application-questions/${btn.getAttribute("data-save-question")}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ prompt, type })
-        });
-        if (!res.ok) {
-          const data = await res.json().catch(() => ({}));
-          errorEl.textContent = data.error || `Could not save that question (HTTP ${res.status}).`;
-          errorEl.classList.add("show");
-          return;
-        }
-        editingQuestionId = null;
-      } catch (err) {
-        errorEl.textContent = "Could not reach the server. Please try again.";
-        errorEl.classList.add("show");
-        return;
-      }
-      loadQuestions();
-    });
-  });
-
-  listEl.querySelectorAll("[data-delete-question]").forEach(btn => {
-    btn.addEventListener("click", async () => {
-      if (!confirm("Delete this question?")) return;
-      errorEl.classList.remove("show");
-      try {
-        const res = await fetch(`/api/admin/application-questions/${btn.getAttribute("data-delete-question")}`, {
-          method: "DELETE"
-        });
-        if (!res.ok) {
-          const data = await res.json().catch(() => ({}));
-          errorEl.textContent = data.error || `Could not delete that question (HTTP ${res.status}).`;
-          errorEl.classList.add("show");
-          return;
-        }
-      } catch (err) {
-        errorEl.textContent = "Could not reach the server. Please try again.";
-        errorEl.classList.add("show");
-        return;
-      }
-      loadQuestions();
-    });
-  });
-}
-
-document.getElementById("add-question-btn").addEventListener("click", async () => {
-  const promptInput = document.getElementById("new-question-prompt");
-  const typeSelect = document.getElementById("new-question-type");
-  const btn = document.getElementById("add-question-btn");
-  const errorEl = document.getElementById("question-error");
-  errorEl.classList.remove("show");
-
-  const prompt = promptInput.value.trim();
-  if (!prompt) {
-    errorEl.textContent = "Enter question text before adding.";
-    errorEl.classList.add("show");
-    return;
+  async function loadQuestions() {
+    const res = await fetch(cfg.questionsApi);
+    const data = await res.json();
+    renderQuestions(data.questions || []);
   }
 
-  btn.disabled = true;
-  btn.textContent = "Adding…";
-  try {
-    const res = await fetch("/api/admin/application-questions", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prompt, type: typeSelect.value })
+  function renderQuestions(questions) {
+    const listEl = document.getElementById(cfg.questionListEl);
+    const errorEl = document.getElementById(cfg.questionErrorEl);
+    listEl.innerHTML = questions.length
+      ? questions.map(q => {
+          if (q.id === editingQuestionId) {
+            return `
+              <div class="question-row" data-question-id="${q.id}">
+                <div class="question-row-main" style="flex:1;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+                  <input type="text" class="edit-question-prompt" value="${escapeHtml(q.prompt)}" style="flex:1;min-width:200px;">
+                  <select class="edit-question-type">
+                    <option value="short" ${q.type === "long" ? "" : "selected"}>Short answer</option>
+                    <option value="long" ${q.type === "long" ? "selected" : ""}>Long answer</option>
+                  </select>
+                </div>
+                <div class="question-row-actions">
+                  <button class="btn small" data-save-question="${q.id}">Save</button>
+                  <button class="btn small secondary" data-cancel-edit-question="${q.id}">Cancel</button>
+                </div>
+              </div>
+            `;
+          }
+          return `
+          <div class="question-row" data-question-id="${q.id}">
+            <div class="question-row-main">
+              <div class="question-row-prompt">${escapeHtml(q.prompt)}</div>
+              <span class="question-row-type">${q.type === "long" ? "Long answer" : "Short answer"}</span>
+            </div>
+            <div class="question-row-actions">
+              <button class="btn small secondary" data-edit-question="${q.id}">Edit</button>
+              <button class="btn small secondary" data-delete-question="${q.id}">Delete</button>
+            </div>
+          </div>
+        `;
+        }).join("")
+      : `<p style="color:var(--ink-soft);font-size:0.9rem;margin:0;">No questions yet — add one below.</p>`;
+
+    listEl.querySelectorAll("[data-edit-question]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        editingQuestionId = btn.getAttribute("data-edit-question");
+        loadQuestions();
+      });
     });
-    if (!res.ok) {
-      const data = await res.json().catch(() => ({}));
-      errorEl.textContent = data.error || `Could not add that question (HTTP ${res.status}).`;
+
+    listEl.querySelectorAll("[data-cancel-edit-question]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        editingQuestionId = null;
+        loadQuestions();
+      });
+    });
+
+    listEl.querySelectorAll("[data-save-question]").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        const row = btn.closest("[data-question-id]");
+        const prompt = row.querySelector(".edit-question-prompt").value.trim();
+        const type = row.querySelector(".edit-question-type").value;
+        errorEl.classList.remove("show");
+        if (!prompt) {
+          errorEl.textContent = "Question text can't be empty.";
+          errorEl.classList.add("show");
+          return;
+        }
+        btn.disabled = true;
+        try {
+          const res = await fetch(`${cfg.questionsApi}/${btn.getAttribute("data-save-question")}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ prompt, type })
+          });
+          if (!res.ok) {
+            const data = await res.json().catch(() => ({}));
+            errorEl.textContent = data.error || `Could not save that question (HTTP ${res.status}).`;
+            errorEl.classList.add("show");
+            return;
+          }
+          editingQuestionId = null;
+        } catch (err) {
+          errorEl.textContent = "Could not reach the server. Please try again.";
+          errorEl.classList.add("show");
+          return;
+        }
+        loadQuestions();
+      });
+    });
+
+    listEl.querySelectorAll("[data-delete-question]").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        if (!confirm("Delete this question?")) return;
+        errorEl.classList.remove("show");
+        try {
+          const res = await fetch(`${cfg.questionsApi}/${btn.getAttribute("data-delete-question")}`, {
+            method: "DELETE"
+          });
+          if (!res.ok) {
+            const data = await res.json().catch(() => ({}));
+            errorEl.textContent = data.error || `Could not delete that question (HTTP ${res.status}).`;
+            errorEl.classList.add("show");
+            return;
+          }
+        } catch (err) {
+          errorEl.textContent = "Could not reach the server. Please try again.";
+          errorEl.classList.add("show");
+          return;
+        }
+        loadQuestions();
+      });
+    });
+  }
+
+  async function addQuestion() {
+    const promptInput = document.getElementById(cfg.newPromptEl);
+    const typeSelect = document.getElementById(cfg.newTypeEl);
+    const btn = document.getElementById(cfg.addBtnEl);
+    const errorEl = document.getElementById(cfg.questionErrorEl);
+    errorEl.classList.remove("show");
+
+    const prompt = promptInput.value.trim();
+    if (!prompt) {
+      errorEl.textContent = "Enter question text before adding.";
       errorEl.classList.add("show");
       return;
     }
-    promptInput.value = "";
-    loadQuestions();
-  } catch (err) {
-    errorEl.textContent = "Could not reach the server. Please try again.";
-    errorEl.classList.add("show");
-  } finally {
-    btn.disabled = false;
-    btn.textContent = "Add";
+
+    btn.disabled = true;
+    btn.textContent = "Adding…";
+    try {
+      const res = await fetch(cfg.questionsApi, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt, type: typeSelect.value })
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        errorEl.textContent = data.error || `Could not add that question (HTTP ${res.status}).`;
+        errorEl.classList.add("show");
+        return;
+      }
+      promptInput.value = "";
+      loadQuestions();
+    } catch (err) {
+      errorEl.textContent = "Could not reach the server. Please try again.";
+      errorEl.classList.add("show");
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Add";
+    }
   }
+
+  async function loadApplications() {
+    const res = await fetch(cfg.applicationsApi);
+    const data = await res.json();
+    renderApplications(data.applications || [], data.questions || []);
+  }
+
+  function renderApplications(applications, questions) {
+    const listEl = document.getElementById(cfg.applicationsListEl);
+    if (!applications.length) {
+      listEl.innerHTML = `<div class="content-card"><p style="margin:0;color:var(--ink-soft);">No applications submitted yet.</p></div>`;
+      return;
+    }
+
+    const promptById = {};
+    questions.forEach(q => { promptById[q.id] = q.prompt; });
+
+    listEl.innerHTML = applications.map((a, i) => {
+      const submitted = new Date(a.submittedAt).toLocaleString();
+      const blocks = Object.entries(a.answers).map(([qid, answer]) => `
+        <div class="answer-block">
+          <div class="question">${escapeHtml(promptById[qid] || "Question (removed)")}</div>
+          <div class="answer">${escapeHtml(answer)}</div>
+        </div>
+      `).join("");
+      return `
+        <div class="content-card">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;">
+            <div>
+              <div class="admin-name">${escapeHtml(a.name)}</div>
+              <div class="admin-email">${escapeHtml(a.email)} &middot; Submitted ${escapeHtml(submitted)}</div>
+            </div>
+            <div style="display:flex;gap:8px;">
+              <button class="btn small secondary" data-toggle-app="${i}">View Answers</button>
+              <button class="btn small secondary" data-reset-app="${a.userId}" data-reset-app-name="${escapeHtml(a.name)}">Allow Resubmit</button>
+            </div>
+          </div>
+          <div class="app-answers" id="${cfg.applicationsListEl}-answers-${i}" style="display:none;margin-top:16px;">${blocks}</div>
+        </div>
+      `;
+    }).join("");
+
+    listEl.querySelectorAll("[data-toggle-app]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const el = document.getElementById(`${cfg.applicationsListEl}-answers-${btn.getAttribute("data-toggle-app")}`);
+        const showing = el.style.display !== "none";
+        el.style.display = showing ? "none" : "block";
+        btn.textContent = showing ? "View Answers" : "Hide Answers";
+      });
+    });
+
+    listEl.querySelectorAll("[data-reset-app]").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        const userId = btn.getAttribute("data-reset-app");
+        const name = btn.getAttribute("data-reset-app-name");
+        if (!confirm(`Allow ${name} to resubmit? This deletes their current application.`)) return;
+        try {
+          const res = await fetch(cfg.resetApi, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ userId })
+          });
+          if (!res.ok) {
+            const data = await res.json().catch(() => ({}));
+            alert(data.error || `Could not reset that application (HTTP ${res.status}).`);
+          }
+        } catch (err) {
+          alert("Could not reach the server. Please try again.");
+        }
+        loadApplications();
+      });
+    });
+  }
+
+  document.getElementById(cfg.addBtnEl).addEventListener("click", addQuestion);
+
+  function toLocalInputValue(iso) {
+    if (!iso) return "";
+    const d = new Date(iso);
+    const pad = n => String(n).padStart(2, "0");
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
+
+  async function loadWindow() {
+    const res = await fetch(cfg.windowApi);
+    const data = await res.json();
+    const w = data.window || { opensAt: null, closesAt: null };
+    document.getElementById(cfg.windowOpensEl).value = toLocalInputValue(w.opensAt);
+    document.getElementById(cfg.windowClosesEl).value = toLocalInputValue(w.closesAt);
+  }
+
+  document.getElementById(cfg.windowSaveBtnEl).addEventListener("click", async () => {
+    const opensVal = document.getElementById(cfg.windowOpensEl).value;
+    const closesVal = document.getElementById(cfg.windowClosesEl).value;
+    const btn = document.getElementById(cfg.windowSaveBtnEl);
+    btn.disabled = true;
+    try {
+      const res = await fetch(cfg.windowApi, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          opensAt: opensVal ? new Date(opensVal).toISOString() : null,
+          closesAt: closesVal ? new Date(closesVal).toISOString() : null
+        })
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        alert(data.error || `Could not save the application window (HTTP ${res.status}).`);
+      }
+    } catch (err) {
+      alert("Could not reach the server. Please try again.");
+    }
+    btn.disabled = false;
+    loadWindow();
+  });
+
+  return { loadQuestions, loadApplications, loadWindow };
+}
+
+const sibrpApplicationSection = createApplicationSection({
+  questionsApi: "/api/admin/application-questions",
+  applicationsApi: "/api/admin/applications",
+  resetApi: "/api/admin/applications/reset",
+  windowApi: "/api/admin/application-window/sibrp",
+  questionListEl: "question-list",
+  questionErrorEl: "question-error",
+  newPromptEl: "new-question-prompt",
+  newTypeEl: "new-question-type",
+  addBtnEl: "add-question-btn",
+  applicationsListEl: "applications-list",
+  windowOpensEl: "window-opens",
+  windowClosesEl: "window-closes",
+  windowSaveBtnEl: "window-save-btn"
 });
 
-// ---------- Applications received ----------
-async function loadApplications() {
-  const res = await fetch("/api/admin/applications");
-  const data = await res.json();
-  renderApplications(data.applications || [], data.questions || []);
-}
-
-function renderApplications(applications, questions) {
-  const listEl = document.getElementById("applications-list");
-  if (!applications.length) {
-    listEl.innerHTML = `<div class="content-card"><p style="margin:0;color:var(--ink-soft);">No applications submitted yet.</p></div>`;
-    return;
-  }
-
-  const promptById = {};
-  questions.forEach(q => { promptById[q.id] = q.prompt; });
-
-  listEl.innerHTML = applications.map((a, i) => {
-    const submitted = new Date(a.submittedAt).toLocaleString();
-    const blocks = Object.entries(a.answers).map(([qid, answer]) => `
-      <div class="answer-block">
-        <div class="question">${escapeHtml(promptById[qid] || "Question (removed)")}</div>
-        <div class="answer">${escapeHtml(answer)}</div>
-      </div>
-    `).join("");
-    return `
-      <div class="content-card">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;">
-          <div>
-            <div class="admin-name">${escapeHtml(a.name)}</div>
-            <div class="admin-email">${escapeHtml(a.email)} &middot; Submitted ${escapeHtml(submitted)}</div>
-          </div>
-          <div style="display:flex;gap:8px;">
-            <button class="btn small secondary" data-toggle-app="${i}">View Answers</button>
-            <button class="btn small secondary" data-reset-app="${a.userId}" data-reset-app-name="${escapeHtml(a.name)}">Allow Resubmit</button>
-          </div>
-        </div>
-        <div class="app-answers" id="app-answers-${i}" style="display:none;margin-top:16px;">${blocks}</div>
-      </div>
-    `;
-  }).join("");
-
-  listEl.querySelectorAll("[data-toggle-app]").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const el = document.getElementById(`app-answers-${btn.getAttribute("data-toggle-app")}`);
-      const showing = el.style.display !== "none";
-      el.style.display = showing ? "none" : "block";
-      btn.textContent = showing ? "View Answers" : "Hide Answers";
-    });
-  });
-
-  listEl.querySelectorAll("[data-reset-app]").forEach(btn => {
-    btn.addEventListener("click", async () => {
-      const userId = btn.getAttribute("data-reset-app");
-      const name = btn.getAttribute("data-reset-app-name");
-      if (!confirm(`Allow ${name} to resubmit? This deletes their current application.`)) return;
-      try {
-        const res = await fetch("/api/admin/applications/reset", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userId })
-        });
-        if (!res.ok) {
-          const data = await res.json().catch(() => ({}));
-          alert(data.error || `Could not reset that application (HTTP ${res.status}).`);
-        }
-      } catch (err) {
-        alert("Could not reach the server. Please try again.");
-      }
-      loadApplications();
-    });
-  });
-}
+const taApplicationSection = createApplicationSection({
+  questionsApi: "/api/admin/ta-application-questions",
+  applicationsApi: "/api/admin/ta-applications",
+  resetApi: "/api/admin/ta-applications/reset",
+  windowApi: "/api/admin/application-window/ta",
+  questionListEl: "ta-question-list",
+  questionErrorEl: "ta-question-error",
+  newPromptEl: "ta-new-question-prompt",
+  newTypeEl: "ta-new-question-type",
+  addBtnEl: "ta-add-question-btn",
+  applicationsListEl: "ta-applications-list",
+  windowOpensEl: "ta-window-opens",
+  windowClosesEl: "ta-window-closes",
+  windowSaveBtnEl: "ta-window-save-btn"
+});
 
 (async () => {
   const user = await bootstrapAuthAndProgress(true);
@@ -440,8 +603,12 @@ function renderApplications(applications, questions) {
   renderHeader(document.getElementById("site-header"), true);
   document.getElementById("brand-mark-mount").outerHTML = BRAND_MARK;
   loadUsers();
-  loadQuestions();
-  loadApplications();
+  sibrpApplicationSection.loadWindow();
+  sibrpApplicationSection.loadQuestions();
+  sibrpApplicationSection.loadApplications();
+  taApplicationSection.loadWindow();
+  taApplicationSection.loadQuestions();
+  taApplicationSection.loadApplications();
 })();
 </script>
 </body>

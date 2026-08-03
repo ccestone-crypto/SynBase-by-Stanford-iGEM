@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Apply — SynBase</title>
+<title>TA Application — SynBase</title>
 <link rel="stylesheet" href="css/style.css?v=15">
 </head>
 <body>
@@ -13,8 +13,8 @@
 <section class="page-hero">
   <div class="container">
     <div id="brand-mark-mount"></div>
-    <h1>Apply</h1>
-    <p class="lede">Finish every module to unlock the application below.</p>
+    <h1>TA Application</h1>
+    <p class="lede">Invitation-only — admins designate which students can apply for a Teaching Assistant position.</p>
   </div>
 </section>
 
@@ -36,8 +36,8 @@ function escapeHtml(str) {
 async function loadApplicationState() {
   const mainEl = document.getElementById("app-main");
   const [meRes, qRes] = await Promise.all([
-    fetch("/api/application/me"),
-    fetch("/api/application/questions")
+    fetch("/api/ta-application/me"),
+    fetch("/api/ta-application/questions")
   ]);
   const me = await meRes.json();
   const qData = await qRes.json();
@@ -48,14 +48,13 @@ async function loadApplicationState() {
     return;
   }
 
-  if (!me.courseComplete) {
-    const overall = overallProgress();
+  if (!me.invited) {
     mainEl.innerHTML = `
       <div class="locked-panel">
         <div class="locked-icon">${LOCK_ICON}</div>
-        <h2>Finish the curriculum to unlock the application</h2>
-        <p>You're at ${overall.pct}% overall. Complete every module — including marking each video watched — before applying.</p>
-        <a class="btn" href="index.html">Continue the Curriculum</a>
+        <h2>You haven't been invited to apply</h2>
+        <p>TA applications are by invitation — an admin designates which students are eligible. If you think you should have access, reach out to an admin.</p>
+        <a class="btn" href="index.html">Back to the Curriculum</a>
       </div>
     `;
     return;
@@ -65,7 +64,7 @@ async function loadApplicationState() {
     mainEl.innerHTML = `
       <div class="locked-panel">
         <div class="locked-icon">${LOCK_ICON}</div>
-        <h2>Applications aren't open yet</h2>
+        <h2>TA applications aren't open yet</h2>
         <p>Applications open ${escapeHtml(new Date(me.window.opensAt).toLocaleString())}. Check back then.</p>
       </div>
     `;
@@ -76,7 +75,7 @@ async function loadApplicationState() {
     mainEl.innerHTML = `
       <div class="locked-panel">
         <div class="locked-icon">${LOCK_ICON}</div>
-        <h2>Applications are closed</h2>
+        <h2>TA applications are closed</h2>
         <p>Applications closed ${escapeHtml(new Date(me.window.closesAt).toLocaleString())}.</p>
       </div>
     `;
@@ -99,7 +98,7 @@ function renderSubmitted(mainEl, application, questions) {
   `).join("");
 
   mainEl.innerHTML = `
-    <div class="submitted-banner">Submitted ${escapeHtml(submitted)} — your application has been received.</div>
+    <div class="submitted-banner">Submitted ${escapeHtml(submitted)} — your TA application has been received.</div>
     <div class="content-card">
       <h2>Your Answers</h2>
       ${blocks}
@@ -109,7 +108,7 @@ function renderSubmitted(mainEl, application, questions) {
 
 function renderForm(mainEl, questions) {
   if (!questions.length) {
-    mainEl.innerHTML = `<div class="content-card"><p>There's no application open right now. Check back later.</p></div>`;
+    mainEl.innerHTML = `<div class="content-card"><p>There's no TA application open right now. Check back later.</p></div>`;
     return;
   }
 
@@ -124,7 +123,7 @@ function renderForm(mainEl, questions) {
 
   mainEl.innerHTML = `
     <div class="content-card">
-      <h2>Application</h2>
+      <h2>TA Application</h2>
       <div class="auth-error" id="app-error"></div>
       <form id="application-form" novalidate>
         ${fields}
@@ -147,7 +146,7 @@ function renderForm(mainEl, questions) {
     });
 
     try {
-      const res = await fetch("/api/application", {
+      const res = await fetch("/api/ta-application", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ answers })

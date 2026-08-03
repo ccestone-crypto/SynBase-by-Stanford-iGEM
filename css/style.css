@@ -78,6 +78,45 @@ a:hover { text-decoration: underline; }
 .header-nav { display: flex; align-items: center; gap: 16px; font-size: 0.9rem; flex-wrap: wrap; justify-content: flex-end; }
 .header-nav a { color: #f0dede; }
 .header-nav a:hover { color: #fff; text-decoration: none; }
+
+/* ---------- Nav dropdown (groups the SiBRP course + TA applications) ---------- */
+.nav-dropdown { position: relative; }
+.nav-dropdown-toggle {
+  background: none;
+  border: none;
+  font: inherit;
+  color: #f0dede;
+  cursor: pointer;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.nav-dropdown-toggle:hover { color: #fff; }
+.nav-dropdown-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 12px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: var(--shadow-hover);
+  min-width: 190px;
+  padding: 6px;
+  z-index: 60;
+}
+.nav-dropdown.open .nav-dropdown-menu { display: block; }
+.header-nav .nav-dropdown-menu a {
+  display: block;
+  padding: 8px 10px;
+  border-radius: 6px;
+  color: var(--ink);
+  font-size: 0.86rem;
+  font-weight: 500;
+}
+.header-nav .nav-dropdown-menu a:hover { background: var(--bg); color: var(--cardinal); text-decoration: none; }
 .header-progress-pill {
   background: rgba(255,255,255,0.16);
   border-radius: 999px;
@@ -954,6 +993,19 @@ a:hover { text-decoration: underline; }
   margin-top: 4px;
 }
 .add-question-form .form-field { margin-bottom: 0; flex: 1; min-width: 220px; }
+.window-form {
+  padding-bottom: 16px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+.window-form input[type="datetime-local"] {
+  padding: 8px 10px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  background: #fff;
+}
 .add-question-form select {
   padding: 10px 12px;
   border: 1.5px solid var(--border);

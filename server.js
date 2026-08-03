@@ -144,7 +144,7 @@ app.post("/api/signup", authLimiter, (req, res) => {
   }
 
   issueSession(res, user);
-  res.json({ user: { id: user.id, name: user.name, email: user.email, isAdmin: user.isAdmin } });
+  res.json({ user: { id: user.id, name: user.name, email: user.email, isAdmin: user.isAdmin, taEligible: !!user.taEligible } });
 });
 
 app.post("/api/login", authLimiter, (req, res) => {
@@ -154,7 +154,7 @@ app.post("/api/login", authLimiter, (req, res) => {
     return res.status(401).json({ error: "Incorrect email or password." });
   }
   issueSession(res, user);
-  res.json({ user: { id: user.id, name: user.name, email: user.email, isAdmin: !!user.isAdmin } });
+  res.json({ user: { id: user.id, name: user.name, email: user.email, isAdmin: !!user.isAdmin, taEligible: !!user.taEligible } });
 });
 
 app.post("/api/logout", (req, res) => {
@@ -164,7 +164,7 @@ app.post("/api/logout", (req, res) => {
 
 app.get("/api/me", (req, res) => {
   const user = getUserFromRequest(req);
-  res.json({ user: user ? { id: user.id, name: user.name, email: user.email, isAdmin: !!user.isAdmin } : null });
+  res.json({ user: user ? { id: user.id, name: user.name, email: user.email, isAdmin: !!user.isAdmin, taEligible: !!user.taEligible } : null });
 });
 
 // ---------- Forgot / reset password ----------
@@ -240,6 +240,24 @@ app.post("/api/progress", requireAuth, (req, res) => {
   res.json({ progress: store.readProgress(req.user.id) });
 });
 
+// ---------- Application open/close windows ----------
+// Admin can optionally bound each application kind to a date range (see
+// /api/admin/application-window/:kind below). Either bound may be null,
+// meaning no restriction on that side.
+function windowStatus(window) {
+  const now = Date.now();
+  if (window.opensAt && now < new Date(window.opensAt).getTime()) return "not-open";
+  if (window.closesAt && now > new Date(window.closesAt).getTime()) return "closed";
+  return "open";
+}
+
+function windowClosedError(kind, status, window) {
+  const label = kind === "ta" ? "TA applications" : "Applications";
+  if (status === "not-open") return `${label} open ${new Date(window.opensAt).toLocaleString()}.`;
+  if (status === "closed") return `${label} closed ${new Date(window.closesAt).toLocaleString()}.`;
+  return null;
+}
+
 // ---------- Application API (students) ----------
 // Questions are visible to any signed-in user (not sensitive); only admins
 // can create/edit/delete them (see Admin API below).
@@ -249,8 +267,14 @@ app.get("/api/application/questions", requireAuth, (req, res) => {
 
 app.get("/api/application/me", requireAuth, (req, res) => {
   const progress = store.readProgress(req.user.id);
+  const courseComplete = isCourseComplete(progress);
+  const window = store.getApplicationWindow("sibrp");
+  const status = windowStatus(window);
   res.json({
-    eligible: isCourseComplete(progress),
+    courseComplete,
+    window,
+    windowStatus: status,
+    eligible: courseComplete && status === "open",
     application: store.findApplicationByUserId(req.user.id)
   });
 });
@@ -259,6 +283,11 @@ app.post("/api/application", requireAuth, (req, res) => {
   const progress = store.readProgress(req.user.id);
   if (!isCourseComplete(progress)) {
     return res.status(403).json({ error: "Finish every module before applying." });
+  }
+  const window = store.getApplicationWindow("sibrp");
+  const status = windowStatus(window);
+  if (status !== "open") {
+    return res.status(403).json({ error: windowClosedError("sibrp", status, window) });
   }
   if (store.findApplicationByUserId(req.user.id)) {
     return res.status(409).json({ error: "You've already submitted an application." });
@@ -283,6 +312,61 @@ app.post("/api/application", requireAuth, (req, res) => {
     email: req.user.email,
     answers
   });
+  res.json({ application });
+});
+
+// ---------- TA Application (students) ----------
+// Eligibility here is granted per-user by an admin (see /api/admin/set-ta-eligible),
+// not tied to course completion — a separate track from the SiBRP application above.
+app.get("/api/ta-application/questions", requireAuth, (req, res) => {
+  res.json({ questions: store.readApplicationQuestions("ta") });
+});
+
+app.get("/api/ta-application/me", requireAuth, (req, res) => {
+  const invited = !!req.user.taEligible;
+  const window = store.getApplicationWindow("ta");
+  const status = windowStatus(window);
+  res.json({
+    invited,
+    window,
+    windowStatus: status,
+    eligible: invited && status === "open",
+    application: store.findApplicationByUserId(req.user.id, "ta")
+  });
+});
+
+app.post("/api/ta-application", requireAuth, (req, res) => {
+  if (!req.user.taEligible) {
+    return res.status(403).json({ error: "You haven't been invited to apply for a TA position." });
+  }
+  const window = store.getApplicationWindow("ta");
+  const status = windowStatus(window);
+  if (status !== "open") {
+    return res.status(403).json({ error: windowClosedError("ta", status, window) });
+  }
+  if (store.findApplicationByUserId(req.user.id, "ta")) {
+    return res.status(409).json({ error: "You've already submitted a TA application." });
+  }
+
+  const questions = store.readApplicationQuestions("ta");
+  if (!questions.length) {
+    return res.status(400).json({ error: "There's no TA application open right now." });
+  }
+
+  const answersIn = (req.body && req.body.answers) || {};
+  const answers = {};
+  for (const q of questions) {
+    const answer = String(answersIn[q.id] || "").trim();
+    if (!answer) return res.status(400).json({ error: `Please answer: "${q.prompt}"` });
+    answers[q.id] = answer;
+  }
+
+  const application = store.saveApplication({
+    userId: req.user.id,
+    name: req.user.name,
+    email: req.user.email,
+    answers
+  }, "ta");
   res.json({ application });
 });
 
@@ -385,9 +469,10 @@ function csvEscape(value) {
   return /[",\r\n]/.test(str) ? `"${str.replace(/"/g, '""')}"` : str;
 }
 
-app.get("/api/admin/applications/export.csv", requireAdmin, (req, res) => {
-  const questions = store.readApplicationQuestions();
-  const applications = store.readApplications();
+// Shared by both the sibrp and ta application exports — same shape, different kind.
+function buildApplicationsCsv(kind) {
+  const questions = store.readApplicationQuestions(kind);
+  const applications = store.readApplications(kind);
 
   // Column order follows the live question list; any answers left over from
   // since-deleted questions still get a column so no submitted data is lost.
@@ -416,11 +501,14 @@ app.get("/api/admin/applications/export.csv", requireAdmin, (req, res) => {
     lines.push(row.map(csvEscape).join(","));
   });
 
-  const csv = "﻿" + lines.join("\r\n");
+  return "﻿" + lines.join("\r\n");
+}
+
+app.get("/api/admin/applications/export.csv", requireAdmin, (req, res) => {
   const filename = `synbase-applications-${new Date().toISOString().slice(0, 10)}.csv`;
   res.setHeader("Content-Type", "text/csv; charset=utf-8");
   res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
-  res.send(csv);
+  res.send(buildApplicationsCsv("sibrp"));
 });
 
 app.post("/api/admin/applications/reset", requireAdmin, (req, res) => {
@@ -430,12 +518,84 @@ app.post("/api/admin/applications/reset", requireAdmin, (req, res) => {
   res.json({ ok: true });
 });
 
+// ---------- TA application (admin-managed questions, gated by admin-granted eligibility) ----------
+app.get("/api/admin/ta-application-questions", requireAdmin, (req, res) => {
+  res.json({ questions: store.readApplicationQuestions("ta") });
+});
+
+app.post("/api/admin/ta-application-questions", requireAdmin, (req, res) => {
+  const { prompt, type } = req.body || {};
+  if (!prompt || !String(prompt).trim()) {
+    return res.status(400).json({ error: "Question text is required." });
+  }
+  const question = store.addApplicationQuestion({
+    id: crypto.randomUUID(),
+    prompt: String(prompt).trim(),
+    type: type === "long" ? "long" : "short"
+  }, "ta");
+  res.json({ question });
+});
+
+app.put("/api/admin/ta-application-questions/:id", requireAdmin, (req, res) => {
+  const question = store.updateApplicationQuestion(req.params.id, req.body || {});
+  if (!question) return res.status(404).json({ error: "Question not found." });
+  res.json({ question });
+});
+
+app.delete("/api/admin/ta-application-questions/:id", requireAdmin, (req, res) => {
+  store.deleteApplicationQuestion(req.params.id);
+  res.json({ ok: true });
+});
+
+app.get("/api/admin/ta-applications", requireAdmin, (req, res) => {
+  res.json({
+    questions: store.readApplicationQuestions("ta"),
+    applications: store.readApplications("ta")
+  });
+});
+
+app.get("/api/admin/ta-applications/export.csv", requireAdmin, (req, res) => {
+  const filename = `synbase-ta-applications-${new Date().toISOString().slice(0, 10)}.csv`;
+  res.setHeader("Content-Type", "text/csv; charset=utf-8");
+  res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+  res.send(buildApplicationsCsv("ta"));
+});
+
+app.post("/api/admin/ta-applications/reset", requireAdmin, (req, res) => {
+  const { userId } = req.body || {};
+  if (!userId) return res.status(400).json({ error: "userId is required." });
+  store.deleteApplication(userId, "ta");
+  res.json({ ok: true });
+});
+
+app.post("/api/admin/set-ta-eligible", requireAdmin, (req, res) => {
+  const { userId, eligible } = req.body || {};
+  if (!store.findUserById(userId)) return res.status(400).json({ error: "Unknown userId." });
+  store.setTaEligible(userId, !!eligible);
+  res.json({ ok: true });
+});
+
+const APPLICATION_KINDS = new Set(["sibrp", "ta"]);
+
+app.get("/api/admin/application-window/:kind", requireAdmin, (req, res) => {
+  if (!APPLICATION_KINDS.has(req.params.kind)) return res.status(400).json({ error: "Unknown application kind." });
+  res.json({ window: store.getApplicationWindow(req.params.kind) });
+});
+
+app.post("/api/admin/application-window/:kind", requireAdmin, (req, res) => {
+  if (!APPLICATION_KINDS.has(req.params.kind)) return res.status(400).json({ error: "Unknown application kind." });
+  const { opensAt, closesAt } = req.body || {};
+  const window = store.setApplicationWindow(req.params.kind, { opensAt, closesAt });
+  res.json({ window });
+});
+
 app.get("/api/admin/users", requireAdmin, (req, res) => {
   const users = store.listUsers().map(u => ({
     id: u.id,
     name: u.name,
     email: u.email,
     isAdmin: !!u.isAdmin,
+    taEligible: !!u.taEligible,
     createdAt: u.createdAt,
     progress: store.readProgress(u.id)
   }));
