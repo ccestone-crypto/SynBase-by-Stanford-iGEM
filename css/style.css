@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Figtree:wght@500;600;700&family=Gabarito:wght@800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Gabarito:wght@700;800;900&display=swap');
 
 /* Palette pulled directly from the SiBRP slide deck: cardinal red header bar,
    cream background, charcoal headings, and a teal/gold/cardinal badge cycle
@@ -24,10 +24,16 @@
   --radius: 14px;
   --shadow: 0 2px 10px rgba(40, 30, 10, 0.06);
   --shadow-hover: 0 8px 24px rgba(40, 30, 10, 0.12);
-  font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-body: 'Figtree', -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-display: 'Gabarito', -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: var(--font-body);
 }
 
 * { box-sizing: border-box; }
+
+/* Bold display font for every heading site-wide, matching the reference design's
+   Gabarito headlines + Figtree body text pairing. */
+h1, h2, h3 { font-family: var(--font-display); }
 
 body {
   margin: 0;
@@ -50,7 +56,7 @@ a:hover { text-decoration: underline; }
   color: var(--ink);
   padding: 0 24px;
   border-bottom: 3px solid var(--gold);
-  font-family: 'Figtree', -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: var(--font-body);
 }
 .site-header .header-inner {
   max-width: 1100px;
@@ -946,7 +952,7 @@ a:hover { text-decoration: underline; }
   border-radius: 999px;
   margin-bottom: 18px;
 }
-.landing-hero h1 { font-family: 'Gabarito', -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-size: 2.6rem; font-weight: 900; line-height: 1.12; letter-spacing: -1px; color: var(--charcoal); margin: 0 0 16px; }
+.landing-hero h1 { font-size: 2.6rem; font-weight: 900; line-height: 1.12; letter-spacing: -1px; color: var(--charcoal); margin: 0 0 16px; }
 .landing-hero .lede { font-size: 1.08rem; color: var(--ink-soft); max-width: 480px; margin: 0 0 26px; }
 .landing-hero-ctas { display: flex; gap: 12px; flex-wrap: wrap; }
 .landing-hero-art {

@@ -121,13 +121,14 @@ const BRAND_MARK = `<div class="brand-mark"><span class="bar1"></span><span clas
 // ---------- Nav dropdown (groups the SiBRP course + TA applications) ----------
 const CHEVRON_DOWN = `<svg viewBox="0 0 20 20" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8l5 5 5-5"/></svg>`;
 
-function sibrpNavDropdownHtml(prefix, taEligible) {
+function sibrpNavDropdownHtml(prefix, user) {
   return `
     <div class="nav-dropdown">
       <button type="button" class="nav-dropdown-toggle">SiBRP ${CHEVRON_DOWN}</button>
       <div class="nav-dropdown-menu">
-        <a href="${prefix}application.html">Course Application</a>
-        ${taEligible ? `<a href="${prefix}ta-application.html">TA Application</a>` : ""}
+        <a href="${prefix}beyond-sibrp.html">Beyond SiBRP</a>
+        ${user ? `<a href="${prefix}application.html">Course Application</a>` : ""}
+        ${user && user.taEligible ? `<a href="${prefix}ta-application.html">TA Application</a>` : ""}
       </div>
     </div>
   `;
@@ -160,8 +161,7 @@ function renderHeader(mountEl, fromRoot) {
       <nav class="header-nav">
         <a href="${homeHref}">Home</a>
         <a href="${prefix}about.html">About</a>
-        <a href="${prefix}beyond-sibrp.html">Beyond SiBRP</a>
-        ${sibrpNavDropdownHtml(prefix, CURRENT_USER && CURRENT_USER.taEligible)}
+        ${sibrpNavDropdownHtml(prefix, CURRENT_USER)}
         <a href="${prefix}speaker-series.html">Speaker Series</a>
         ${CURRENT_USER && CURRENT_USER.isAdmin ? `<a href="${prefix}admin.html">Admin</a>` : ""}
         <span class="header-progress-pill">Overall: ${overall.pct}%</span>
@@ -198,10 +198,9 @@ async function renderPublicHeader(mountEl, fromRoot) {
       <a class="brand" href="${prefix}about.html"><span class="dot"></span> SynBase<span class="brand-suffix">by Stanford iGEM</span></a>
       <nav class="header-nav">
         <a href="${prefix}about.html">About</a>
-        <a href="${prefix}beyond-sibrp.html">Beyond SiBRP</a>
+        ${sibrpNavDropdownHtml(prefix, user)}
         ${user ? `
           <a href="${homeHref}">Home</a>
-          ${sibrpNavDropdownHtml(prefix, user.taEligible)}
           <a href="${prefix}speaker-series.html">Speaker Series</a>
           ${user.isAdmin ? `<a href="${prefix}admin.html">Admin</a>` : ""}
           <span class="header-user">${user.name}</span>
