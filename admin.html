@@ -147,7 +147,7 @@
 </footer>
 
 <script src="js/modules-meta.js?v=6"></script>
-<script src="js/progress.js?v=9"></script>
+<script src="js/progress.js?v=10"></script>
 <script>
 function calcModuleProgress(progress, moduleId, sectionCount) {
   const mod = (progress && progress[moduleId]) || { sections: {}, videoWatched: false };
@@ -199,18 +199,18 @@ function renderUsers(users) {
     return `
       <tr data-user-id="${u.id}">
         <td>
-          <div class="admin-name">${u.name}${u.isAdmin ? '<span class="admin-badge">Admin</span>' : ""}${u.taEligible ? '<span class="admin-badge">TA Eligible</span>' : ""}</div>
-          <div class="admin-email">${u.email}</div>
+          <div class="admin-name">${escapeHtml(u.name)}${u.isAdmin ? '<span class="admin-badge">Admin</span>' : ""}${u.taEligible ? '<span class="admin-badge">TA Eligible</span>' : ""}</div>
+          <div class="admin-email">${escapeHtml(u.email)}</div>
         </td>
         <td>${joined}</td>
         ${modCells}
         <td class="admin-overall">${calcOverall(u.progress)}%</td>
         <td style="display:flex;gap:6px;flex-wrap:wrap;">
-          <button class="btn small secondary admin-reset-btn" data-reset-user="${u.id}" data-reset-name="${u.name}">Reset</button>
+          <button class="btn small secondary admin-reset-btn" data-reset-user="${u.id}" data-reset-name="${escapeHtml(u.name)}">Reset</button>
           ${u.id === CURRENT_USER.id
             ? ""
-            : `<button class="btn small secondary" data-toggle-admin="${u.id}" data-toggle-admin-name="${u.name}" data-toggle-admin-next="${u.isAdmin ? "0" : "1"}">${u.isAdmin ? "Revoke Admin" : "Make Admin"}</button>`}
-          <button class="btn small secondary" data-toggle-ta="${u.id}" data-toggle-ta-name="${u.name}" data-toggle-ta-next="${u.taEligible ? "0" : "1"}">${u.taEligible ? "Revoke TA Eligibility" : "Allow TA Application"}</button>
+            : `<button class="btn small secondary" data-toggle-admin="${u.id}" data-toggle-admin-name="${escapeHtml(u.name)}" data-toggle-admin-next="${u.isAdmin ? "0" : "1"}">${u.isAdmin ? "Revoke Admin" : "Make Admin"}</button>`}
+          <button class="btn small secondary" data-toggle-ta="${u.id}" data-toggle-ta-name="${escapeHtml(u.name)}" data-toggle-ta-next="${u.taEligible ? "0" : "1"}">${u.taEligible ? "Revoke TA Eligibility" : "Allow TA Application"}</button>
         </td>
       </tr>
     `;

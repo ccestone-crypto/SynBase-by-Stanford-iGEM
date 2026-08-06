@@ -7,6 +7,12 @@
 let CURRENT_USER = null;
 let PROGRESS_CACHE = {};
 
+function escapeHtml(str) {
+  const div = document.createElement("div");
+  div.textContent = str == null ? "" : str;
+  return div.innerHTML;
+}
+
 function loginPath(fromRoot) {
   return fromRoot ? "login.html" : "../login.html";
 }
@@ -154,7 +160,7 @@ function renderHeader(mountEl, fromRoot) {
   const overall = overallProgress();
   const homeHref = fromRoot ? "index.html" : "../index.html";
   const prefix = fromRoot ? "" : "../";
-  const name = CURRENT_USER ? CURRENT_USER.name : "";
+  const name = CURRENT_USER ? escapeHtml(CURRENT_USER.name) : "";
   mountEl.innerHTML = `
     <div class="header-inner">
       <a class="brand" href="${homeHref}"><span class="dot"></span> SynBase<span class="brand-suffix">by Stanford iGEM</span></a>
@@ -203,7 +209,7 @@ async function renderPublicHeader(mountEl, fromRoot) {
           <a href="${homeHref}">Home</a>
           <a href="${prefix}speaker-series.html">Speaker Series</a>
           ${user.isAdmin ? `<a href="${prefix}admin.html">Admin</a>` : ""}
-          <span class="header-user">${user.name}</span>
+          <span class="header-user">${escapeHtml(user.name)}</span>
           <a href="#" id="logout-link">Log out</a>
         ` : `
           <a href="${prefix}login.html">Log In</a>

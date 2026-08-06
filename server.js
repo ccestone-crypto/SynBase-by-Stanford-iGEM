@@ -13,7 +13,7 @@ const store = require("./server/store");
 const mailer = require("./server/mailer");
 const speakerStore = require("./server/speaker-store");
 const { getSessionSecret } = require("./server/secret");
-const { isCourseComplete } = require("./server/course-config");
+const { isCourseComplete, isValidSection } = require("./server/course-config");
 
 const SESSION_SECRET = getSessionSecret();
 const COOKIE_NAME = "sibrp_session";
@@ -233,7 +233,12 @@ app.post("/api/progress", requireAuth, (req, res) => {
   const { moduleId, sectionId, videoWatched } = req.body || {};
   if (!moduleId) return res.status(400).json({ error: "moduleId is required." });
 
-  if (sectionId) store.markSectionComplete(req.user.id, moduleId, sectionId);
+  if (sectionId) {
+    if (!isValidSection(moduleId, sectionId)) {
+      return res.status(400).json({ error: "Unknown section." });
+    }
+    store.markSectionComplete(req.user.id, moduleId, sectionId);
+  }
   if (typeof videoWatched === "boolean") store.setVideoWatched(req.user.id, moduleId, videoWatched);
 
   res.json({ progress: store.readProgress(req.user.id) });
@@ -458,7 +463,10 @@ app.get("/api/admin/applications", requireAdmin, (req, res) => {
 });
 
 function csvEscape(value) {
-  const str = value == null ? "" : String(value);
+  let str = value == null ? "" : String(value);
+  // Neutralize CSV formula injection: a leading =, +, -, or @ makes Excel/Sheets
+  // interpret the cell as a formula. Prefixing with an apostrophe forces text.
+  if (/^[=+\-@]/.test(str)) str = `'${str}`;
   return /[",\r\n]/.test(str) ? `"${str.replace(/"/g, '""')}"` : str;
 }
 
