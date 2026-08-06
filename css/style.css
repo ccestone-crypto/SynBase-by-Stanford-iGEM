@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Figtree:wght@500;600;700&family=Gabarito:wght@800;900&display=swap');
+
 /* Palette pulled directly from the SiBRP slide deck: cardinal red header bar,
    cream background, charcoal headings, and a teal/gold/cardinal badge cycle
    for numbered items (see "Three Domains of Life", "Three Common Types of Cells"). */
@@ -44,10 +46,11 @@ a:hover { text-decoration: underline; }
   position: sticky;
   top: 0;
   z-index: 50;
-  background: var(--cardinal);
-  color: #fff;
+  background: var(--cream);
+  color: var(--ink);
   padding: 0 24px;
   border-bottom: 3px solid var(--gold);
+  font-family: 'Figtree', -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 .site-header .header-inner {
   max-width: 1100px;
@@ -63,21 +66,21 @@ a:hover { text-decoration: underline; }
   gap: 10px;
   font-weight: 800;
   font-size: 1.1rem;
-  color: #fff;
+  color: var(--charcoal);
 }
-.brand .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--gold); }
-.brand:hover { text-decoration: none; opacity: 0.9; }
+.brand .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--cardinal); }
+.brand:hover { text-decoration: none; opacity: 0.85; }
 .brand-suffix, .auth-brand .brand-suffix {
   font-family: Georgia, "Times New Roman", serif;
   font-style: italic;
   font-weight: 400;
   font-size: 0.72em;
-  opacity: 0.72;
+  opacity: 0.65;
   margin-left: 6px;
 }
-.header-nav { display: flex; align-items: center; gap: 16px; font-size: 0.9rem; flex-wrap: wrap; justify-content: flex-end; }
-.header-nav a { color: #f0dede; }
-.header-nav a:hover { color: #fff; text-decoration: none; }
+.header-nav { display: flex; align-items: center; gap: 16px; font-size: 0.9rem; font-weight: 600; flex-wrap: wrap; justify-content: flex-end; }
+.header-nav a { color: var(--ink); }
+.header-nav a:hover { color: var(--cardinal); text-decoration: none; }
 
 /* ---------- Nav dropdown (groups the SiBRP course + TA applications) ---------- */
 .nav-dropdown { position: relative; }
@@ -85,14 +88,14 @@ a:hover { text-decoration: underline; }
   background: none;
   border: none;
   font: inherit;
-  color: #f0dede;
+  color: var(--ink);
   cursor: pointer;
   padding: 0;
   display: inline-flex;
   align-items: center;
   gap: 4px;
 }
-.nav-dropdown-toggle:hover { color: #fff; }
+.nav-dropdown-toggle:hover { color: var(--cardinal); }
 .nav-dropdown-menu {
   display: none;
   position: absolute;
@@ -118,18 +121,18 @@ a:hover { text-decoration: underline; }
 }
 .header-nav .nav-dropdown-menu a:hover { background: var(--bg); color: var(--cardinal); text-decoration: none; }
 .header-progress-pill {
-  background: rgba(255,255,255,0.16);
+  background: var(--cardinal-tint);
   border-radius: 999px;
   padding: 6px 14px;
   font-size: 0.82rem;
-  color: #fff;
+  color: var(--cardinal);
   font-weight: 600;
 }
 .header-user {
   font-size: 0.85rem;
   font-weight: 700;
-  color: #fff;
-  opacity: 0.9;
+  color: var(--ink);
+  opacity: 0.85;
 }
 
 /* ---------- Layout helpers ---------- */
@@ -922,6 +925,122 @@ a:hover { text-decoration: underline; }
 .cta-banner .btn { background: var(--gold); color: var(--charcoal); }
 .cta-banner .btn:hover { background: #dc9d30; }
 
+/* ---------- Landing hero (split layout, about.html) ---------- */
+.landing-hero { background: var(--cream); border-bottom: 1px solid var(--border); padding: 56px 24px; }
+.landing-hero .container {
+  max-width: 1100px;
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 48px;
+  align-items: center;
+  text-align: left;
+}
+.landing-hero-badge {
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--gold-dark);
+  background: var(--gold-tint);
+  border: 1px solid var(--gold);
+  padding: 5px 14px;
+  border-radius: 999px;
+  margin-bottom: 18px;
+}
+.landing-hero h1 { font-family: 'Gabarito', -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-size: 2.6rem; font-weight: 900; line-height: 1.12; letter-spacing: -1px; color: var(--charcoal); margin: 0 0 16px; }
+.landing-hero .lede { font-size: 1.08rem; color: var(--ink-soft); max-width: 480px; margin: 0 0 26px; }
+.landing-hero-ctas { display: flex; gap: 12px; flex-wrap: wrap; }
+.landing-hero-art {
+  background: var(--cream);
+  border: 4px solid var(--cardinal);
+  border-radius: 24px;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+@media (max-width: 860px) {
+  .landing-hero .container { grid-template-columns: 1fr; text-align: center; }
+  .landing-hero .lede { margin-left: auto; margin-right: auto; }
+  .landing-hero-ctas { justify-content: center; }
+  .landing-hero-art { max-width: 280px; margin: 0 auto; }
+}
+
+/* ---------- Explore modules grid ---------- */
+.explore-section { padding: 56px 24px; background: #fff; }
+.explore-section .container { max-width: 1000px; }
+.explore-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; margin-top: 32px; }
+.explore-card { display: block; padding: 22px; border-radius: 16px; border: 1px solid transparent; position: relative; }
+.explore-card:hover { text-decoration: none; border-color: currentColor; }
+.explore-card.tint-teal { background: var(--teal-tint); color: var(--teal-dark); }
+.explore-card.tint-gold { background: var(--gold-tint); color: var(--gold-dark); }
+.explore-card.tint-cardinal { background: var(--cardinal-tint); color: var(--cardinal-dark, var(--cardinal)); }
+.explore-card-icon {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.65);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 14px;
+}
+.explore-card-arrow { position: absolute; top: 20px; right: 20px; opacity: 0.55; }
+.explore-card h3 { font-size: 1.02rem; margin: 0 0 6px; color: var(--charcoal); }
+.explore-card p { font-size: 0.86rem; color: var(--ink-soft); margin: 0; line-height: 1.5; }
+
+/* ---------- Steps ("How it works") ---------- */
+.steps-section { padding: 56px 24px; background: var(--bg); }
+.steps-section .container { max-width: 800px; }
+.step-row { display: flex; gap: 18px; padding: 22px 0; border-bottom: 1px solid var(--border); }
+.step-row:last-child { border-bottom: none; }
+.step-icon {
+  flex-shrink: 0;
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff;
+}
+.step-copy h3 { margin: 0 0 6px; font-size: 1.05rem; color: var(--charcoal); }
+.step-copy p { margin: 0; font-size: 0.92rem; color: var(--ink-soft); }
+
+/* ---------- Highlights (Beyond SiBRP, real project data) ---------- */
+.highlights-section { padding: 56px 24px; background: #fff; }
+.highlights-section .container { max-width: 1100px; }
+.highlights-head { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 12px; margin-bottom: 28px; }
+.highlights-head h2 { margin: 0; font-size: 1.7rem; font-weight: 800; color: var(--charcoal); }
+.highlights-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; }
+
+/* ---------- Interactive trial quiz ---------- */
+.trial-section { padding: 56px 24px; background: var(--bg); }
+.trial-section .container { max-width: 900px; display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 40px; align-items: center; }
+.trial-copy h2 { font-size: 1.7rem; font-weight: 800; margin: 0 0 12px; color: var(--charcoal); }
+.trial-copy p { color: var(--ink-soft); margin: 0 0 20px; }
+@media (max-width: 760px) { .trial-section .container { grid-template-columns: 1fr; } }
+
+/* ---------- Split CTA ---------- */
+.split-cta-section { padding: 56px 24px; background: #fff; }
+.split-cta-row { max-width: 1000px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.split-cta-card { padding: 32px; border-radius: 18px; }
+.split-cta-card.tint-teal { background: var(--teal-tint); }
+.split-cta-card.tint-cardinal { background: var(--cardinal-tint); }
+.split-cta-card h3 { margin: 0 0 8px; font-size: 1.2rem; color: var(--charcoal); }
+.split-cta-card p { margin: 0 0 18px; color: var(--ink-soft); font-size: 0.92rem; }
+@media (max-width: 640px) { .split-cta-row { grid-template-columns: 1fr; } }
+
+/* ---------- Landing footer (about.html only — other pages keep .site-footer) ---------- */
+.landing-footer { background: var(--charcoal); color: #cfcdc5; padding: 48px 24px 28px; }
+.landing-footer .container { max-width: 1100px; }
+.landing-footer-top {
+  display: flex; justify-content: space-between; flex-wrap: wrap; gap: 32px;
+  padding-bottom: 28px; margin-bottom: 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+}
+.landing-footer-brand { display: flex; align-items: center; gap: 8px; color: #fff; font-weight: 800; font-size: 1.05rem; }
+.landing-footer-brand .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--gold); }
+.landing-footer-links { display: flex; gap: 40px; flex-wrap: wrap; }
+.landing-footer-col h4 { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; color: #8f8c82; margin: 0 0 12px; }
+.landing-footer-col a { display: block; color: #cfcdc5; font-size: 0.9rem; margin-bottom: 8px; }
+.landing-footer-col a:hover { color: #fff; text-decoration: none; }
+.landing-footer-bottom { font-size: 0.82rem; color: #8f8c82; }
+
 /* ---------- Application form (student + admin question builder) ---------- */
 .form-field { margin-bottom: 18px; }
 .form-field label {
@@ -1005,6 +1124,88 @@ a:hover { text-decoration: underline; }
   font-size: 0.9rem;
   font-family: inherit;
   background: #fff;
+}
+
+/* ---------- Admin application tabs (Google-Forms-style Questions/Responses) ---------- */
+.app-tabs { display: flex; gap: 4px; border-bottom: 2px solid var(--border); margin-bottom: 24px; }
+.app-tab {
+  background: none;
+  border: none;
+  font: inherit;
+  cursor: pointer;
+  padding: 10px 16px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+}
+.app-tab:hover { color: var(--cardinal); }
+.app-tab.active { color: var(--cardinal); border-bottom-color: var(--cardinal); }
+
+.app-subtabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+.app-subtab {
+  background: none;
+  border: none;
+  font: inherit;
+  cursor: pointer;
+  padding: 8px 14px;
+  font-weight: 600;
+  font-size: 0.88rem;
+  color: var(--ink-soft);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.app-subtab:hover { color: var(--charcoal); }
+.app-subtab.active { color: var(--charcoal); border-bottom-color: var(--gold); }
+.app-subtab-count {
+  background: var(--cardinal-tint);
+  color: var(--cardinal);
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 1px 8px;
+  border-radius: 999px;
+}
+.app-panel-note { color: var(--ink-soft); font-size: 0.9rem; margin: 0 0 8px; }
+
+/* ---------- Response viewer (Google Forms-style: one response at a time) ---------- */
+.response-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+.response-search {
+  flex: 1;
+  min-width: 200px;
+  max-width: 320px;
+  padding: 8px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-family: inherit;
+}
+.response-nav { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+.response-nav-btns { display: flex; align-items: center; gap: 10px; }
+.response-counter { font-size: 0.88rem; font-weight: 700; color: var(--ink-soft); white-space: nowrap; }
+.response-nav-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  background: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--charcoal);
+}
+.response-nav-btn:hover:not(:disabled) { border-color: var(--cardinal); color: var(--cardinal); }
+.response-nav-btn:disabled { opacity: 0.35; cursor: default; }
+.response-empty {
+  text-align: center;
+  padding: 40px 24px;
+  color: var(--ink-soft);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
 }
 .add-question-form select {
   padding: 10px 12px;

@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin — SynBase</title>
-<link rel="stylesheet" href="css/style.css?v=16">
+<link rel="stylesheet" href="css/style.css?v=20">
 </head>
 <body>
 
@@ -41,90 +41,105 @@
 
 <main class="container narrow">
   <div class="content-card">
-    <h2>Application Questions</h2>
-    <p style="color:var(--ink-soft);font-size:0.9rem;margin:0 0 8px;">
-      Students see these once they've finished every module. Changes apply immediately.
-    </p>
-    <div class="window-form">
-      <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
-        <div class="form-field" style="margin-bottom:0;">
-          <label for="window-opens">Opens</label>
-          <input type="datetime-local" id="window-opens">
-        </div>
-        <div class="form-field" style="margin-bottom:0;">
-          <label for="window-closes">Closes</label>
-          <input type="datetime-local" id="window-closes">
-        </div>
-        <button class="btn small secondary" id="window-save-btn">Save Window</button>
-      </div>
-      <p style="color:var(--ink-soft);font-size:0.82rem;margin:8px 0 0;">Leave a field blank for no restriction on that side. Outside this window, students see an "opens/closed" message instead of the form.</p>
+    <div class="app-tabs" id="app-top-tabs">
+      <button type="button" class="app-tab active" data-app-panel="sibrp">SiBRP Application</button>
+      <button type="button" class="app-tab" data-app-panel="ta">TA Application</button>
     </div>
-    <div class="auth-error" id="question-error"></div>
-    <div id="question-list"></div>
-    <div class="add-question-form">
-      <div class="form-field">
-        <label for="new-question-prompt">New question</label>
-        <input type="text" id="new-question-prompt" placeholder="e.g. Why do you want to join?">
-      </div>
-      <select id="new-question-type">
-        <option value="short">Short answer</option>
-        <option value="long">Long answer</option>
-      </select>
-      <button class="btn small" id="add-question-btn">Add</button>
-    </div>
-  </div>
-</main>
 
-<main class="container">
-  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
-    <div class="section-label" style="margin-top:0">Applications Received</div>
-    <a class="btn small secondary" id="export-csv-link" href="/api/admin/applications/export.csv" download>Export as CSV</a>
-  </div>
-  <div id="applications-list"></div>
-</main>
-
-<main class="container narrow">
-  <div class="content-card">
-    <h2>TA Application Questions</h2>
-    <p style="color:var(--ink-soft);font-size:0.9rem;margin:0 0 8px;">
-      A separate application track — only students you've marked "TA Eligible" in the table above can see or submit this one. Changes apply immediately.
-    </p>
-    <div class="window-form">
-      <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
-        <div class="form-field" style="margin-bottom:0;">
-          <label for="ta-window-opens">Opens</label>
-          <input type="datetime-local" id="ta-window-opens">
-        </div>
-        <div class="form-field" style="margin-bottom:0;">
-          <label for="ta-window-closes">Closes</label>
-          <input type="datetime-local" id="ta-window-closes">
-        </div>
-        <button class="btn small secondary" id="ta-window-save-btn">Save Window</button>
+    <!-- ===== SiBRP Application ===== -->
+    <div class="app-panel" id="app-panel-sibrp">
+      <div class="app-subtabs" data-subtab-group="sibrp">
+        <button type="button" class="app-subtab active" data-subpanel="sibrp-questions">Questions</button>
+        <button type="button" class="app-subtab" data-subpanel="sibrp-responses">Responses <span class="app-subtab-count" id="sibrp-response-count">0</span></button>
       </div>
-      <p style="color:var(--ink-soft);font-size:0.82rem;margin:8px 0 0;">Leave a field blank for no restriction on that side. Outside this window, invited students see an "opens/closed" message instead of the form.</p>
-    </div>
-    <div class="auth-error" id="ta-question-error"></div>
-    <div id="ta-question-list"></div>
-    <div class="add-question-form">
-      <div class="form-field">
-        <label for="ta-new-question-prompt">New question</label>
-        <input type="text" id="ta-new-question-prompt" placeholder="e.g. Why do you want to TA?">
-      </div>
-      <select id="ta-new-question-type">
-        <option value="short">Short answer</option>
-        <option value="long">Long answer</option>
-      </select>
-      <button class="btn small" id="ta-add-question-btn">Add</button>
-    </div>
-  </div>
-</main>
 
-<main class="container">
-  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
-    <div class="section-label" style="margin-top:0">TA Applications Received</div>
-    <a class="btn small secondary" href="/api/admin/ta-applications/export.csv" download>Export as CSV</a>
+      <div class="app-subpanel" id="sibrp-questions-subpanel">
+        <p class="app-panel-note">Students see these once they've finished every module. Changes apply immediately.</p>
+        <div class="window-form">
+          <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
+            <div class="form-field" style="margin-bottom:0;">
+              <label for="window-opens">Opens</label>
+              <input type="datetime-local" id="window-opens">
+            </div>
+            <div class="form-field" style="margin-bottom:0;">
+              <label for="window-closes">Closes</label>
+              <input type="datetime-local" id="window-closes">
+            </div>
+            <button class="btn small secondary" id="window-save-btn">Save Window</button>
+          </div>
+          <p style="color:var(--ink-soft);font-size:0.82rem;margin:8px 0 0;">Leave a field blank for no restriction on that side. Outside this window, students see an "opens/closed" message instead of the form.</p>
+        </div>
+        <div class="auth-error" id="question-error"></div>
+        <div id="question-list"></div>
+        <div class="add-question-form">
+          <div class="form-field">
+            <label for="new-question-prompt">New question</label>
+            <input type="text" id="new-question-prompt" placeholder="e.g. Why do you want to join?">
+          </div>
+          <select id="new-question-type">
+            <option value="short">Short answer</option>
+            <option value="long">Long answer</option>
+          </select>
+          <button class="btn small" id="add-question-btn">Add</button>
+        </div>
+      </div>
+
+      <div class="app-subpanel" id="sibrp-responses-subpanel" style="display:none;">
+        <div class="response-toolbar">
+          <input type="text" class="response-search" id="sibrp-response-search" placeholder="Search by name or email...">
+          <a class="btn small secondary" href="/api/admin/applications/export.csv" download>Export as CSV</a>
+        </div>
+        <div id="sibrp-response-viewer"></div>
+      </div>
+    </div>
+
+    <!-- ===== TA Application ===== -->
+    <div class="app-panel" id="app-panel-ta" style="display:none;">
+      <div class="app-subtabs" data-subtab-group="ta">
+        <button type="button" class="app-subtab active" data-subpanel="ta-questions">Questions</button>
+        <button type="button" class="app-subtab" data-subpanel="ta-responses">Responses <span class="app-subtab-count" id="ta-response-count">0</span></button>
+      </div>
+
+      <div class="app-subpanel" id="ta-questions-subpanel">
+        <p class="app-panel-note">A separate application track — only students you've marked "TA Eligible" in the table above can see or submit this one. Changes apply immediately.</p>
+        <div class="window-form">
+          <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
+            <div class="form-field" style="margin-bottom:0;">
+              <label for="ta-window-opens">Opens</label>
+              <input type="datetime-local" id="ta-window-opens">
+            </div>
+            <div class="form-field" style="margin-bottom:0;">
+              <label for="ta-window-closes">Closes</label>
+              <input type="datetime-local" id="ta-window-closes">
+            </div>
+            <button class="btn small secondary" id="ta-window-save-btn">Save Window</button>
+          </div>
+          <p style="color:var(--ink-soft);font-size:0.82rem;margin:8px 0 0;">Leave a field blank for no restriction on that side. Outside this window, invited students see an "opens/closed" message instead of the form.</p>
+        </div>
+        <div class="auth-error" id="ta-question-error"></div>
+        <div id="ta-question-list"></div>
+        <div class="add-question-form">
+          <div class="form-field">
+            <label for="ta-new-question-prompt">New question</label>
+            <input type="text" id="ta-new-question-prompt" placeholder="e.g. Why do you want to TA?">
+          </div>
+          <select id="ta-new-question-type">
+            <option value="short">Short answer</option>
+            <option value="long">Long answer</option>
+          </select>
+          <button class="btn small" id="ta-add-question-btn">Add</button>
+        </div>
+      </div>
+
+      <div class="app-subpanel" id="ta-responses-subpanel" style="display:none;">
+        <div class="response-toolbar">
+          <input type="text" class="response-search" id="ta-response-search" placeholder="Search by name or email...">
+          <a class="btn small secondary" href="/api/admin/ta-applications/export.csv" download>Export as CSV</a>
+        </div>
+        <div id="ta-response-viewer"></div>
+      </div>
+    </div>
   </div>
-  <div id="ta-applications-list"></div>
 </main>
 
 <footer class="site-footer">
@@ -443,78 +458,113 @@ function createApplicationSection(cfg) {
     }
   }
 
+  // ---------- Responses (Google Forms-style: one at a time, not a giant list) ----------
+  // Shows a single response with Prev/Next navigation instead of rendering every
+  // response as its own card — the same list-of-cards approach that's fine at 10
+  // responses becomes an unusable wall of DOM at 3000+, so this scales by only
+  // ever rendering one response's worth of markup regardless of the total count.
+  let allApplications = [];
+  let allQuestions = [];
+  let filteredApplications = [];
+  let currentIndex = 0;
+
   async function loadApplications() {
     const res = await fetch(cfg.applicationsApi);
     const data = await res.json();
-    renderApplications(data.applications || [], data.questions || []);
+    allApplications = data.applications || [];
+    allQuestions = data.questions || [];
+    document.getElementById(cfg.responseCountEl).textContent = allApplications.length;
+    applyResponseFilter();
   }
 
-  function renderApplications(applications, questions) {
-    const listEl = document.getElementById(cfg.applicationsListEl);
-    if (!applications.length) {
-      listEl.innerHTML = `<div class="content-card"><p style="margin:0;color:var(--ink-soft);">No applications submitted yet.</p></div>`;
+  function applyResponseFilter() {
+    const term = document.getElementById(cfg.responseSearchEl).value.trim().toLowerCase();
+    filteredApplications = term
+      ? allApplications.filter(a => a.name.toLowerCase().includes(term) || a.email.toLowerCase().includes(term))
+      : allApplications;
+    currentIndex = 0;
+    renderResponseViewer();
+  }
+
+  function renderResponseViewer() {
+    const viewerEl = document.getElementById(cfg.responseViewerEl);
+
+    if (!allApplications.length) {
+      viewerEl.innerHTML = `<div class="response-empty">No applications submitted yet.</div>`;
+      return;
+    }
+    if (!filteredApplications.length) {
+      viewerEl.innerHTML = `<div class="response-empty">No responses match that search.</div>`;
       return;
     }
 
+    if (currentIndex >= filteredApplications.length) currentIndex = filteredApplications.length - 1;
+    if (currentIndex < 0) currentIndex = 0;
+
+    const a = filteredApplications[currentIndex];
+    const submitted = new Date(a.submittedAt).toLocaleString();
     const promptById = {};
-    questions.forEach(q => { promptById[q.id] = q.prompt; });
+    allQuestions.forEach(q => { promptById[q.id] = q.prompt; });
+    const blocks = Object.entries(a.answers).map(([qid, answer]) => `
+      <div class="answer-block">
+        <div class="question">${escapeHtml(promptById[qid] || "Question (removed)")}</div>
+        <div class="answer">${escapeHtml(answer)}</div>
+      </div>
+    `).join("");
 
-    listEl.innerHTML = applications.map((a, i) => {
-      const submitted = new Date(a.submittedAt).toLocaleString();
-      const blocks = Object.entries(a.answers).map(([qid, answer]) => `
-        <div class="answer-block">
-          <div class="question">${escapeHtml(promptById[qid] || "Question (removed)")}</div>
-          <div class="answer">${escapeHtml(answer)}</div>
+    viewerEl.innerHTML = `
+      <div class="response-nav">
+        <div class="response-nav-btns">
+          <button type="button" class="response-nav-btn" id="${cfg.responseViewerEl}-prev" ${currentIndex === 0 ? "disabled" : ""} aria-label="Previous response">
+            <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4l-6 6 6 6"/></svg>
+          </button>
+          <span class="response-counter">Response ${currentIndex + 1} of ${filteredApplications.length}</span>
+          <button type="button" class="response-nav-btn" id="${cfg.responseViewerEl}-next" ${currentIndex === filteredApplications.length - 1 ? "disabled" : ""} aria-label="Next response">
+            <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4l6 6-6 6"/></svg>
+          </button>
         </div>
-      `).join("");
-      return `
-        <div class="content-card">
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;">
-            <div>
-              <div class="admin-name">${escapeHtml(a.name)}</div>
-              <div class="admin-email">${escapeHtml(a.email)} &middot; Submitted ${escapeHtml(submitted)}</div>
-            </div>
-            <div style="display:flex;gap:8px;">
-              <button class="btn small secondary" data-toggle-app="${i}">View Answers</button>
-              <button class="btn small secondary" data-reset-app="${a.userId}" data-reset-app-name="${escapeHtml(a.name)}">Allow Resubmit</button>
-            </div>
-          </div>
-          <div class="app-answers" id="${cfg.applicationsListEl}-answers-${i}" style="display:none;margin-top:16px;">${blocks}</div>
-        </div>
-      `;
-    }).join("");
+        <button class="btn small secondary" data-reset-app="${a.userId}" data-reset-app-name="${escapeHtml(a.name)}">Allow Resubmit</button>
+      </div>
+      <div class="content-card">
+        <div class="admin-name">${escapeHtml(a.name)}</div>
+        <div class="admin-email" style="margin-bottom:16px;">${escapeHtml(a.email)} &middot; Submitted ${escapeHtml(submitted)}</div>
+        ${blocks}
+      </div>
+    `;
 
-    listEl.querySelectorAll("[data-toggle-app]").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const el = document.getElementById(`${cfg.applicationsListEl}-answers-${btn.getAttribute("data-toggle-app")}`);
-        const showing = el.style.display !== "none";
-        el.style.display = showing ? "none" : "block";
-        btn.textContent = showing ? "View Answers" : "Hide Answers";
-      });
-    });
+    const prevBtn = document.getElementById(`${cfg.responseViewerEl}-prev`);
+    const nextBtn = document.getElementById(`${cfg.responseViewerEl}-next`);
+    if (prevBtn) prevBtn.addEventListener("click", () => { currentIndex--; renderResponseViewer(); });
+    if (nextBtn) nextBtn.addEventListener("click", () => { currentIndex++; renderResponseViewer(); });
 
-    listEl.querySelectorAll("[data-reset-app]").forEach(btn => {
-      btn.addEventListener("click", async () => {
-        const userId = btn.getAttribute("data-reset-app");
-        const name = btn.getAttribute("data-reset-app-name");
-        if (!confirm(`Allow ${name} to resubmit? This deletes their current application.`)) return;
-        try {
-          const res = await fetch(cfg.resetApi, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ userId })
-          });
-          if (!res.ok) {
-            const data = await res.json().catch(() => ({}));
-            alert(data.error || `Could not reset that application (HTTP ${res.status}).`);
-          }
-        } catch (err) {
-          alert("Could not reach the server. Please try again.");
+    viewerEl.querySelector("[data-reset-app]").addEventListener("click", async (e) => {
+      const btn = e.currentTarget;
+      const userId = btn.getAttribute("data-reset-app");
+      const name = btn.getAttribute("data-reset-app-name");
+      if (!confirm(`Allow ${name} to resubmit? This deletes their current application.`)) return;
+      btn.disabled = true;
+      try {
+        const res = await fetch(cfg.resetApi, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId })
+        });
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          alert(data.error || `Could not reset that application (HTTP ${res.status}).`);
+          btn.disabled = false;
+          return;
         }
-        loadApplications();
-      });
+      } catch (err) {
+        alert("Could not reach the server. Please try again.");
+        btn.disabled = false;
+        return;
+      }
+      loadApplications();
     });
   }
+
+  document.getElementById(cfg.responseSearchEl).addEventListener("input", applyResponseFilter);
 
   document.getElementById(cfg.addBtnEl).addEventListener("click", addQuestion);
 
@@ -571,10 +621,12 @@ const sibrpApplicationSection = createApplicationSection({
   newPromptEl: "new-question-prompt",
   newTypeEl: "new-question-type",
   addBtnEl: "add-question-btn",
-  applicationsListEl: "applications-list",
   windowOpensEl: "window-opens",
   windowClosesEl: "window-closes",
-  windowSaveBtnEl: "window-save-btn"
+  windowSaveBtnEl: "window-save-btn",
+  responseCountEl: "sibrp-response-count",
+  responseSearchEl: "sibrp-response-search",
+  responseViewerEl: "sibrp-response-viewer"
 });
 
 const taApplicationSection = createApplicationSection({
@@ -587,10 +639,36 @@ const taApplicationSection = createApplicationSection({
   newPromptEl: "ta-new-question-prompt",
   newTypeEl: "ta-new-question-type",
   addBtnEl: "ta-add-question-btn",
-  applicationsListEl: "ta-applications-list",
   windowOpensEl: "ta-window-opens",
   windowClosesEl: "ta-window-closes",
-  windowSaveBtnEl: "ta-window-save-btn"
+  windowSaveBtnEl: "ta-window-save-btn",
+  responseCountEl: "ta-response-count",
+  responseSearchEl: "ta-response-search",
+  responseViewerEl: "ta-response-viewer"
+});
+
+// ---------- Tabs: top-level (SiBRP vs TA) and sub-tabs (Questions vs Responses) ----------
+document.querySelectorAll("#app-top-tabs .app-tab").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll("#app-top-tabs .app-tab").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    const target = btn.getAttribute("data-app-panel");
+    document.getElementById("app-panel-sibrp").style.display = target === "sibrp" ? "" : "none";
+    document.getElementById("app-panel-ta").style.display = target === "ta" ? "" : "none";
+  });
+});
+
+document.querySelectorAll(".app-subtabs").forEach(group => {
+  const prefix = group.getAttribute("data-subtab-group");
+  group.querySelectorAll(".app-subtab").forEach(btn => {
+    btn.addEventListener("click", () => {
+      group.querySelectorAll(".app-subtab").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      const target = btn.getAttribute("data-subpanel");
+      document.getElementById(`${prefix}-questions-subpanel`).style.display = target === `${prefix}-questions` ? "" : "none";
+      document.getElementById(`${prefix}-responses-subpanel`).style.display = target === `${prefix}-responses` ? "" : "none";
+    });
+  });
 });
 
 (async () => {
