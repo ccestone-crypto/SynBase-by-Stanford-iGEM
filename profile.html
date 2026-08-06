@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Profile — SynBase</title>
+<link rel="stylesheet" href="css/style.css?v=22">
+</head>
+<body>
+
+<header class="site-header" id="site-header"></header>
+
+<section class="page-hero">
+  <div class="container">
+    <h1>Your Profile</h1>
+    <p class="lede">Account details and your progress through the curriculum.</p>
+  </div>
+</section>
+
+<main class="container narrow">
+  <div class="content-card">
+    <div class="profile-header">
+      <div class="profile-avatar-lg" id="profile-avatar"></div>
+      <div>
+        <h2 id="profile-name"></h2>
+        <p class="profile-email" id="profile-email"></p>
+        <div id="profile-badges"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="content-card">
+    <h2>Course Progress</h2>
+    <div class="profile-overall">
+      <span class="profile-overall-pct" id="profile-overall-pct"></span>
+      <span class="progress-track light"><span class="fill" id="profile-overall-fill" style="width:0%"></span></span>
+    </div>
+    <div id="profile-module-list"></div>
+  </div>
+
+  <div class="content-card">
+    <button class="btn secondary" id="logout-btn">Log Out</button>
+  </div>
+</main>
+
+<footer class="site-footer">
+  Adapted from Stanford iGEM Bioengineering Research Program (SiBRP), Session 2 — July 15th, 2026.
+</footer>
+
+<script src="js/modules-meta.js?v=6"></script>
+<script src="js/progress.js?v=11"></script>
+<script>
+function escapeHtml(str) {
+  const div = document.createElement("div");
+  div.textContent = str == null ? "" : str;
+  return div.innerHTML;
+}
+
+function renderProfile(user) {
+  document.getElementById("profile-avatar").textContent = (user.name || "?").trim().charAt(0).toUpperCase() || "?";
+  document.getElementById("profile-name").textContent = user.name;
+  document.getElementById("profile-email").textContent = user.email;
+
+  const badges = [];
+  if (user.isAdmin) badges.push("Admin");
+  if (user.taEligible) badges.push("TA Eligible");
+  document.getElementById("profile-badges").innerHTML = badges.map(b => `<span class="admin-badge">${escapeHtml(b)}</span>`).join(" ");
+
+  const overall = overallProgress();
+  document.getElementById("profile-overall-pct").textContent = `${overall.pct}%`;
+  document.getElementById("profile-overall-fill").style.width = `${overall.pct}%`;
+
+  document.getElementById("profile-module-list").innerHTML = MODULES_META.map(m => {
+    const p = moduleProgress(m.id, m.sectionCount);
+    return `
+      <div class="profile-module-row">
+        <span class="profile-module-title">${escapeHtml(m.title)}</span>
+        <span class="progress-track light"><span class="fill" style="width:${p.pct}%"></span></span>
+        <span class="profile-module-pct">${p.pct}%</span>
+      </div>
+    `;
+  }).join("");
+}
+
+(async () => {
+  const user = await bootstrapAuthAndProgress(true);
+  if (!user) return;
+  renderHeader(document.getElementById("site-header"), true);
+  renderProfile(user);
+
+  document.getElementById("logout-btn").addEventListener("click", async () => {
+    await fetch("/api/logout", { method: "POST" }).catch(() => {});
+    location.href = loginPath(true);
+  });
+})();
+</script>
+</body>
+</html>

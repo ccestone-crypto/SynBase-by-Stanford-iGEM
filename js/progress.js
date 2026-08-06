@@ -156,76 +156,57 @@ function wireNavDropdowns(mountEl) {
 }
 
 // ---------- Shared header ----------
-function renderHeader(mountEl, fromRoot) {
+// Same nav markup regardless of entry point, so the header never reorders
+// itself as a user moves between protected pages (renderHeader) and public
+// pages (renderPublicHeader).
+function headerNavHtml(prefix, user) {
+  return `
+    <a href="${prefix}index.html">Home</a>
+    <a href="${prefix}about.html">About</a>
+    ${sibrpNavDropdownHtml(prefix, user)}
+    <a href="${prefix}speaker-series.html">Speaker Series</a>
+    ${user && user.isAdmin ? `<a href="${prefix}admin.html">Admin</a>` : ""}
+  `;
+}
+
+function headerActionsHtml(prefix, user) {
+  if (!user) {
+    return `
+      <a class="btn small secondary" href="${prefix}login.html">Log In</a>
+      <a class="btn small" href="${prefix}signup.html">Sign Up Free</a>
+    `;
+  }
   const overall = overallProgress();
-  const homeHref = fromRoot ? "index.html" : "../index.html";
+  const initial = escapeHtml((user.name || "?").trim().charAt(0).toUpperCase() || "?");
+  return `
+    <span class="header-progress-pill">Overall: ${overall.pct}%</span>
+    <a class="header-avatar" href="${prefix}profile.html" title="${escapeHtml(user.name)}">${initial}</a>
+  `;
+}
+
+function renderHeaderCore(mountEl, fromRoot, user) {
   const prefix = fromRoot ? "" : "../";
-  const name = CURRENT_USER ? escapeHtml(CURRENT_USER.name) : "";
   mountEl.innerHTML = `
     <div class="header-inner">
-      <a class="brand" href="${homeHref}"><span class="dot"></span> SynBase<span class="brand-suffix">by Stanford iGEM</span></a>
-      <nav class="header-nav">
-        <a href="${homeHref}">Home</a>
-        <a href="${prefix}about.html">About</a>
-        ${sibrpNavDropdownHtml(prefix, CURRENT_USER)}
-        <a href="${prefix}speaker-series.html">Speaker Series</a>
-        ${CURRENT_USER && CURRENT_USER.isAdmin ? `<a href="${prefix}admin.html">Admin</a>` : ""}
-        <span class="header-progress-pill">Overall: ${overall.pct}%</span>
-        ${name ? `<span class="header-user">${name}</span>` : ""}
-        <a href="#" id="logout-link">Log out</a>
-      </nav>
+      <a class="brand" href="${prefix}about.html"><span class="dot"></span> SynBase<span class="brand-suffix">by Stanford iGEM</span></a>
+      <nav class="header-nav">${headerNavHtml(prefix, user)}</nav>
+      <div class="header-actions">${headerActionsHtml(prefix, user)}</div>
     </div>
   `;
-
   wireNavDropdowns(mountEl);
+}
 
-  const logoutLink = mountEl.querySelector("#logout-link");
-  logoutLink.addEventListener("click", async (e) => {
-    e.preventDefault();
-    await fetch("/api/logout", { method: "POST" }).catch(() => {});
-    location.href = loginPath(fromRoot);
-  });
+function renderHeader(mountEl, fromRoot) {
+  renderHeaderCore(mountEl, fromRoot, CURRENT_USER);
 }
 
 // ---------- Public header (About / Beyond SiBRP — no login required) ----------
 async function renderPublicHeader(mountEl, fromRoot) {
-  const homeHref = fromRoot ? "index.html" : "../index.html";
-  const prefix = fromRoot ? "" : "../";
-
   let user = null;
   try {
     const res = await fetch("/api/me");
     const data = await res.json();
     user = data.user;
   } catch (e) {}
-
-  mountEl.innerHTML = `
-    <div class="header-inner">
-      <a class="brand" href="${prefix}about.html"><span class="dot"></span> SynBase<span class="brand-suffix">by Stanford iGEM</span></a>
-      <nav class="header-nav">
-        <a href="${prefix}about.html">About</a>
-        ${sibrpNavDropdownHtml(prefix, user)}
-        ${user ? `
-          <a href="${homeHref}">Home</a>
-          <a href="${prefix}speaker-series.html">Speaker Series</a>
-          ${user.isAdmin ? `<a href="${prefix}admin.html">Admin</a>` : ""}
-          <span class="header-user">${escapeHtml(user.name)}</span>
-          <a href="#" id="logout-link">Log out</a>
-        ` : `
-          <a href="${prefix}login.html">Log In</a>
-          <a class="btn small" href="${prefix}signup.html">Sign Up</a>
-        `}
-      </nav>
-    </div>
-  `;
-
-  wireNavDropdowns(mountEl);
-
-  if (user) {
-    mountEl.querySelector("#logout-link").addEventListener("click", async (e) => {
-      e.preventDefault();
-      await fetch("/api/logout", { method: "POST" }).catch(() => {});
-      location.reload();
-    });
-  }
+  renderHeaderCore(mountEl, fromRoot, user);
 }
