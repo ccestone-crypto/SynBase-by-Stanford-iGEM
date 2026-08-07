@@ -8,10 +8,12 @@ const cookieParser = require("cookie-parser");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const rateLimit = require("express-rate-limit");
+const multer = require("multer");
 
 const store = require("./server/store");
 const mailer = require("./server/mailer");
 const speakerStore = require("./server/speaker-store");
+const portfolioStore = require("./server/portfolio-store");
 const { getSessionSecret } = require("./server/secret");
 const { isCourseComplete, isValidSection } = require("./server/course-config");
 
@@ -32,6 +34,22 @@ function getAdminEmails() {
 const app = express();
 app.use(express.json());
 app.use(cookieParser());
+
+// ---------- Portfolio project photo uploads ----------
+const PORTFOLIO_UPLOAD_DIR = path.join(__dirname, "assets", "img", "portfolio", "uploads");
+if (!fs.existsSync(PORTFOLIO_UPLOAD_DIR)) fs.mkdirSync(PORTFOLIO_UPLOAD_DIR, { recursive: true });
+const ALLOWED_IMAGE_MIMES = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
+const portfolioImageUpload = multer({
+  storage: multer.diskStorage({
+    destination: PORTFOLIO_UPLOAD_DIR,
+    filename: (req, file, cb) => cb(null, `${crypto.randomUUID()}${path.extname(file.originalname).toLowerCase()}`)
+  }),
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (!ALLOWED_IMAGE_MIMES.has(file.mimetype)) return cb(new Error("Photo must be a JPEG, PNG, WebP, or GIF image."));
+    cb(null, true);
+  }
+});
 
 // ---------- Auth helpers ----------
 function issueSession(res, user) {
@@ -426,6 +444,64 @@ app.delete("/api/admin/speaker-talks/:id", requireAdmin, (req, res) => {
   res.json({ ok: true });
 });
 
+// ---------- Beyond SiBRP project stories ----------
+const PORTFOLIO_ACCENTS = new Set(["teal", "gold", "cardinal"]);
+
+// Validates the text fields shared by create/update; the photo itself is
+// handled separately by multer (req.file) so admins can only ever set image
+// to a server-generated upload path, never an arbitrary string.
+function parsePortfolioFields(body) {
+  const { student, title, year, tag, accent, shortDescription, fullStory, anecdote, link } = body || {};
+  if (!student || !String(student).trim()) return { error: "Student name is required." };
+  if (!title || !String(title).trim()) return { error: "Project title is required." };
+  if (!shortDescription || !String(shortDescription).trim()) return { error: "A short summary is required." };
+  const trimmedLink = link ? String(link).trim() : "";
+  if (trimmedLink && !/^https?:\/\//i.test(trimmedLink)) {
+    return { error: "Link must start with http:// or https://." };
+  }
+  return {
+    fields: {
+      student: String(student).trim(),
+      title: String(title).trim(),
+      year: year ? String(year).trim() : "",
+      tag: tag ? String(tag).trim() : "",
+      accent: PORTFOLIO_ACCENTS.has(accent) ? accent : "teal",
+      shortDescription: String(shortDescription).trim(),
+      fullStory: fullStory ? String(fullStory).trim() : "",
+      anecdote: anecdote ? String(anecdote).trim() : "",
+      link: trimmedLink
+    }
+  };
+}
+
+app.get("/api/portfolio-projects", (req, res) => {
+  res.json({ projects: portfolioStore.listProjects() });
+});
+
+app.post("/api/admin/portfolio-projects", requireAdmin, portfolioImageUpload.single("image"), (req, res) => {
+  const { error, fields } = parsePortfolioFields(req.body);
+  if (error) return res.status(400).json({ error });
+  if (req.file) fields.image = `assets/img/portfolio/uploads/${req.file.filename}`;
+  const project = portfolioStore.addProject(fields);
+  res.json({ project });
+});
+
+app.put("/api/admin/portfolio-projects/:id", requireAdmin, portfolioImageUpload.single("image"), (req, res) => {
+  const existing = portfolioStore.findProjectById(req.params.id);
+  if (!existing) return res.status(404).json({ error: "Project not found." });
+  const { error, fields } = parsePortfolioFields(req.body);
+  if (error) return res.status(400).json({ error });
+  if (req.file) fields.image = `assets/img/portfolio/uploads/${req.file.filename}`;
+  const project = portfolioStore.updateProject(req.params.id, fields);
+  res.json({ project });
+});
+
+app.delete("/api/admin/portfolio-projects/:id", requireAdmin, (req, res) => {
+  const deleted = portfolioStore.deleteProject(req.params.id);
+  if (!deleted) return res.status(404).json({ error: "Project not found." });
+  res.json({ ok: true });
+});
+
 // ---------- Admin API ----------
 app.get("/api/admin/application-questions", requireAdmin, (req, res) => {
   res.json({ questions: store.readApplicationQuestions() });
@@ -650,6 +726,17 @@ app.get(/\.html$/, (req, res, next) => {
 
 // ---------- Static site ----------
 app.use(express.static(path.join(__dirname), { extensions: ["html"] }));
+
+// Multer throws (bad mimetype, file too large) as an error passed to next()
+// rather than a normal response — without this handler Express would fall
+// back to its default HTML error page instead of the JSON the frontend expects.
+app.use((err, req, res, next) => {
+  if (err instanceof multer.MulterError || (err && /image/i.test(err.message || ""))) {
+    return res.status(400).json({ error: err.message });
+  }
+  console.error(err);
+  res.status(500).json({ error: "Something went wrong." });
+});
 
 app.listen(PORT, () => {
   console.log(`SynBase running at http://localhost:${PORT}`);

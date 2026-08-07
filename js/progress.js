@@ -79,6 +79,12 @@ function moduleProgress(moduleId, sectionCount) {
 }
 
 function overallProgress() {
+  // Guards pages that show the header's progress pill (any page a logged-in
+  // user can land on) but forget to load js/modules-meta.js — without this,
+  // a missing script tag throws here and blanks the entire page instead of
+  // just the pill, since this runs inside the same render call as the rest
+  // of the header.
+  if (typeof MODULES_META === "undefined") return { completed: 0, total: 0, pct: 0 };
   let completed = 0, total = 0;
   MODULES_META.forEach(m => {
     const p = moduleProgress(m.id, m.sectionCount);
@@ -188,7 +194,7 @@ function renderHeaderCore(mountEl, fromRoot, user) {
   const prefix = fromRoot ? "" : "../";
   mountEl.innerHTML = `
     <div class="header-inner">
-      <a class="brand" href="${prefix}about.html"><span class="dot"></span> SynBase<span class="brand-suffix">by Stanford iGEM</span></a>
+      <a class="brand" href="${prefix}about.html"><img class="brand-logo" src="${prefix}assets/img/site/logo.png" alt="SynBase"><span class="brand-suffix">by Stanford iGEM</span></a>
       <nav class="header-nav">${headerNavHtml(prefix, user)}</nav>
       <div class="header-actions">${headerActionsHtml(prefix, user)}</div>
     </div>

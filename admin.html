@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin — SynBase</title>
-<link rel="stylesheet" href="css/style.css?v=22">
+<link rel="stylesheet" href="css/style.css?v=25">
 </head>
 <body>
 
@@ -44,6 +44,8 @@
     <div class="app-tabs" id="app-top-tabs">
       <button type="button" class="app-tab active" data-app-panel="sibrp">SiBRP Application</button>
       <button type="button" class="app-tab" data-app-panel="ta">TA Application</button>
+      <button type="button" class="app-tab" data-app-panel="portfolio">Beyond SiBRP</button>
+      <button type="button" class="app-tab" data-app-panel="speakers">Speaker Series</button>
     </div>
 
     <!-- ===== SiBRP Application ===== -->
@@ -139,6 +141,98 @@
         <div id="ta-response-viewer"></div>
       </div>
     </div>
+
+    <!-- ===== Beyond SiBRP ===== -->
+    <div class="app-panel" id="app-panel-portfolio" style="display:none;">
+      <p class="app-panel-note">Manage the project stories shown on the Beyond SiBRP page. A photo is optional — projects without one show colored initials instead.</p>
+      <div class="auth-error" id="portfolio-error"></div>
+      <div id="portfolio-list"></div>
+
+      <div class="content-card" style="margin-top:20px;box-shadow:none;border:1px dashed var(--border);">
+        <h2 id="portfolio-form-heading">Add a Project</h2>
+        <form id="portfolio-form" novalidate>
+          <div class="upload-form-grid">
+            <div class="form-field">
+              <label for="pf-student">Student name</label>
+              <input type="text" id="pf-student" required>
+            </div>
+            <div class="form-field">
+              <label for="pf-title">Project title</label>
+              <input type="text" id="pf-title" required>
+            </div>
+            <div class="form-field">
+              <label for="pf-year">Year</label>
+              <input type="text" id="pf-year" placeholder="2026">
+            </div>
+            <div class="form-field">
+              <label for="pf-tag">Tag</label>
+              <input type="text" id="pf-tag" placeholder="iGEM Project">
+            </div>
+            <div class="form-field">
+              <label for="pf-accent">Accent color</label>
+              <select id="pf-accent">
+                <option value="teal">Teal</option>
+                <option value="gold">Gold</option>
+                <option value="cardinal">Cardinal</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label for="pf-link">External link (optional)</label>
+              <input type="url" id="pf-link" placeholder="https://...">
+            </div>
+            <div class="form-field full">
+              <label for="pf-photo">Photo (optional — falls back to initials)</label>
+              <input type="file" id="pf-photo" accept="image/png,image/jpeg,image/webp,image/gif">
+            </div>
+            <div class="form-field full">
+              <label for="pf-short">Short summary (shown on the card)</label>
+              <textarea id="pf-short" required></textarea>
+            </div>
+            <div class="form-field full">
+              <label for="pf-full">Full story</label>
+              <textarea id="pf-full"></textarea>
+            </div>
+            <div class="form-field full">
+              <label for="pf-anecdote">Student quote (optional)</label>
+              <textarea id="pf-anecdote"></textarea>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:16px;">
+            <button type="submit" class="btn" id="portfolio-submit-btn">Add Project</button>
+            <button type="button" class="btn small secondary" id="portfolio-cancel-btn" style="display:none;">Cancel Edit</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ===== Speaker Series ===== -->
+    <div class="app-panel" id="app-panel-speakers" style="display:none;">
+      <p class="app-panel-note">Paste a YouTube link — the site shows the cover image and description on the Speaker Series page, and clicking through takes students to YouTube to watch it.</p>
+      <div class="auth-error" id="speaker-upload-error"></div>
+      <form id="speaker-upload-form" novalidate>
+        <div class="upload-form-grid">
+          <div class="form-field">
+            <label for="talk-title">Title</label>
+            <input type="text" id="talk-title" required>
+          </div>
+          <div class="form-field">
+            <label for="talk-speaker">Speaker</label>
+            <input type="text" id="talk-speaker" required>
+          </div>
+          <div class="form-field full">
+            <label for="talk-youtube-url">YouTube link</label>
+            <input type="url" id="talk-youtube-url" placeholder="https://www.youtube.com/watch?v=..." required>
+          </div>
+          <div class="form-field full">
+            <label for="talk-description">Description (optional)</label>
+            <textarea id="talk-description"></textarea>
+          </div>
+        </div>
+        <button type="submit" class="btn" id="speaker-upload-btn" style="margin-top:16px">Add Talk</button>
+      </form>
+
+      <div id="speaker-admin-list" style="margin-top:24px;"></div>
+    </div>
   </div>
 </main>
 
@@ -147,7 +241,8 @@
 </footer>
 
 <script src="js/modules-meta.js?v=6"></script>
-<script src="js/progress.js?v=11"></script>
+<script src="js/portfolio-data.js?v=2"></script>
+<script src="js/progress.js?v=13"></script>
 <script>
 function calcModuleProgress(progress, moduleId, sectionCount) {
   const mod = (progress && progress[moduleId]) || { sections: {}, videoWatched: false };
@@ -647,14 +742,233 @@ const taApplicationSection = createApplicationSection({
   responseViewerEl: "ta-response-viewer"
 });
 
-// ---------- Tabs: top-level (SiBRP vs TA) and sub-tabs (Questions vs Responses) ----------
+// ---------- Beyond SiBRP projects ----------
+let editingProjectId = null;
+
+async function loadProjects() {
+  const res = await fetch("/api/portfolio-projects");
+  const data = await res.json();
+  renderProjectList(data.projects || []);
+}
+
+function renderProjectList(projects) {
+  const listEl = document.getElementById("portfolio-list");
+  listEl.innerHTML = projects.length
+    ? projects.map(p => `
+        <div class="question-row" data-project-id="${p.id}">
+          <div class="question-row-thumb chip-${p.accent}">
+            ${p.image ? `<img src="${escapeHtml(p.image)}" alt="">` : escapeHtml(initials(p.student))}
+          </div>
+          <div class="question-row-main">
+            <div class="question-row-prompt">${escapeHtml(p.title)}</div>
+            <span class="question-row-type">${escapeHtml(p.student)}</span>
+          </div>
+          <div class="question-row-actions">
+            <button class="btn small secondary" data-edit-project="${p.id}">Edit</button>
+            <button class="btn small secondary" data-delete-project="${p.id}">Delete</button>
+          </div>
+        </div>
+      `).join("")
+    : `<p style="color:var(--ink-soft);font-size:0.9rem;margin:0;">No projects yet — add one below.</p>`;
+
+  listEl.querySelectorAll("[data-edit-project]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const project = projects.find(p => p.id === btn.getAttribute("data-edit-project"));
+      if (project) startEditProject(project);
+    });
+  });
+
+  listEl.querySelectorAll("[data-delete-project]").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      if (!confirm("Delete this project?")) return;
+      btn.disabled = true;
+      try {
+        const res = await fetch(`/api/admin/portfolio-projects/${btn.getAttribute("data-delete-project")}`, { method: "DELETE" });
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          alert(data.error || `Could not delete that project (HTTP ${res.status}).`);
+        }
+      } catch (err) {
+        alert("Could not reach the server. Please try again.");
+      }
+      loadProjects();
+    });
+  });
+}
+
+function startEditProject(project) {
+  editingProjectId = project.id;
+  document.getElementById("portfolio-form-heading").textContent = "Edit Project";
+  document.getElementById("pf-student").value = project.student;
+  document.getElementById("pf-title").value = project.title;
+  document.getElementById("pf-year").value = project.year;
+  document.getElementById("pf-tag").value = project.tag;
+  document.getElementById("pf-accent").value = project.accent;
+  document.getElementById("pf-link").value = project.link;
+  document.getElementById("pf-short").value = project.shortDescription;
+  document.getElementById("pf-full").value = project.fullStory;
+  document.getElementById("pf-anecdote").value = project.anecdote;
+  document.getElementById("pf-photo").value = "";
+  document.getElementById("portfolio-submit-btn").textContent = "Save Changes";
+  document.getElementById("portfolio-cancel-btn").style.display = "";
+  document.getElementById("portfolio-form").scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+function resetProjectForm() {
+  editingProjectId = null;
+  document.getElementById("portfolio-form").reset();
+  document.getElementById("portfolio-form-heading").textContent = "Add a Project";
+  document.getElementById("portfolio-submit-btn").textContent = "Add Project";
+  document.getElementById("portfolio-cancel-btn").style.display = "none";
+}
+
+document.getElementById("portfolio-cancel-btn").addEventListener("click", resetProjectForm);
+
+document.getElementById("portfolio-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const errorEl = document.getElementById("portfolio-error");
+  errorEl.classList.remove("show");
+  const btn = document.getElementById("portfolio-submit-btn");
+
+  const student = document.getElementById("pf-student").value.trim();
+  const title = document.getElementById("pf-title").value.trim();
+  const shortDescription = document.getElementById("pf-short").value.trim();
+  if (!student || !title || !shortDescription) {
+    errorEl.textContent = "Student name, title, and short summary are required.";
+    errorEl.classList.add("show");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("student", student);
+  formData.append("title", title);
+  formData.append("year", document.getElementById("pf-year").value.trim());
+  formData.append("tag", document.getElementById("pf-tag").value.trim());
+  formData.append("accent", document.getElementById("pf-accent").value);
+  formData.append("link", document.getElementById("pf-link").value.trim());
+  formData.append("shortDescription", shortDescription);
+  formData.append("fullStory", document.getElementById("pf-full").value.trim());
+  formData.append("anecdote", document.getElementById("pf-anecdote").value.trim());
+  const photoFile = document.getElementById("pf-photo").files[0];
+  if (photoFile) formData.append("image", photoFile);
+
+  const wasEditing = editingProjectId;
+  btn.disabled = true;
+  btn.textContent = wasEditing ? "Saving…" : "Adding…";
+  try {
+    const url = wasEditing ? `/api/admin/portfolio-projects/${wasEditing}` : "/api/admin/portfolio-projects";
+    const res = await fetch(url, { method: wasEditing ? "PUT" : "POST", body: formData });
+    const data = await res.json();
+    if (!res.ok) {
+      errorEl.textContent = data.error || `Could not save that project (HTTP ${res.status}).`;
+      errorEl.classList.add("show");
+      return;
+    }
+    resetProjectForm();
+    loadProjects();
+  } catch (err) {
+    errorEl.textContent = "Could not reach the server. Please try again.";
+    errorEl.classList.add("show");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = wasEditing ? "Save Changes" : "Add Project";
+  }
+});
+
+// ---------- Speaker Series ----------
+async function loadSpeakerTalks() {
+  const res = await fetch("/api/speaker-talks");
+  const data = await res.json();
+  renderSpeakerAdminList(data.talks || []);
+}
+
+function renderSpeakerAdminList(talks) {
+  const listEl = document.getElementById("speaker-admin-list");
+  listEl.innerHTML = talks.length
+    ? talks.map(t => `
+        <div class="question-row" data-talk-id="${t.id}">
+          <div class="question-row-thumb"><img src="${escapeHtml(t.thumbnailUrl)}" alt=""></div>
+          <div class="question-row-main">
+            <div class="question-row-prompt">${escapeHtml(t.title)}</div>
+            <span class="question-row-type">${escapeHtml(t.speakerName)}</span>
+          </div>
+          <div class="question-row-actions">
+            <button class="btn small secondary" data-delete-talk="${t.id}">Delete</button>
+          </div>
+        </div>
+      `).join("")
+    : `<p style="color:var(--ink-soft);font-size:0.9rem;margin:0;">No talks yet — add one above.</p>`;
+
+  listEl.querySelectorAll("[data-delete-talk]").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      if (!confirm("Delete this talk?")) return;
+      btn.disabled = true;
+      try {
+        const res = await fetch(`/api/admin/speaker-talks/${btn.getAttribute("data-delete-talk")}`, { method: "DELETE" });
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          alert(data.error || `Could not delete that talk (HTTP ${res.status}).`);
+        }
+      } catch (err) {
+        alert("Could not reach the server. Please try again.");
+      }
+      loadSpeakerTalks();
+    });
+  });
+}
+
+document.getElementById("speaker-upload-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const errorEl = document.getElementById("speaker-upload-error");
+  const btn = document.getElementById("speaker-upload-btn");
+  errorEl.classList.remove("show");
+
+  const youtubeUrl = document.getElementById("talk-youtube-url").value.trim();
+  if (!youtubeUrl) {
+    errorEl.textContent = "Paste a YouTube link.";
+    errorEl.classList.add("show");
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = "Adding…";
+  try {
+    const res = await fetch("/api/admin/speaker-talks", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title: document.getElementById("talk-title").value,
+        speakerName: document.getElementById("talk-speaker").value,
+        description: document.getElementById("talk-description").value,
+        youtubeUrl
+      })
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      errorEl.textContent = data.error || `Could not add that talk (HTTP ${res.status}).`;
+      errorEl.classList.add("show");
+      return;
+    }
+    document.getElementById("speaker-upload-form").reset();
+    loadSpeakerTalks();
+  } catch (err) {
+    errorEl.textContent = "Could not reach the server. Please try again.";
+    errorEl.classList.add("show");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Add Talk";
+  }
+});
+
+// ---------- Tabs: top-level (SiBRP / TA / Beyond SiBRP / Speaker Series) and sub-tabs (Questions vs Responses) ----------
 document.querySelectorAll("#app-top-tabs .app-tab").forEach(btn => {
   btn.addEventListener("click", () => {
     document.querySelectorAll("#app-top-tabs .app-tab").forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
     const target = btn.getAttribute("data-app-panel");
-    document.getElementById("app-panel-sibrp").style.display = target === "sibrp" ? "" : "none";
-    document.getElementById("app-panel-ta").style.display = target === "ta" ? "" : "none";
+    ["sibrp", "ta", "portfolio", "speakers"].forEach(name => {
+      document.getElementById(`app-panel-${name}`).style.display = target === name ? "" : "none";
+    });
   });
 });
 
@@ -687,6 +1001,8 @@ document.querySelectorAll(".app-subtabs").forEach(group => {
   taApplicationSection.loadWindow();
   taApplicationSection.loadQuestions();
   taApplicationSection.loadApplications();
+  loadProjects();
+  loadSpeakerTalks();
 })();
 </script>
 </body>

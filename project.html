@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Story — SynBase</title>
-<link rel="stylesheet" href="css/style.css?v=22">
+<link rel="stylesheet" href="css/style.css?v=25">
 </head>
 <body>
 
@@ -16,8 +16,9 @@
   Adapted from Stanford iGEM Bioengineering Research Program (SiBRP), Session 2 — July 15th, 2026.
 </footer>
 
-<script src="js/portfolio-data.js?v=1"></script>
-<script src="js/progress.js?v=11"></script>
+<script src="js/modules-meta.js?v=6"></script>
+<script src="js/portfolio-data.js?v=2"></script>
+<script src="js/progress.js?v=13"></script>
 <script>
 function escapeHtml(str) {
   const div = document.createElement("div");
@@ -32,7 +33,7 @@ function renderStory(mountEl, project) {
     <div class="story-back"><a href="beyond-sibrp.html">&larr; Beyond SiBRP</a></div>
 
     <div class="story-thumb chip-${project.accent}">
-      ${project.image ? `<img src="${project.image}" alt="${escapeHtml(project.title)}">` : `<span class="story-thumb-initials">${initials(project.student)}</span>`}
+      ${project.image ? `<img src="${escapeHtml(project.image)}" alt="${escapeHtml(project.title)}">` : `<span class="story-thumb-initials">${escapeHtml(initials(project.student))}</span>`}
     </div>
 
     <span class="portfolio-tag chip-${project.accent}">${escapeHtml(project.tag)}${project.year ? " &middot; " + escapeHtml(project.year) : ""}</span>
@@ -41,7 +42,7 @@ function renderStory(mountEl, project) {
 
     <p class="story-lede">${escapeHtml(project.shortDescription)}</p>
 
-    <div class="story-body">${project.fullStory}</div>
+    <div class="story-body">${escapeHtml(project.fullStory)}</div>
 
     <div class="quote-card story-anecdote">
       <div class="quote-mark">&ldquo;</div>
@@ -49,7 +50,7 @@ function renderStory(mountEl, project) {
       <div class="quote-attribution">${escapeHtml(project.student)}</div>
     </div>
 
-    ${project.link ? `<a class="btn" href="${project.link}" target="_blank" rel="noopener">View Full Project &rarr;</a>` : ""}
+    ${project.link ? `<a class="btn" href="${escapeHtml(project.link)}" target="_blank" rel="noopener">View Full Project &rarr;</a>` : ""}
   `;
 }
 
@@ -67,8 +68,10 @@ function renderNotFound(mountEl) {
 (async () => {
   await renderPublicHeader(document.getElementById("site-header"), true);
   const id = new URLSearchParams(location.search).get("id");
-  const project = id ? findProjectById(id) : null;
   const mountEl = document.getElementById("story-main");
+  const res = await fetch("/api/portfolio-projects");
+  const data = await res.json();
+  const project = id ? (data.projects || []).find(p => p.id === id) : null;
   if (project) {
     renderStory(mountEl, project);
   } else {

@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Beyond SiBRP — SynBase</title>
-<link rel="stylesheet" href="css/style.css?v=22">
+<link rel="stylesheet" href="css/style.css?v=25">
 </head>
 <body>
 
@@ -26,22 +26,29 @@
   Adapted from Stanford iGEM Bioengineering Research Program (SiBRP), Session 2 — July 15th, 2026.
 </footer>
 
-<script src="js/portfolio-data.js?v=1"></script>
-<script src="js/progress.js?v=11"></script>
+<script src="js/modules-meta.js?v=6"></script>
+<script src="js/portfolio-data.js?v=2"></script>
+<script src="js/progress.js?v=13"></script>
 <script>
-function renderProjects(mountEl) {
-  if (!PROJECTS.length) {
+function escapeHtml(str) {
+  const div = document.createElement("div");
+  div.textContent = str == null ? "" : str;
+  return div.innerHTML;
+}
+
+function renderProjects(mountEl, projects) {
+  if (!projects.length) {
     mountEl.outerHTML = `<div class="portfolio-empty">No projects added yet — check back soon.</div>`;
     return;
   }
-  mountEl.innerHTML = PROJECTS.map(p => `
+  mountEl.innerHTML = projects.map(p => `
     <a class="portfolio-card" href="project.html?id=${encodeURIComponent(p.id)}">
-      <div class="portfolio-thumb chip-${p.accent}">${p.image ? `<img src="${p.image}" alt="${p.title}" loading="lazy">` : initials(p.student)}</div>
+      <div class="portfolio-thumb chip-${p.accent}">${p.image ? `<img src="${escapeHtml(p.image)}" alt="${escapeHtml(p.title)}" loading="lazy">` : escapeHtml(initials(p.student))}</div>
       <div class="portfolio-body">
-        <span class="portfolio-tag chip-${p.accent}">${p.tag}${p.year ? " &middot; " + p.year : ""}</span>
-        <h3>${p.title}</h3>
-        <div class="portfolio-student">${p.student}</div>
-        <p>${p.shortDescription}</p>
+        <span class="portfolio-tag chip-${p.accent}">${escapeHtml(p.tag)}${p.year ? " &middot; " + escapeHtml(p.year) : ""}</span>
+        <h3>${escapeHtml(p.title)}</h3>
+        <div class="portfolio-student">${escapeHtml(p.student)}</div>
+        <p>${escapeHtml(p.shortDescription)}</p>
       </div>
     </a>
   `).join("");
@@ -50,7 +57,9 @@ function renderProjects(mountEl) {
 (async () => {
   await renderPublicHeader(document.getElementById("site-header"), true);
   document.getElementById("brand-mark-mount").outerHTML = BRAND_MARK;
-  renderProjects(document.getElementById("portfolio-grid"));
+  const res = await fetch("/api/portfolio-projects");
+  const data = await res.json();
+  renderProjects(document.getElementById("portfolio-grid"), data.projects || []);
 })();
 </script>
 </body>
