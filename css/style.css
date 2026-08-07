@@ -14,15 +14,17 @@
   --teal-dark: #124a3b;
   --teal-tint: #e3f0ec;
   --cream: #faf6ec;
-  /* SynBase logo colors + a Khan Academy-style supporting palette, used on
-     about.html and the site header — kept separate from the cardinal/gold/teal
-     slide-deck palette above, which the curriculum pages still use. */
-  --syn-green: #1f7a46;
-  --syn-green-dark: #145733;
-  --syn-green-tint: #e3f7e3;
-  --syn-purple: #6e4fc9;
-  --syn-purple-dark: #52399c;
-  --syn-purple-tint: #ece7fb;
+  /* SynBase logo colors (sampled directly from assets/img/site/logo.png) + a
+     Khan Academy-style supporting palette, used on about.html, the site
+     header, and the primary button color — kept separate from the
+     cardinal/gold/teal slide-deck palette above, which the curriculum pages
+     still use for module chips. */
+  --syn-green: #0f5f38;
+  --syn-green-dark: #0a4527;
+  --syn-green-tint: #e1f2e7;
+  --syn-purple: #7851b3;
+  --syn-purple-dark: #5c3d8a;
+  --syn-purple-tint: #ece5f7;
   --syn-blue: #2f8fd6;
   --syn-blue-tint: #ddf0fe;
   --syn-pink: #e85fac;
