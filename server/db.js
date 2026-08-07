@@ -118,19 +118,6 @@ if (db.prepare("SELECT COUNT(*) c FROM portfolio_projects").get().c === 0) {
   const now = new Date().toISOString();
   const seedProjects = [
     {
-      id: "biosensor-heavy-metal",
-      student: "Example Student",
-      title: "Engineering a Biosensor for Heavy Metal Detection",
-      year: "2025",
-      tag: "iGEM Project",
-      accent: "teal",
-      image: "",
-      shortDescription: "Placeholder short summary for the card and story header. Replace with one or two sentences describing what the student built.",
-      fullStory: "Placeholder project story. Replace with a few paragraphs describing the problem, what the student built, how it worked, and any results or recognition.",
-      anecdote: "Placeholder first-person quote from the student about their experience.",
-      link: ""
-    },
-    {
       id: "diabetic-retinopathy-ai",
       student: "Roseline Bandela",
       title: "AI-Based Screening System for Diabetic Retinopathy",
@@ -141,19 +128,6 @@ if (db.prepare("SELECT COUNT(*) c FROM portfolio_projects").get().c === 0) {
       shortDescription: "Roseline built an AI-powered diabetic retinopathy screening tool and now leads an effort to bring iGEM and a biomedical engineering lab to McNeese State University.",
       fullStory: "Following SiBRP, Roseline developed a project titled \"Development of an Artificial Intelligence-Based Screening System for Diabetic Retinopathy in Rural Regions Using the Integration of Convolutional Neural Networks in PyCharm.\" Roseline trained her own CNN model, wrote a research paper, and presented it at the Region V Science Fair. The project earned a nomination for the Louisiana Science & Engineering Fair (LSEF) and received several awards, including the Yale Science & Engineering Association Most Outstanding Exhibit in STEM Award, the Regeneron Biomedical Science Award, the Society for In Vitro Biology Outstanding Achievement Award, and 2nd Place in Biomedical Engineering.\n\nSince September 2025, Roseline has also been working to bring iGEM to McNeese State University to build a team centered around synthetic biology, with an emphasis on the Software & AI, Diagnostics, and Space Innovation Villages. Alongside this, Roseline is developing a Bioelectronics & Neural Interfaces Lab for students to work on hands-on projects involving biosensors, neural engineering, wearable devices, and AI-driven healthcare technologies. This idea was sparked by a session where 2025 iGEM team member Melwin talked about biomedical engineering and developing medical devices. From that session, Roseline did more research and eventually came up with the idea to develop a lab. She plans to officially launch the lab this year.",
       anecdote: "Last year, my team and I focused on using AI to detect retinoblastoma from fundus retinal images. That experience introduced me to AI applications in healthcare and inspired me to pursue independent research. Looking back, SiBRP gave me the foundation and confidence to dive into AI, biomedical engineering, and synthetic biology. I would not have started these initiatives without that experience, and it has played a major role in shaping my career path.",
-      link: ""
-    },
-    {
-      id: "mrna-delivery-startup",
-      student: "Example Student",
-      title: "Synthetic Biology Startup Pitch: mRNA Delivery Platform",
-      year: "2026",
-      tag: "Startup",
-      accent: "cardinal",
-      image: "",
-      shortDescription: "Placeholder short summary for the card and story header. Replace with one or two sentences describing what the student built.",
-      fullStory: "Placeholder project story. Replace with a few paragraphs describing the problem, what the student built, how it worked, and any results or recognition.",
-      anecdote: "Placeholder first-person quote from the student about their experience.",
       link: ""
     }
   ];

@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>About — SynBase</title>
-<link rel="stylesheet" href="css/style.css?v=26">
+<link rel="stylesheet" href="css/style.css?v=38">
 </head>
 <body>
 
@@ -191,7 +191,6 @@
 <footer class="landing-footer">
   <div class="container">
     <div class="landing-footer-top">
-      <div class="landing-footer-brand"><img class="brand-logo" src="assets/img/site/logo.png" alt="SynBase"></div>
       <div class="landing-footer-links">
         <div class="landing-footer-col">
           <h4>Curriculum</h4>
@@ -212,7 +211,8 @@
       </div>
     </div>
     <div class="landing-footer-bottom">
-      Adapted from Stanford iGEM Bioengineering Research Program (SiBRP), Session 2 — July 15th, 2026.
+      <img class="footer-partner-logo" src="assets/img/site/stanford-igem-logo.png" alt="Stanford iGEM">
+      <div>Presented by the Stanford iGEM Team</div>
     </div>
   </div>
 </footer>
@@ -238,7 +238,8 @@ const EXPLORE_TINTS = ["green", "purple", "blue"];
 const ARROW_ICON = `<svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 15L15 5M7 5h8v8"/></svg>`;
 
 function renderExploreGrid(mountEl) {
-  mountEl.innerHTML = MODULES_META.map((m, i) => `
+  // Module 5 (Review & Wrap-Up) omitted from this preview grid for now.
+  mountEl.innerHTML = MODULES_META.filter(m => m.id !== "module5").map((m, i) => `
     <a class="explore-card tint-${EXPLORE_TINTS[i % EXPLORE_TINTS.length]}" href="signup.html">
       <span class="explore-card-arrow">${ARROW_ICON}</span>
       <div class="explore-card-icon">${MODULE_ICONS[i % MODULE_ICONS.length]}</div>
