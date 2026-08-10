@@ -13,6 +13,10 @@
 //         prompt: "...",
 //         options: [{ text: "...", correct: true|false }, ...],
 //         explanation: "..."
+//       },
+//       freeResponse: {                    // optional, alongside or instead of `question`
+//         prompt: "...",                   // shown to the student
+//         rubric: "..."                    // grading guidance sent to the AI, not shown verbatim
 //       }
 //     }, ...
 //   ]
@@ -146,6 +150,7 @@ function renderSections(MODULE) {
 
   MODULE.sections.forEach(section => {
     wireQuiz(MODULE, section);
+    wireFreeResponse(MODULE, section);
   });
 }
 
@@ -165,6 +170,7 @@ function sectionTemplate(MODULE, section, index) {
         </figure>
         <div class="topic-text">${section.html}</div>
         ${section.question ? quizTemplate(section) : ""}
+        ${section.freeResponse ? freeResponseTemplate(section) : ""}
       </div>
     </article>
   `;
@@ -229,6 +235,98 @@ function wireQuiz(MODULE, section) {
       articleEl.querySelector(".topic-index").innerHTML = "&#10003;";
       const meta = MODULES_META.find(m => m.id === MODULE.id);
       refreshModuleProgressBar(MODULE, meta);
+    }
+  });
+}
+
+function freeResponseTemplate(section) {
+  const fr = section.freeResponse;
+  return `
+    <div class="free-response-box" data-fr-for="${section.id}">
+      <div class="free-response-label">Reflection <span class="fr-badge">Formative — revise and resubmit anytime</span></div>
+      <p class="free-response-question">${fr.prompt}</p>
+      <textarea class="free-response-input" data-fr-input rows="5" placeholder="Type your response here..." maxlength="4000"></textarea>
+      <div class="free-response-actions">
+        <button class="btn small" data-fr-submit>Get Feedback</button>
+        <span class="free-response-status" data-fr-status></span>
+      </div>
+      <div class="free-response-feedback" data-fr-feedback hidden>
+        <div class="free-response-feedback-label">AI Feedback</div>
+        <div class="free-response-feedback-text" data-fr-feedback-text></div>
+      </div>
+    </div>
+  `;
+}
+
+function wireFreeResponse(MODULE, section) {
+  if (!section.freeResponse) return;
+  const box = document.querySelector(`.free-response-box[data-fr-for="${section.id}"]`);
+  if (!box) return;
+  const input = box.querySelector("[data-fr-input]");
+  const submitBtn = box.querySelector("[data-fr-submit]");
+  const status = box.querySelector("[data-fr-status]");
+  const feedbackBox = box.querySelector("[data-fr-feedback]");
+  const feedbackText = box.querySelector("[data-fr-feedback-text]");
+
+  function showFeedback(text) {
+    feedbackText.textContent = text;
+    feedbackBox.hidden = false;
+  }
+
+  // Prefill from a previous attempt, if any, so students can see and revise
+  // their last answer instead of starting from a blank box every visit.
+  fetch(`/api/free-response/${encodeURIComponent(MODULE.id)}/${encodeURIComponent(section.id)}`)
+    .then(res => res.ok ? res.json() : null)
+    .then(data => {
+      if (data && data.response) {
+        input.value = data.response.answer || "";
+        if (data.response.feedback) showFeedback(data.response.feedback);
+      }
+    })
+    .catch(() => {});
+
+  submitBtn.addEventListener("click", async () => {
+    const answer = input.value.trim();
+    if (!answer) {
+      status.textContent = "Write a response first.";
+      status.className = "free-response-status incorrect";
+      return;
+    }
+
+    submitBtn.disabled = true;
+    status.textContent = "Getting feedback…";
+    status.className = "free-response-status";
+
+    try {
+      const res = await fetch("/api/free-response", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          moduleId: MODULE.id,
+          sectionId: section.id,
+          prompt: section.freeResponse.prompt,
+          rubric: section.freeResponse.rubric,
+          answer
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Something went wrong.");
+
+      showFeedback(data.feedback);
+      status.textContent = "Feel free to revise your answer and try again.";
+      status.className = "free-response-status correct";
+
+      markSectionComplete(MODULE.id, section.id);
+      const articleEl = document.getElementById(`section-${section.id}`);
+      articleEl.classList.add("is-complete");
+      articleEl.querySelector(".topic-index").innerHTML = "&#10003;";
+      const meta = MODULES_META.find(m => m.id === MODULE.id);
+      refreshModuleProgressBar(MODULE, meta);
+    } catch (err) {
+      status.textContent = err.message || "Couldn't get feedback. Please try again.";
+      status.className = "free-response-status incorrect";
+    } finally {
+      submitBtn.disabled = false;
     }
   });
 }

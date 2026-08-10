@@ -105,6 +105,20 @@ db.exec(`
     link TEXT NOT NULL DEFAULT '',
     createdAt TEXT NOT NULL
   );
+
+  -- One saved response per (user, module, section) for free-response
+  -- reflection questions. feedback is the AI's most recent formative
+  -- response — ungraded, so resubmitting just overwrites both fields rather
+  -- than keeping a full history.
+  CREATE TABLE IF NOT EXISTS free_responses (
+    userId TEXT NOT NULL,
+    moduleId TEXT NOT NULL,
+    sectionId TEXT NOT NULL,
+    answer TEXT NOT NULL DEFAULT '',
+    feedback TEXT NOT NULL DEFAULT '',
+    updatedAt TEXT NOT NULL,
+    PRIMARY KEY (userId, moduleId, sectionId)
+  );
 `);
 
 // Seed the table that used to be the hardcoded PROJECTS array in
