@@ -758,7 +758,7 @@ app.get("/", (req, res) => res.redirect("/about.html"));
 // Client-side JS already redirects unauthenticated visitors, but this stops
 // the HTML from being served at all without a valid session cookie.
 const PUBLIC_PATHS = new Set([
-  "/login.html", "/signup.html", "/about.html", "/stanford-igem-team.html", "/beyond-sibrp.html", "/project.html",
+  "/login.html", "/signup.html", "/about.html", "/stanford-igem-team.html", "/igem.html", "/beyond-sibrp.html", "/project.html",
   "/forgot-password.html", "/reset-password.html"
 ]);
 const ADMIN_PATHS = new Set(["/admin.html"]);

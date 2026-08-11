@@ -140,6 +140,7 @@ function aboutNavDropdownHtml(prefix) {
       <div class="nav-dropdown-menu">
         <a href="${prefix}about.html">About SynBase</a>
         <a href="${prefix}stanford-igem-team.html">Stanford iGEM Team</a>
+        <a href="${prefix}igem.html">What Is iGEM?</a>
       </div>
     </div>
   `;
