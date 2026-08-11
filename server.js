@@ -278,10 +278,16 @@ app.post("/api/progress", requireAuth, (req, res) => {
 // ---------- Free-response AI feedback ----------
 const FREE_RESPONSE_MAX_LEN = 4000;
 
+// The discussion board (everyone's answers, anonymized) only unlocks once
+// the requesting user has submitted their own answer for this section —
+// enforced here, not on the client, since the client can't be trusted to
+// hide data it was never supposed to receive.
 app.get("/api/free-response/:moduleId/:sectionId", requireAuth, (req, res) => {
   const { moduleId, sectionId } = req.params;
   if (!isValidSection(moduleId, sectionId)) return res.status(400).json({ error: "Unknown section." });
-  res.json({ response: freeResponseStore.getResponse(req.user.id, moduleId, sectionId) });
+  const response = freeResponseStore.getResponse(req.user.id, moduleId, sectionId);
+  const board = response ? freeResponseStore.listAnswersForSection(moduleId, sectionId) : [];
+  res.json({ response, board });
 });
 
 // Body: { moduleId, sectionId, prompt, rubric, answer }. prompt/rubric come
@@ -305,7 +311,8 @@ app.post("/api/free-response", requireAuth, aiFeedbackLimiter, async (req, res) 
   try {
     const feedback = await getFormativeFeedback({ questionPrompt, rubric: rubricText, studentAnswer: trimmedAnswer });
     freeResponseStore.saveResponse({ userId: req.user.id, moduleId, sectionId, answer: trimmedAnswer, feedback });
-    res.json({ feedback });
+    const board = freeResponseStore.listAnswersForSection(moduleId, sectionId);
+    res.json({ feedback, board });
   } catch (e) {
     console.error("AI feedback error:", e);
     res.status(502).json({ error: "AI feedback is temporarily unavailable. Please try again in a moment." });

@@ -649,6 +649,49 @@ a:hover { text-decoration: underline; }
   white-space: pre-wrap;
 }
 
+/* ---------- Discussion board (anonymous class responses) ---------- */
+.discussion-board { margin-top: 16px; }
+.discussion-board-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--syn-green);
+  margin-bottom: 8px;
+}
+.discussion-board-locked,
+.discussion-board-empty {
+  font-size: 0.88rem;
+  color: var(--ink-soft);
+  margin: 0;
+}
+.discussion-board-locked {
+  background: #fff;
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+.discussion-board-list { display: flex; flex-direction: column; gap: 10px; }
+.discussion-board-entry {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 14px;
+}
+.discussion-board-entry-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-soft);
+  margin-bottom: 4px;
+}
+.discussion-board-entry-text {
+  font-size: 0.9rem;
+  color: var(--ink);
+  white-space: pre-wrap;
+}
+
 /* ---------- Footer / module nav ---------- */
 .module-footer-nav {
   display: flex;

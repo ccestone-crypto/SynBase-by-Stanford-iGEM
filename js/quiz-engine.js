@@ -254,8 +254,35 @@ function freeResponseTemplate(section) {
         <div class="free-response-feedback-label">AI Feedback</div>
         <div class="free-response-feedback-text" data-fr-feedback-text></div>
       </div>
+      <div class="discussion-board" data-fr-board>
+        <div class="discussion-board-label">Class Responses</div>
+        <div class="discussion-board-list" data-fr-board-list></div>
+      </div>
     </div>
   `;
+}
+
+function renderBoardLocked(el) {
+  el.innerHTML = `<p class="discussion-board-locked">Submit your response above to see what other students wrote.</p>`;
+}
+
+// board entries are anonymous, user-submitted text — build the skeleton via
+// innerHTML, then fill each entry via textContent (same XSS-safe pattern as
+// the AI feedback box) rather than interpolating the text into the template.
+function renderBoardEntries(el, board) {
+  if (!board || !board.length) {
+    el.innerHTML = `<p class="discussion-board-empty">No responses yet — be the first!</p>`;
+    return;
+  }
+  el.innerHTML = board.map((_, i) => `
+    <div class="discussion-board-entry">
+      <div class="discussion-board-entry-label">Response ${i + 1}</div>
+      <div class="discussion-board-entry-text" data-entry-text></div>
+    </div>
+  `).join("");
+  el.querySelectorAll("[data-entry-text]").forEach((node, i) => {
+    node.textContent = board[i].answer;
+  });
 }
 
 function wireFreeResponse(MODULE, section) {
@@ -267,6 +294,7 @@ function wireFreeResponse(MODULE, section) {
   const status = box.querySelector("[data-fr-status]");
   const feedbackBox = box.querySelector("[data-fr-feedback]");
   const feedbackText = box.querySelector("[data-fr-feedback-text]");
+  const boardList = box.querySelector("[data-fr-board-list]");
 
   function showFeedback(text) {
     feedbackText.textContent = text;
@@ -274,13 +302,17 @@ function wireFreeResponse(MODULE, section) {
   }
 
   // Prefill from a previous attempt, if any, so students can see and revise
-  // their last answer instead of starting from a blank box every visit.
+  // their last answer instead of starting from a blank box every visit. The
+  // discussion board only arrives in the response once they've already
+  // answered — gated server-side, not something the client decides.
+  renderBoardLocked(boardList);
   fetch(`/api/free-response/${encodeURIComponent(MODULE.id)}/${encodeURIComponent(section.id)}`)
     .then(res => res.ok ? res.json() : null)
     .then(data => {
       if (data && data.response) {
         input.value = data.response.answer || "";
         if (data.response.feedback) showFeedback(data.response.feedback);
+        renderBoardEntries(boardList, data.board);
       }
     })
     .catch(() => {});
@@ -315,6 +347,7 @@ function wireFreeResponse(MODULE, section) {
       showFeedback(data.feedback);
       status.textContent = "Feel free to revise your answer and try again.";
       status.className = "free-response-status correct";
+      renderBoardEntries(boardList, data.board);
 
       markSectionComplete(MODULE.id, section.id);
       const articleEl = document.getElementById(`section-${section.id}`);
