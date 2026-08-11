@@ -671,7 +671,11 @@ a:hover { text-decoration: underline; }
   border-radius: 8px;
   padding: 12px 14px;
 }
-.discussion-board-list { display: flex; flex-direction: column; gap: 10px; }
+.discussion-board-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+}
 .discussion-board-entry {
   background: #fff;
   border: 1px solid var(--border);
