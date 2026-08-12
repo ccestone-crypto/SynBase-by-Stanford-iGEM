@@ -15,8 +15,7 @@
 //         explanation: "..."
 //       },
 //       freeResponse: {                    // optional, alongside or instead of `question`
-//         prompt: "...",                   // shown to the student
-//         rubric: "..."                    // grading guidance sent to the AI, not shown verbatim
+//         prompt: "..."                    // shown to the student; posting unlocks the discussion board
 //       }
 //     }, ...
 //   ]
@@ -243,16 +242,12 @@ function freeResponseTemplate(section) {
   const fr = section.freeResponse;
   return `
     <div class="free-response-box" data-fr-for="${section.id}">
-      <div class="free-response-label">Reflection <span class="fr-badge">Formative — revise and resubmit anytime</span></div>
+      <div class="free-response-label">Reflection <span class="fr-badge">Post to see what classmates wrote</span></div>
       <p class="free-response-question">${fr.prompt}</p>
       <textarea class="free-response-input" data-fr-input rows="5" placeholder="Type your response here..." maxlength="4000"></textarea>
       <div class="free-response-actions">
-        <button class="btn small" data-fr-submit>Get Feedback</button>
+        <button class="btn small" data-fr-submit>Post Response</button>
         <span class="free-response-status" data-fr-status></span>
-      </div>
-      <div class="free-response-feedback" data-fr-feedback hidden>
-        <div class="free-response-feedback-label">AI Feedback</div>
-        <div class="free-response-feedback-text" data-fr-feedback-text></div>
       </div>
       <div class="discussion-board" data-fr-board>
         <div class="discussion-board-label">Class Responses</div>
@@ -292,14 +287,7 @@ function wireFreeResponse(MODULE, section) {
   const input = box.querySelector("[data-fr-input]");
   const submitBtn = box.querySelector("[data-fr-submit]");
   const status = box.querySelector("[data-fr-status]");
-  const feedbackBox = box.querySelector("[data-fr-feedback]");
-  const feedbackText = box.querySelector("[data-fr-feedback-text]");
   const boardList = box.querySelector("[data-fr-board-list]");
-
-  function showFeedback(text) {
-    feedbackText.textContent = text;
-    feedbackBox.hidden = false;
-  }
 
   // Prefill from a previous attempt, if any, so students can see and revise
   // their last answer instead of starting from a blank box every visit. The
@@ -311,7 +299,6 @@ function wireFreeResponse(MODULE, section) {
     .then(data => {
       if (data && data.response) {
         input.value = data.response.answer || "";
-        if (data.response.feedback) showFeedback(data.response.feedback);
         renderBoardEntries(boardList, data.board);
       }
     })
@@ -326,7 +313,7 @@ function wireFreeResponse(MODULE, section) {
     }
 
     submitBtn.disabled = true;
-    status.textContent = "Getting feedback…";
+    status.textContent = "Posting…";
     status.className = "free-response-status";
 
     try {
@@ -336,16 +323,13 @@ function wireFreeResponse(MODULE, section) {
         body: JSON.stringify({
           moduleId: MODULE.id,
           sectionId: section.id,
-          prompt: section.freeResponse.prompt,
-          rubric: section.freeResponse.rubric,
           answer
         })
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Something went wrong.");
 
-      showFeedback(data.feedback);
-      status.textContent = "Feel free to revise your answer and try again.";
+      status.textContent = "Posted! Revise and resubmit anytime.";
       status.className = "free-response-status correct";
       renderBoardEntries(boardList, data.board);
 
@@ -356,7 +340,7 @@ function wireFreeResponse(MODULE, section) {
       const meta = MODULES_META.find(m => m.id === MODULE.id);
       refreshModuleProgressBar(MODULE, meta);
     } catch (err) {
-      status.textContent = err.message || "Couldn't get feedback. Please try again.";
+      status.textContent = err.message || "Couldn't post your response. Please try again.";
       status.className = "free-response-status incorrect";
     } finally {
       submitBtn.disabled = false;

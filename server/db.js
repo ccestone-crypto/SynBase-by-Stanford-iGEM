@@ -106,16 +106,14 @@ db.exec(`
     createdAt TEXT NOT NULL
   );
 
-  -- One saved response per (user, module, section) for free-response
-  -- reflection questions. feedback is the AI's most recent formative
-  -- response — ungraded, so resubmitting just overwrites both fields rather
-  -- than keeping a full history.
+  -- One saved answer per (user, module, section) for free-response reflection
+  -- questions, doubling as the anonymous discussion board for that question —
+  -- resubmitting just overwrites the row rather than keeping a full history.
   CREATE TABLE IF NOT EXISTS free_responses (
     userId TEXT NOT NULL,
     moduleId TEXT NOT NULL,
     sectionId TEXT NOT NULL,
     answer TEXT NOT NULL DEFAULT '',
-    feedback TEXT NOT NULL DEFAULT '',
     updatedAt TEXT NOT NULL,
     PRIMARY KEY (userId, moduleId, sectionId)
   );
@@ -199,6 +197,25 @@ if (hasColumn("speaker_talks", "filename") && !hasColumn("speaker_talks", "youtu
       youtubeId TEXT NOT NULL,
       uploadedAt TEXT NOT NULL
     );
+  `);
+}
+
+// free_responses dropped its AI-feedback column when the feature became a
+// plain discussion board — rebuild for anyone migrating from the old schema.
+if (hasColumn("free_responses", "feedback")) {
+  db.exec(`
+    ALTER TABLE free_responses RENAME TO free_responses_old;
+    CREATE TABLE free_responses (
+      userId TEXT NOT NULL,
+      moduleId TEXT NOT NULL,
+      sectionId TEXT NOT NULL,
+      answer TEXT NOT NULL DEFAULT '',
+      updatedAt TEXT NOT NULL,
+      PRIMARY KEY (userId, moduleId, sectionId)
+    );
+    INSERT INTO free_responses (userId, moduleId, sectionId, answer, updatedAt)
+      SELECT userId, moduleId, sectionId, answer, updatedAt FROM free_responses_old;
+    DROP TABLE free_responses_old;
   `);
 }
 

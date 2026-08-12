@@ -15,7 +15,6 @@ const mailer = require("./server/mailer");
 const speakerStore = require("./server/speaker-store");
 const portfolioStore = require("./server/portfolio-store");
 const freeResponseStore = require("./server/free-response-store");
-const { getFormativeFeedback } = require("./server/ai-feedback");
 const { getSessionSecret } = require("./server/secret");
 const { isCourseComplete, isValidSection } = require("./server/course-config");
 
@@ -112,15 +111,15 @@ const forgotPasswordLimiter = rateLimit({
   message: { error: "Too many reset requests from this network. Please try again in a few minutes." }
 });
 
-// Each request is a paid AI API call, so cap it independently of the
-// generous auth limiter above — still comfortably more than a student would
-// hit while genuinely revising an answer.
-const aiFeedbackLimiter = rateLimit({
+// Keeps the discussion board from being spammed with rapid resubmissions —
+// still comfortably more than a student would hit while genuinely revising
+// an answer.
+const freeResponsePostLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 15,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { error: "Too many feedback requests. Please wait a few minutes and try again." }
+  message: { error: "Too many posts. Please wait a few minutes and try again." }
 });
 
 // On top of the per-IP limiter above, this stops any single email address
@@ -275,7 +274,14 @@ app.post("/api/progress", requireAuth, (req, res) => {
   res.json({ progress: store.readProgress(req.user.id) });
 });
 
-// ---------- Free-response AI feedback ----------
+// Public — powers the "X learners have completed this curriculum" stat on
+// the logged-out curriculum.html page. Only a count is exposed, never who.
+app.get("/api/curriculum-stats", (req, res) => {
+  const completedCount = store.listUsers().filter(u => isCourseComplete(store.readProgress(u.id))).length;
+  res.json({ completedCount });
+});
+
+// ---------- Free-response discussion board ----------
 const FREE_RESPONSE_MAX_LEN = 4000;
 
 // The discussion board (everyone's answers, anonymized) only unlocks once
@@ -290,33 +296,19 @@ app.get("/api/free-response/:moduleId/:sectionId", requireAuth, (req, res) => {
   res.json({ response, board });
 });
 
-// Body: { moduleId, sectionId, prompt, rubric, answer }. prompt/rubric come
-// from the (developer-authored, non-sensitive) module content and only
-// shape the AI's feedback — they carry no completion-gating weight, so
-// there's nothing to gain by tampering with them beyond worse feedback for
-// yourself. answer is the only field with real limits.
-app.post("/api/free-response", requireAuth, aiFeedbackLimiter, async (req, res) => {
-  const { moduleId, sectionId, prompt, rubric, answer } = req.body || {};
+app.post("/api/free-response", requireAuth, freeResponsePostLimiter, (req, res) => {
+  const { moduleId, sectionId, answer } = req.body || {};
   if (!isValidSection(moduleId, sectionId)) return res.status(400).json({ error: "Unknown section." });
 
   const trimmedAnswer = typeof answer === "string" ? answer.trim() : "";
-  if (!trimmedAnswer) return res.status(400).json({ error: "Write a response before requesting feedback." });
+  if (!trimmedAnswer) return res.status(400).json({ error: "Write a response before posting." });
   if (trimmedAnswer.length > FREE_RESPONSE_MAX_LEN) {
     return res.status(400).json({ error: `Keep your response under ${FREE_RESPONSE_MAX_LEN} characters.` });
   }
 
-  const questionPrompt = typeof prompt === "string" ? prompt.slice(0, 2000) : "";
-  const rubricText = typeof rubric === "string" ? rubric.slice(0, 2000) : "";
-
-  try {
-    const feedback = await getFormativeFeedback({ questionPrompt, rubric: rubricText, studentAnswer: trimmedAnswer });
-    freeResponseStore.saveResponse({ userId: req.user.id, moduleId, sectionId, answer: trimmedAnswer, feedback });
-    const board = freeResponseStore.listAnswersForSection(moduleId, sectionId);
-    res.json({ feedback, board });
-  } catch (e) {
-    console.error("AI feedback error:", e);
-    res.status(502).json({ error: "AI feedback is temporarily unavailable. Please try again in a moment." });
-  }
+  freeResponseStore.saveResponse({ userId: req.user.id, moduleId, sectionId, answer: trimmedAnswer });
+  const board = freeResponseStore.listAnswersForSection(moduleId, sectionId);
+  res.json({ board });
 });
 
 // ---------- Application open/close windows ----------
@@ -765,7 +757,7 @@ app.get("/", (req, res) => res.redirect("/about.html"));
 // Client-side JS already redirects unauthenticated visitors, but this stops
 // the HTML from being served at all without a valid session cookie.
 const PUBLIC_PATHS = new Set([
-  "/login.html", "/signup.html", "/about.html", "/stanford-igem-team.html", "/igem.html", "/beyond-sibrp.html", "/project.html",
+  "/login.html", "/signup.html", "/about.html", "/stanford-igem-team.html", "/igem.html", "/curriculum.html", "/beyond-sibrp.html", "/project.html",
   "/forgot-password.html", "/reset-password.html"
 ]);
 const ADMIN_PATHS = new Set(["/admin.html"]);

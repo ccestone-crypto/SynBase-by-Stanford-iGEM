@@ -103,9 +103,12 @@ function moduleStatusLabel(pct) {
 // ---------- Module locking ----------
 // Module 1 is always unlocked. Every later module requires the module right
 // before it to be 100% complete (all sections passed + video marked watched).
+// Admins bypass this entirely — they need to review the full curriculum
+// without grinding through it as a student would.
 const LOCK_ICON = `<svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="9" width="11" height="8" rx="1.5"/><path d="M6.5 9V6.5a3.5 3.5 0 0 1 7 0V9"/></svg>`;
 
 function isModuleUnlocked(moduleId) {
+  if (CURRENT_USER && CURRENT_USER.isAdmin) return true;
   const idx = MODULES_META.findIndex(m => m.id === moduleId);
   if (idx <= 0) return true;
   const prev = MODULES_META[idx - 1];
@@ -180,8 +183,8 @@ function wireNavDropdowns(mountEl) {
 // pages (renderPublicHeader).
 function headerNavHtml(prefix, user) {
   return `
-    <a href="${prefix}index.html">Home</a>
     ${aboutNavDropdownHtml(prefix)}
+    <a href="${prefix}${user ? "index.html" : "curriculum.html"}">Curriculum</a>
     ${sibrpNavDropdownHtml(prefix, user)}
     <a href="${prefix}speaker-series.html">Speaker Series</a>
     ${user && user.isAdmin ? `<a href="${prefix}admin.html">Admin</a>` : ""}

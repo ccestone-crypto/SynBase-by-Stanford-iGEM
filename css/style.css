@@ -371,6 +371,17 @@ a:hover { text-decoration: underline; }
 .progress-track.small { height: 7px; width: 90px; }
 .unit-body { padding: 0 20px 20px; border-top: 1px solid var(--border); }
 .unit-desc { color: var(--ink-soft); font-size: 0.9rem; margin: 14px 0 16px; }
+.syllabus-subhead {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-soft);
+  margin: 14px 0 6px;
+}
+.syllabus-subhead:first-of-type { margin-top: 16px; }
+.syllabus-list { margin: 0 0 4px; padding-left: 20px; font-size: 0.9rem; color: var(--ink); }
+.syllabus-list li { margin-bottom: 4px; }
 .lesson-group { border-top: 1px solid var(--border); }
 .lesson-group:last-of-type { margin-bottom: 16px; }
 .lesson-row {
@@ -628,26 +639,6 @@ a:hover { text-decoration: underline; }
 .free-response-status { font-size: 0.9rem; font-weight: 600; }
 .free-response-status.correct { color: var(--syn-purple); }
 .free-response-status.incorrect { color: var(--danger); }
-.free-response-feedback {
-  margin-top: 14px;
-  background: #fff;
-  border-left: 3px solid var(--syn-purple);
-  border-radius: 0 6px 6px 0;
-  padding: 10px 14px;
-}
-.free-response-feedback-label {
-  font-size: 0.7rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--syn-purple);
-  margin-bottom: 6px;
-}
-.free-response-feedback-text {
-  font-size: 0.9rem;
-  color: var(--ink-soft);
-  white-space: pre-wrap;
-}
 
 /* ---------- Discussion board (anonymous class responses) ---------- */
 .discussion-board { margin-top: 16px; }
@@ -819,6 +810,9 @@ a:hover { text-decoration: underline; }
 }
 .page-hero h1 { font-size: 2.3rem; font-weight: 800; margin: 0 0 12px; color: var(--charcoal); letter-spacing: -0.7px; line-height: 1.15; }
 .page-hero p.lede { color: var(--ink-soft); max-width: 680px; margin: 0; font-size: 1.05rem; }
+.page-hero-title-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.page-hero-title-row h1 { margin: 0; }
+.page-hero-mascot { height: 56px; width: auto; flex-shrink: 0; }
 
 .content-card {
   background: var(--card);
@@ -1506,19 +1500,6 @@ a:hover { text-decoration: underline; }
 }
 
 /* ---------- Speaker Series ---------- */
-.optional-badge {
-  display: inline-block;
-  font-size: 0.7rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--syn-purple-dark);
-  background: var(--syn-purple-tint);
-  border: 1px solid var(--syn-purple);
-  padding: 3px 10px;
-  border-radius: 999px;
-  margin-bottom: 12px;
-}
 .upload-form-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));

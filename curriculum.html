@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Curriculum — SynBase</title>
+<link rel="stylesheet" href="css/style.css?v=48">
+</head>
+<body>
+
+<header class="site-header" id="site-header"></header>
+
+<!-- Hero (centered variant, shared with the Stanford iGEM Team / What Is iGEM pages) -->
+<section class="landing-hero centered">
+  <div class="container">
+    <div>
+      <span class="landing-hero-badge">Self-Paced &middot; Free &middot; No Background Required</span>
+      <h1>The SynBase Curriculum</h1>
+      <p class="lede">A full syllabus of what this course covers, from your first day through the mentored program that follows it.</p>
+      <div class="landing-hero-ctas">
+        <a class="btn" href="signup.html">Start Learning</a>
+        <a class="btn secondary" href="login.html">Log In</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Stats band -->
+<section class="stats-band">
+  <div class="stats-row">
+    <div class="stat-big tint-green"><span class="num">7</span><span class="label">Course Units</span></div>
+    <div class="stat-big tint-purple"><span class="num" id="completed-stat">—</span><span class="label">Learners Completed</span></div>
+    <div class="stat-big tint-blue"><span class="num">100%</span><span class="label">Free</span></div>
+  </div>
+</section>
+
+<!-- Purpose statement (placeholder — fill in) -->
+<section class="pillar-section">
+  <div class="container">
+    <div class="pillar-heading">
+      <h2>About This Curriculum</h2>
+      <p>Add a description of this course's purpose and mission here — what it teaches, why it exists, and what completing it unlocks. <span class="placeholder-note">Placeholder — edit this section</span></p>
+    </div>
+  </div>
+</section>
+
+<!-- Syllabus -->
+<section class="steps-section">
+  <div class="container" style="max-width:900px;">
+    <p class="about-eyebrow">Full Syllabus</p>
+    <h2 style="font-size:2rem;font-weight:800;color:var(--ink-black);margin:0 0 8px;">What you'll cover, unit by unit.</h2>
+    <p style="color:var(--ink-soft);margin:0 0 8px;">Click a unit to see its learning objectives and topics.</p>
+    <div class="unit-accordion" id="syllabus-list" style="margin-top:24px;"></div>
+  </div>
+</section>
+
+<!-- Final CTA -->
+<section class="cta-banner">
+  <h2>Ready to start?</h2>
+  <p>Module 1 starts with the basics — no background in biology or engineering required.</p>
+  <a class="btn" href="signup.html">Start the Curriculum</a>
+</section>
+
+<footer class="landing-footer">
+  <div class="container">
+    <div class="landing-footer-top">
+      <div class="landing-footer-links">
+        <div class="landing-footer-col">
+          <h4>Curriculum</h4>
+          <a href="curriculum.html">Curriculum</a>
+          <a href="speaker-series.html">Speaker Series</a>
+          <a href="signup.html">Sign Up</a>
+        </div>
+        <div class="landing-footer-col">
+          <h4>Community</h4>
+          <a href="beyond-sibrp.html">Beyond SiBRP</a>
+          <a href="about.html">About</a>
+          <a href="stanford-igem-team.html">Stanford iGEM Team</a>
+          <a href="igem.html">What Is iGEM?</a>
+        </div>
+        <div class="landing-footer-col">
+          <h4>Account</h4>
+          <a href="login.html">Log In</a>
+          <a href="signup.html">Create Account</a>
+        </div>
+      </div>
+    </div>
+    <div class="landing-footer-bottom">
+      <img class="footer-partner-logo" src="assets/img/site/stanford-igem-logo.png" alt="Stanford iGEM">
+      <div>Presented by the Stanford iGEM Team</div>
+    </div>
+  </div>
+</footer>
+
+<script src="js/modules-meta.js?v=6"></script>
+<script src="js/progress.js?v=19"></script>
+<script>
+function escapeHtml(str) {
+  const div = document.createElement("div");
+  div.textContent = str == null ? "" : str;
+  return div.innerHTML;
+}
+
+const CHEVRON_ICON = `<svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8l4 4 4-4"/></svg>`;
+const CHECK_ICON = `<svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5l3.5 3.5L16 6"/></svg>`;
+const CHIP_TINTS = ["green", "purple", "blue"];
+
+// Full course syllabus — provided directly by the program, not tied to the
+// interactive module system yet. Module 4-6 is one combined placeholder
+// entry until those units are split out and built.
+const SYLLABUS = [
+  {
+    chip: "1", title: "Introduction to iGEM & Bioengineering", time: "Est. completion time: 30 min",
+    objectives: [
+      "Define bioengineering as a field and describe its major subdisciplines (synthetic biology, genetic engineering, biomedical devices, etc.)",
+      "Explain this course's mission and structure, and what completing this course unlocks (a prerequisite for the mentored program)",
+      "Identify real-world examples of bioengineering's impact"
+    ],
+    topics: [
+      "What is bioengineering? Overview of subfields and how they relate",
+      "What is iGEM, and Stanford iGEM specifically?",
+      "Landmark examples and why the field matters",
+      "Platform orientation: how to navigate the course, track progress, and get help"
+    ]
+  },
+  {
+    chip: "2", title: "Core Concepts in Biology", time: "Est. completion time: 1 hr",
+    objectives: [
+      "Describe the central dogma of molecular biology (DNA → RNA → protein)",
+      "Explain basic cell structure and function relevant to bioengineering",
+      "Identify key biomolecules (DNA, RNA, proteins, enzymes) and their roles"
+    ],
+    topics: [
+      "Cell biology basics",
+      "Central dogma: transcription and translation",
+      "Core biochemistry needed for genetic engineering work later in the course"
+    ]
+  },
+  {
+    chip: "3", title: "Biodesign & Literature Review", time: "Est. completion time: 1 hr",
+    objectives: [
+      "Understand the biodesign process as a framework for approaching a research problem",
+      "Find and evaluate scientific literature",
+      "Formulate a research question"
+    ],
+    topics: [
+      "Biodesign thinking framework",
+      "Searching PubMed/Google Scholar effectively",
+      "Evaluating primary sources and identifying gaps in the literature"
+    ]
+  },
+  {
+    chip: "4–6", title: "Genetic Circuit Design, Plasmid DNA Design, Experimental Workflows", note: "(to be expanded)", time: "Est. completion time: 3-4 hrs",
+    objectives: [
+      "Explain what a genetic circuit is",
+      "Describe basic components: promoters, ribosome binding sites, coding sequences, terminators",
+      "Interpret simple circuit diagrams",
+      "Describe plasmid structure and function",
+      "Explain basic cloning methods (restriction enzyme cloning, Gibson assembly)",
+      "Read and annotate a simple plasmid map",
+      "Outline a typical wet-lab experimental workflow, from hypothesis to result",
+      "Describe common bioengineering lab techniques (PCR, gel electrophoresis, transformation) at a conceptual level",
+      "Apply basic experimental design principles: controls, replicates, variables"
+    ],
+    topics: [
+      "Intro to standardized biological parts (e.g., registry of standard parts)",
+      "Logic gates in biology",
+      "Examples of engineered genetic circuits",
+      "Brief intro to circuit-design tools used in the field",
+      "Plasmid components: origin of replication, selection marker, multiple cloning site",
+      "Common cloning methods, at a conceptual level",
+      "Intro to free plasmid-design/visualization tools",
+      "From hypothesis to experiment",
+      "Overview of common lab techniques (conceptual, not hands-on)",
+      "Experimental design principles and basic lab safety"
+    ]
+  },
+  {
+    chip: "7", title: "Entrepreneurship in Bioengineering", time: "Est. completion time: 45 min",
+    objectives: [
+      "Describe paths from bioengineering research to real-world application",
+      "Explain basic concepts in biotech entrepreneurship: IP, funding, translation from lab to market",
+      "Identify possible career pathways in the field"
+    ],
+    topics: [
+      "Research commercialization and technology transfer",
+      "Case studies of biotech startups",
+      "Intro to intellectual property in biotech",
+      "Career pathways overview"
+    ]
+  },
+  {
+    chip: "8", title: "Ethics & Broader Applications", time: "Est. completion time: 1 hr",
+    objectives: [
+      "Identify major ethical considerations in bioengineering: biosafety, biosecurity, dual-use research, equitable access",
+      "Discuss the societal impact of genetic technologies"
+    ],
+    topics: [
+      "Bioethics frameworks",
+      "Case studies (e.g., CRISPR ethics, gene drives, biosecurity)",
+      "Equitable access to biotechnology",
+      "Discussion prompts for further reflection"
+    ]
+  },
+  {
+    closing: true, title: "Closing Module: Next Steps",
+    single: "Information about applying to SiBRP"
+  }
+];
+
+function renderSyllabus(mountEl) {
+  mountEl.innerHTML = SYLLABUS.map((m, i) => `
+    <details class="unit">
+      <summary class="unit-summary">
+        <span class="unit-chevron">${CHEVRON_ICON}</span>
+        <span class="unit-heading">
+          <span class="module-chip chip-${CHIP_TINTS[i % CHIP_TINTS.length]}">${m.closing ? CHECK_ICON : escapeHtml(m.chip)}</span>
+          <span class="unit-title-group">
+            <span class="unit-label">${m.closing ? "Closing Unit" : "Unit " + escapeHtml(m.chip)}</span>
+            <span class="unit-title">${escapeHtml(m.title)}${m.note ? " " + escapeHtml(m.note) : ""}</span>
+          </span>
+        </span>
+        ${m.time ? `<span class="unit-progress"><span class="unit-progress-pct">${escapeHtml(m.time.replace("Est. completion time: ", ""))}</span></span>` : ""}
+      </summary>
+      <div class="unit-body">
+        ${m.single ? `<p class="unit-desc">${escapeHtml(m.single)}</p>` : `
+          <h4 class="syllabus-subhead">Learning Objectives</h4>
+          <ul class="syllabus-list">${m.objectives.map(o => `<li>${escapeHtml(o)}</li>`).join("")}</ul>
+          <h4 class="syllabus-subhead">Topics</h4>
+          <ul class="syllabus-list">${m.topics.map(t => `<li>${escapeHtml(t)}</li>`).join("")}</ul>
+        `}
+      </div>
+    </details>
+  `).join("");
+}
+
+async function renderCompletedStat(el) {
+  try {
+    const res = await fetch("/api/curriculum-stats");
+    const data = await res.json();
+    el.textContent = data.completedCount != null ? data.completedCount : "0";
+  } catch (e) {
+    el.textContent = "0";
+  }
+}
+
+(async () => {
+  await renderPublicHeader(document.getElementById("site-header"), true);
+  renderSyllabus(document.getElementById("syllabus-list"));
+  renderCompletedStat(document.getElementById("completed-stat"));
+})();
+</script>
+</body>
+</html>

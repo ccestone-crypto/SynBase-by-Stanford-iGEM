@@ -1,11 +1,10 @@
-// Stores each student's latest answer + AI formative feedback for a
-// free-response reflection question. One row per (user, module, section) —
-// resubmitting overwrites the previous attempt since feedback is ungraded
-// practice, not a scored record.
+// Stores each student's latest answer to a free-response reflection question
+// and powers the anonymous discussion board built on top of it. One row per
+// (user, module, section) — resubmitting overwrites the previous attempt.
 const db = require("./db");
 
 const getStmt = db.prepare(`
-  SELECT answer, feedback, updatedAt FROM free_responses
+  SELECT answer, updatedAt FROM free_responses
   WHERE userId = ? AND moduleId = ? AND sectionId = ?
 `);
 // Anonymous by design — no userId/name in the result. Ordered chronologically
@@ -17,11 +16,10 @@ const listForSectionStmt = db.prepare(`
   LIMIT 200
 `);
 const upsertStmt = db.prepare(`
-  INSERT INTO free_responses (userId, moduleId, sectionId, answer, feedback, updatedAt)
-  VALUES (@userId, @moduleId, @sectionId, @answer, @feedback, @updatedAt)
+  INSERT INTO free_responses (userId, moduleId, sectionId, answer, updatedAt)
+  VALUES (@userId, @moduleId, @sectionId, @answer, @updatedAt)
   ON CONFLICT(userId, moduleId, sectionId) DO UPDATE SET
     answer = excluded.answer,
-    feedback = excluded.feedback,
     updatedAt = excluded.updatedAt
 `);
 
@@ -33,9 +31,9 @@ function listAnswersForSection(moduleId, sectionId) {
   return listForSectionStmt.all(moduleId, sectionId);
 }
 
-function saveResponse({ userId, moduleId, sectionId, answer, feedback }) {
+function saveResponse({ userId, moduleId, sectionId, answer }) {
   const updatedAt = new Date().toISOString();
-  upsertStmt.run({ userId, moduleId, sectionId, answer, feedback, updatedAt });
+  upsertStmt.run({ userId, moduleId, sectionId, answer, updatedAt });
   return getResponse(userId, moduleId, sectionId);
 }
 
