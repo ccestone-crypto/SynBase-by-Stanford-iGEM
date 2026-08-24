@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Module 2: Core Concepts in Molecular and Cellular Biology — SynBase</title>
-<link rel="stylesheet" href="../css/style.css?v=52">
+<link rel="stylesheet" href="../css/style.css?v=53">
 </head>
 <body>
 
@@ -19,9 +19,9 @@
   <div class="page-footer-nav" id="page-footer-nav"></div>
 </div>
 
-<script src="../js/modules-meta.js?v=10"></script>
+<script src="../js/modules-meta.js?v=11"></script>
 <script src="../js/progress.js?v=21"></script>
-<script src="../js/quiz-engine.js?v=14"></script>
+<script src="../js/quiz-engine.js?v=15"></script>
 <script>
 const PART1 = "Part 1: Biology of Cells";
 const PART2 = "Part 2: Exploring DNA";
@@ -44,19 +44,6 @@ const MODULE = {
       `
     },
     {
-      id: "c1c", type: "practice", part: PART1, title: "Check Your Understanding: Cells and DNA",
-      question: {
-        prompt: "What best describes the relationship between cells and DNA, according to this section?",
-        options: [
-          { text: "DNA is found outside of cells, in the extracellular matrix.", correct: false },
-          { text: "Cells are the building blocks of life, and the DNA inside them is the instruction manual that makes each organism unique.", correct: true },
-          { text: "Cells are made entirely of DNA.", correct: false },
-          { text: "Only bacterial cells contain DNA.", correct: false }
-        ],
-        explanation: "Cells are the smallest units that can live, grow, and replicate. The DNA housed inside them is the instruction manual encoding traits like personality, appearance, and metabolism."
-      }
-    },
-    {
       id: "c2r", type: "read", part: PART1, title: "The Three Domains of Life",
       html: `
         <p>Life is separated into three domains: Eukarya, Bacteria, and Archaea.</p>
@@ -68,19 +55,6 @@ const MODULE = {
       `
     },
     {
-      id: "c2c", type: "practice", part: PART1, title: "Check Your Understanding: Domains of Life",
-      question: {
-        prompt: "Which domain of life lacks a membrane-bound nucleus AND has a cell wall containing peptidoglycan?",
-        options: [
-          { text: "Eukarya", correct: false },
-          { text: "Bacteria", correct: true },
-          { text: "Archaea", correct: false },
-          { text: "None of these", correct: false }
-        ],
-        explanation: "Bacteria lack a nuclear membrane and have a cell wall containing peptidoglycan. Archaea also lack a nucleus, but their cell walls do not contain peptidoglycan — that's what distinguishes the two domains."
-      }
-    },
-    {
       id: "c3r", type: "read", part: PART1, title: "Model Cell Lines",
       html: `
         <p>Model cell lines are simple cell populations used to represent other, more complex cells of interest. They are used because they are easy to culture, samples are highly uniform, and they have high growth rates. They can be cultured for many cycles in cell dishes if well maintained.</p>
@@ -90,55 +64,16 @@ const MODULE = {
       `
     },
     {
-      id: "c3c", type: "practice", part: PART1, title: "Check Your Understanding: Model Cell Lines",
-      question: {
-        prompt: "Which model cell line is commonly used to represent mammalian cells in synthetic biology?",
-        options: [
-          { text: "E. coli", correct: false },
-          { text: "HEK 293", correct: true },
-          { text: "BY-2", correct: false },
-          { text: "Archaea", correct: false }
-        ],
-        explanation: "HEK 293 (human embryonic kidney) cells are a common mammalian model cell line. E. coli models bacterial cells, and BY-2 (tobacco) models plant cells."
-      }
-    },
-    {
       id: "c4r", type: "read", part: PART1, title: "Anatomy of a Bacterial Cell",
       html: `
         <p>A bacterial cell is encapsulated by a <strong>cell wall</strong>, which protects and maintains the shape of the cell. Inside the cell is the <strong>cytoplasm</strong>, a gel-like fluid enclosed by the cell membrane. <strong>Ribosomes</strong> synthesize proteins from genetic material. A <strong>plasmid</strong> is small, circular DNA that typically contains an antibiotic-resistance gene. The <strong>nucleoid</strong> hosts genetic material — note that it does not have a nuclear membrane.</p>
       `
     },
     {
-      id: "c4c", type: "practice", part: PART1, title: "Check Your Understanding: Bacterial Cell Anatomy",
-      question: {
-        prompt: "Which bacterial cell structure is small, circular DNA separate from the main chromosome, often carrying an antibiotic-resistance gene?",
-        options: [
-          { text: "Nucleoid", correct: false },
-          { text: "Plasmid", correct: true },
-          { text: "Ribosome", correct: false },
-          { text: "Cell wall", correct: false }
-        ],
-        explanation: "The plasmid is a small, circular piece of DNA distinct from the main chromosomal DNA in the nucleoid, often carrying an antibiotic-resistance gene."
-      }
-    },
-    {
       id: "c5r", type: "read", part: PART1, title: "Anatomy of a Eukaryotic Cell",
       html: `
         <p>A eukaryotic cell is encapsulated by a <strong>cell membrane</strong>, which regulates movement in and out of the cell (note that plant cells also have a cell wall). The <strong>cytoplasm</strong> is gel-like fluid enclosed by the cell membrane. <strong>Ribosomes</strong> synthesize proteins from genetic material, just as in bacteria. The <strong>nucleus</strong> hosts genetic material (DNA).</p>
       `
-    },
-    {
-      id: "c5c", type: "practice", part: PART1, title: "Check Your Understanding: Eukaryotic Cell Anatomy",
-      question: {
-        prompt: "What is the key structural difference between a eukaryotic cell and a bacterial cell?",
-        options: [
-          { text: "Eukaryotic cells have a nucleus hosting their genetic material; bacterial cells do not.", correct: true },
-          { text: "Only bacterial cells have ribosomes.", correct: false },
-          { text: "Only eukaryotic cells have cytoplasm.", correct: false },
-          { text: "Bacterial cells have a nucleus, but eukaryotic cells do not.", correct: false }
-        ],
-        explanation: "Eukaryotic cells host their DNA in a nucleus. Bacterial cells lack a nucleus — their DNA sits in the nucleoid instead."
-      }
     },
     {
       id: "c6r", type: "read", part: PART1, title: "Outside the Cell: The ECM and Cell Membrane",
@@ -148,19 +83,6 @@ const MODULE = {
         <p>The principle of "like dissolves like" means that substances with similar polarities can attract and dissolve each other. Both the extracellular matrix and the cytoplasm are largely hydrophilic, which is why the phospholipid bilayer's hydrophilic heads face outward toward them, while the hydrophobic tails tuck away in the middle.</p>
       `
     },
-    {
-      id: "c6c", type: "practice", part: PART1, title: "Check Your Understanding: The Cell Membrane",
-      question: {
-        prompt: "What principle explains why the phospholipid bilayer's hydrophilic heads face outward and its hydrophobic tails face inward?",
-        options: [
-          { text: "The central dogma", correct: false },
-          { text: "\"Like dissolves like\"", correct: true },
-          { text: "Complementary base-pairing", correct: false },
-          { text: "Codon redundancy", correct: false }
-        ],
-        explanation: "\"Like dissolves like\": the hydrophilic heads face the largely hydrophilic ECM and cytoplasm, while the hydrophobic tails avoid them by facing inward."
-      }
-    },
 
     // ---------------- Part 2: Exploring DNA ----------------
     {
@@ -168,19 +90,6 @@ const MODULE = {
       html: `
         <p>The central dogma of molecular biology consists of DNA undergoing <strong>transcription</strong> to become RNA, and RNA undergoing <strong>translation</strong> to become proteins. DNA can also undergo <strong>replication</strong> to result in more DNA.</p>
       `
-    },
-    {
-      id: "d1c", type: "practice", part: PART2, title: "Check Your Understanding: The Central Dogma",
-      question: {
-        prompt: "What are the three steps of the central dogma, in order?",
-        options: [
-          { text: "Protein → RNA → DNA", correct: false },
-          { text: "DNA → RNA (transcription) → protein (translation)", correct: true },
-          { text: "RNA → DNA → protein", correct: false },
-          { text: "DNA → protein (translation) → RNA (transcription)", correct: false }
-        ],
-        explanation: "The central dogma flows DNA → RNA via transcription, then RNA → protein via translation. DNA can also replicate into more DNA."
-      }
     },
     {
       id: "d2r", type: "read", part: PART2, title: "DNA and RNA Bases",
@@ -192,19 +101,6 @@ const MODULE = {
       `
     },
     {
-      id: "d2c", type: "practice", part: PART2, title: "Check Your Understanding: DNA and RNA Bases",
-      question: {
-        prompt: "Which base pairs with adenine (A) in RNA?",
-        options: [
-          { text: "Thymine", correct: false },
-          { text: "Uracil", correct: true },
-          { text: "Cytosine", correct: false },
-          { text: "Guanine", correct: false }
-        ],
-        explanation: "RNA substitutes Uracil for Thymine, so adenine pairs with uracil in RNA (versus adenine-thymine pairing in DNA)."
-      }
-    },
-    {
       id: "d3r", type: "read", part: PART2, title: "The Double Helix and Antiparallel Strands",
       html: `
         <p>DNA operates under a double-helix structure and runs in antiparallel directions. The 5' end of one strand binds to the 3' end of the other strand.</p>
@@ -214,36 +110,10 @@ const MODULE = {
       `
     },
     {
-      id: "d3c", type: "practice", part: PART2, title: "Check Your Understanding: Coding vs. Template Strand",
-      question: {
-        prompt: "How does the transcribed RNA sequence relate to the coding and template strands?",
-        options: [
-          { text: "RNA matches the template strand exactly, including Thymine.", correct: false },
-          { text: "RNA matches the coding strand's sequence, with Uracil in place of Thymine — it's the complement of the template strand.", correct: true },
-          { text: "RNA is unrelated to either strand.", correct: false },
-          { text: "RNA matches both strands identically.", correct: false }
-        ],
-        explanation: "The template strand is the complement of the coding strand. RNA is transcribed as the complement of the template strand — which makes it match the coding strand's sequence, just with U instead of T."
-      }
-    },
-    {
       id: "d4r", type: "read", part: PART2, title: "From DNA to mRNA: Leaving the Nucleus",
       html: `
         <p>After transcription, several modifications are made. First, the RNA has to leave the nucleus. mRNA, short for messenger RNA, moves out of the nucleus to find a ribosome within the cytoplasm that can help make proteins. The ribosome is the site where translation (the process of making protein from RNA) occurs. mRNA is also structured to be resistant to degradation in the cytoplasm.</p>
       `
-    },
-    {
-      id: "d4c", type: "practice", part: PART2, title: "Check Your Understanding: mRNA",
-      question: {
-        prompt: "Why must mRNA leave the nucleus after transcription?",
-        options: [
-          { text: "To be degraded and recycled.", correct: false },
-          { text: "To reach a ribosome in the cytoplasm, where translation into protein occurs.", correct: true },
-          { text: "To undergo replication into more DNA.", correct: false },
-          { text: "It doesn't — mRNA stays in the nucleus.", correct: false }
-        ],
-        explanation: "mRNA moves out of the nucleus into the cytoplasm to find a ribosome, the site where translation (making protein from RNA) occurs."
-      }
     },
     {
       id: "d5r", type: "read", part: PART2, title: "Translation: Ribosomes, tRNA, and the Codon Table",
@@ -252,19 +122,6 @@ const MODULE = {
         <p>tRNAs (which carry amino acids corresponding to the codon of the mRNA) have complementary anticodons. They base-pair with the mRNA codons, then add new amino acids to the growing protein chain.</p>
         <p>The codon table specifies the codons that map to each amino acid. Some amino acids can be coded for by multiple codons.</p>
       `
-    },
-    {
-      id: "d5c", type: "practice", part: PART2, title: "Check Your Understanding: Translation",
-      question: {
-        prompt: "What do tRNAs carry to the ribosome during translation?",
-        options: [
-          { text: "Copies of the DNA template strand", correct: false },
-          { text: "Amino acids, matched to mRNA codons via complementary anticodons", correct: true },
-          { text: "Extra ribosomes", correct: false },
-          { text: "The original coding strand", correct: false }
-        ],
-        explanation: "tRNAs carry amino acids and have anticodons that base-pair with mRNA codons, adding the matching amino acid to the growing protein chain."
-      }
     },
 
     // ---------------- Part 3: Engineering Applications in Molecular Biology ----------------
@@ -276,37 +133,11 @@ const MODULE = {
       `
     },
     {
-      id: "e1c", type: "practice", part: PART3, title: "Check Your Understanding: DNA Engineering",
-      question: {
-        prompt: "What gene is inserted into wheat to help it resist drought, according to this section?",
-        options: [
-          { text: "BCL11A", correct: false },
-          { text: "Hahb4, a drought-resistant gene from sunflower", correct: true },
-          { text: "TP53", correct: false },
-          { text: "Cas9", correct: false }
-        ],
-        explanation: "Hahb4, a drought-resistant gene present in sunflower seeds, was inserted into wheat to help it withstand drought — approved by the USDA in 2024."
-      }
-    },
-    {
       id: "e2r", type: "read", part: PART3, title: "RNA Engineering Examples",
       html: `
         <p>Perhaps the most famous example is the COVID-19 vaccine. This technology uses engineered mRNA to produce virus-like particles and antibodies to fight it, making the immune system more prepared to fight infections.</p>
         <p>Patisiran uses RNA interference to reduce levels of transthyretin, helping treat transthyretin-mediated amyloidosis.</p>
       `
-    },
-    {
-      id: "e2c", type: "practice", part: PART3, title: "Check Your Understanding: RNA Engineering",
-      question: {
-        prompt: "How does Patisiran work, according to this section?",
-        options: [
-          { text: "It edits DNA directly using CRISPR-Cas9.", correct: false },
-          { text: "It uses RNA interference to reduce levels of transthyretin, treating transthyretin-mediated amyloidosis.", correct: true },
-          { text: "It delivers virus-like particles to train the immune system.", correct: false },
-          { text: "It predicts 3D protein structures.", correct: false }
-        ],
-        explanation: "Patisiran uses RNA interference (RNAi) to reduce transthyretin levels, treating transthyretin-mediated amyloidosis."
-      }
     },
     {
       id: "e3r", type: "read", part: PART3, title: "Protein Engineering Examples",
@@ -315,19 +146,6 @@ const MODULE = {
         <p>CAR-T therapy is a type of protein engineering that engineers an individual's T-cells by adding a chimeric antigen receptor so they can recognize and degrade tumor cells.</p>
         <p>AlphaFold is a software by Google DeepMind that can generate 3D protein structure predictions.</p>
       `
-    },
-    {
-      id: "e3c", type: "practice", part: PART3, title: "Check Your Understanding: Protein Engineering",
-      question: {
-        prompt: "What does AlphaFold do?",
-        options: [
-          { text: "Edits DNA directly using guide RNA and Cas9.", correct: false },
-          { text: "Generates 3D protein structure predictions.", correct: true },
-          { text: "Delivers mRNA vaccines.", correct: false },
-          { text: "Engineers T-cells to recognize tumor cells.", correct: false }
-        ],
-        explanation: "AlphaFold, from Google DeepMind, generates 3D protein structure predictions — distinct from CAR-T therapy (engineered T-cells) and ReForm (engineered CO2-converting enzymes)."
-      }
     },
     {
       id: "e4r", type: "read", part: PART3, title: "What Is p53?",
@@ -357,37 +175,11 @@ const MODULE = {
       `
     },
     {
-      id: "i1c", type: "practice", part: PART4, title: "Check Your Understanding: CRISPR-Cas9",
-      question: {
-        prompt: "In CRISPR-Cas9 gene editing, what does the guide RNA do?",
-        options: [
-          { text: "It directly replaces the target DNA sequence.", correct: false },
-          { text: "It recognizes the target DNA sequence and recruits the Cas9 enzyme to cut it.", correct: true },
-          { text: "It repairs DNA after the cut is made.", correct: false },
-          { text: "It converts DNA into a plasmid.", correct: false }
-        ],
-        explanation: "The guide RNA recognizes the target DNA sequence and recruits Cas9 to cut it there — the cell's own repair machinery then makes the edit."
-      }
-    },
-    {
       id: "i2r", type: "read", part: PART4, title: "Plasmids: Making DNA Insertable",
       html: `
         <p>In order to insert DNA, it must be made into a circular shape to form a <strong>plasmid</strong>. Plasmids are circular DNA loops that are easy to insert into cells, because circular DNA has no exposed ends — which protects it from degradation — and circular DNA is compact. Since DNA can only work in the nucleus, it can get destroyed if inserted linearly, as it travels through the cytoplasm.</p>
         <p>RNA, on the other hand, can be inserted in a linear shape; it doesn't have to be a plasmid shape like DNA to be successfully inserted into cells. The key reason: RNA works in the cytoplasm, so it can be immediately translated once it enters the cell. It doesn't have to survive cell division the way DNA does.</p>
       `
-    },
-    {
-      id: "i2c", type: "practice", part: PART4, title: "Check Your Understanding: Plasmids",
-      question: {
-        prompt: "Why must DNA be made circular (a plasmid) to be inserted into cells, while RNA doesn't need to be?",
-        options: [
-          { text: "DNA needs to survive in the nucleus without exposed ends to avoid degradation; RNA works directly in the cytoplasm and doesn't need that protection.", correct: true },
-          { text: "RNA cannot be inserted into cells at all.", correct: false },
-          { text: "Circular DNA is easier to sequence.", correct: false },
-          { text: "Plasmids are only used for RNA delivery.", correct: false }
-        ],
-        explanation: "Circular DNA (a plasmid) has no exposed ends, protecting it from degradation as it travels to the nucleus. RNA works in the cytoplasm and can be translated immediately, so it can be inserted linearly."
-      }
     },
     {
       id: "i3r", type: "read", part: PART4, title: "Delivery Mechanisms",
@@ -402,36 +194,10 @@ const MODULE = {
       `
     },
     {
-      id: "i3c", type: "practice", part: PART4, title: "Check Your Understanding: Delivery Mechanisms",
-      question: {
-        prompt: "Which delivery mechanism uses electrical pulses to create temporary holes in the cell membrane?",
-        options: [
-          { text: "Viral vectors", correct: false },
-          { text: "Lipid nanoparticles", correct: false },
-          { text: "Lipoplexation", correct: false },
-          { text: "Electroporation", correct: true }
-        ],
-        explanation: "Electroporation uses electrical pulses to poke temporary holes in cell membranes so genetic material can travel inside."
-      }
-    },
-    {
       id: "i4r", type: "read", part: PART4, title: "Stable vs. Transient Expression",
       html: `
         <p><strong>Stable expression</strong> means that the foreign genetic material successfully integrates into the host cell's genome. <strong>Transient expression</strong> indicates that foreign genetic material does not integrate into the host cell's genome.</p>
       `
-    },
-    {
-      id: "i4c", type: "practice", part: PART4, title: "Check Your Understanding: Stable vs. Transient Expression",
-      question: {
-        prompt: "What is the difference between stable and transient expression?",
-        options: [
-          { text: "Stable expression means the genetic material integrates into the host genome; transient expression means it does not.", correct: true },
-          { text: "Stable expression only applies to RNA; transient expression only applies to DNA.", correct: false },
-          { text: "There is no difference — the terms are interchangeable.", correct: false },
-          { text: "Transient expression lasts longer than stable expression.", correct: false }
-        ],
-        explanation: "Stable expression means the foreign genetic material integrates into the host cell's genome; transient expression means it does not integrate."
-      }
     }
   ]
 };

@@ -10,7 +10,7 @@ const MODULES_META = [
     title: "Introduction to SynBase",
     description: "A short welcome to SynBase — what this curriculum covers, how it's structured, and what completing it unlocks.",
     href: "modules/module0.html",
-    sectionCount: 2
+    sectionCount: 1
   },
   {
     id: "module1",
@@ -18,7 +18,7 @@ const MODULES_META = [
     title: "Introduction to iGEM & Bioengineering",
     description: "What Stanford iGEM is, how bioengineering and synthetic biology relate, a brief history of the field, and real examples of synthetic biology's impact.",
     href: "modules/module1.html",
-    sectionCount: 12
+    sectionCount: 6
   },
   {
     id: "module2",
@@ -26,6 +26,6 @@ const MODULES_META = [
     title: "Core Concepts in Molecular and Cellular Biology",
     description: "The biology of cells and DNA, engineering applications in molecular biology (with a p53 discussion activity), and how foreign DNA gets inserted into cells.",
     href: "modules/module2.html",
-    sectionCount: 38
+    sectionCount: 20
   }
 ];

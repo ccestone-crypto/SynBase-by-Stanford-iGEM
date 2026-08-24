@@ -560,7 +560,8 @@ a:hover { text-decoration: underline; }
   gap: 12px;
   margin: 4px 0 30px;
 }
-.page-footer-nav .btn:disabled { visibility: hidden; }
+.page-footer-nav [data-page-back]:disabled { visibility: hidden; }
+.page-footer-nav [data-page-continue]:disabled { cursor: not-allowed; }
 
 /* ---------- Topic article ---------- */
 .topic-article {

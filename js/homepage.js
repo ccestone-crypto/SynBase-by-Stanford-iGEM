@@ -35,7 +35,7 @@ function renderCourseHeader(mountEl) {
       <div class="course-eyebrow">SynBase &rsaquo; Science</div>
       <h1>Core Concepts in Molecular and Cellular Biology</h1>
       <div class="course-meta">${MODULES_META.length} MODULES &middot; ${totalLessons} LESSONS &middot; ${overall.pct}% COMPLETE</div>
-      <p class="course-intro">A self-paced curriculum adapted from Stanford iGEM's SiBRP Session 2. Work through cells, DNA, engineering applications, and gene delivery — one lesson at a time, with a short check for understanding after each one.</p>
+      <p class="course-intro">A self-paced curriculum adapted from Stanford iGEM's SiBRP program. Work through iGEM, bioengineering, cells, DNA, and engineering applications — one lesson at a time.</p>
       <div class="jump-row">
         <div class="jump-pills">
           ${MODULES_META.map(m => `<a class="pill" href="#${m.id}">Module ${m.number}</a>`).join("")}
@@ -104,24 +104,25 @@ function renderUnitsAccordion(mountEl) {
     }
 
     const rows = outline.map((topic, i) => {
-      const done = isSectionComplete(m.id, topic.checkId);
+      const readDone = isSectionComplete(m.id, topic.readId);
       const readHref = `${m.href}#page-${topic.readId}`;
-      const checkHref = `${m.href}#page-${topic.checkId}`;
       const partHeading = (topic.part && topic.part !== (outline[i - 1] || {}).part)
         ? `<div class="lesson-part-label">${topic.part}</div>`
         : "";
+      const checkRow = topic.checkId ? `
+          <a class="lesson-row" href="${m.href}#page-${topic.checkId}">
+            <span class="lesson-icon">${ICONS.practice}</span>
+            <span class="lesson-title">${topic.checkTitle || `Check your understanding: ${topic.title}`}</span>
+            <span class="lesson-status ${isSectionComplete(m.id, topic.checkId) ? "is-done" : ""}">${isSectionComplete(m.id, topic.checkId) ? ICONS.statusDone : ICONS.statusOpen}</span>
+          </a>` : "";
       return `
         ${partHeading}
         <div class="lesson-group">
           <a class="lesson-row" href="${readHref}">
             <span class="lesson-icon">${ICONS.reading}</span>
             <span class="lesson-title">${topic.title}</span>
-          </a>
-          <a class="lesson-row" href="${checkHref}">
-            <span class="lesson-icon">${ICONS.practice}</span>
-            <span class="lesson-title">Check your understanding: ${topic.title}</span>
-            <span class="lesson-status ${done ? "is-done" : ""}">${done ? ICONS.statusDone : ICONS.statusOpen}</span>
-          </a>
+            <span class="lesson-status ${readDone ? "is-done" : ""}">${readDone ? ICONS.statusDone : ICONS.statusOpen}</span>
+          </a>${checkRow}
         </div>
       `;
     }).join("");
@@ -172,8 +173,9 @@ function renderUpNext(mountEl) {
     return;
   }
   const outline = COURSE_OUTLINE[firstIncomplete.id] || [];
-  const nextTopic = outline.find(t => !isSectionComplete(firstIncomplete.id, t.readId) || !isSectionComplete(firstIncomplete.id, t.checkId));
-  const nextHref = nextTopic ? `${firstIncomplete.href}#page-${isSectionComplete(firstIncomplete.id, nextTopic.readId) ? nextTopic.checkId : nextTopic.readId}` : firstIncomplete.href;
+  const nextTopic = outline.find(t => !isSectionComplete(firstIncomplete.id, t.readId) || (t.checkId && !isSectionComplete(firstIncomplete.id, t.checkId)));
+  const nextPageId = nextTopic && !isSectionComplete(firstIncomplete.id, nextTopic.readId) ? nextTopic.readId : (nextTopic || {}).checkId;
+  const nextHref = nextTopic ? `${firstIncomplete.href}#page-${nextPageId}` : firstIncomplete.href;
   mountEl.innerHTML = `
     <div class="container">
       <div class="up-next-card">

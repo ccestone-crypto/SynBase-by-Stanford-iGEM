@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Module 1: Introduction to iGEM &amp; Bioengineering — SynBase</title>
-<link rel="stylesheet" href="../css/style.css?v=52">
+<link rel="stylesheet" href="../css/style.css?v=53">
 </head>
 <body>
 
@@ -19,9 +19,9 @@
   <div class="page-footer-nav" id="page-footer-nav"></div>
 </div>
 
-<script src="../js/modules-meta.js?v=10"></script>
+<script src="../js/modules-meta.js?v=11"></script>
 <script src="../js/progress.js?v=21"></script>
-<script src="../js/quiz-engine.js?v=14"></script>
+<script src="../js/quiz-engine.js?v=15"></script>
 <script>
 const MODULE = {
   id: "module1",
@@ -44,20 +44,6 @@ const MODULE = {
       `
     },
     {
-      id: "1.1c", type: "practice",
-      title: "Check Your Understanding: Stanford iGEM",
-      question: {
-        prompt: "According to this section, what have iGEM alumni founded more than 300 of?",
-        options: [
-          { text: "Registry parts", correct: false },
-          { text: "Ventures — including companies like Benchling and Ginkgo Bioworks", correct: true },
-          { text: "Villages", correct: false },
-          { text: "Countries", correct: false }
-        ],
-        explanation: "iGEM alumni have founded more than 300 ventures, including companies like Benchling and Ginkgo Bioworks — one of several stats (100,000+ iGEMers, 5,000+ projects, 84,000+ registry parts) that show the scale of the iGEM community."
-      }
-    },
-    {
       id: "1.2r", type: "read", title: "From Biology to Engineering",
       html: `
         <p>Bioengineering is a very, very broad field. At its core, it applies engineering principles of design and analysis to biological systems and biomedical technologies. <a href="https://bioengineering.stanford.edu/" target="_blank" rel="noopener">Stanford Bioengineering</a> similarly describes the field as bringing together life sciences and engineering to advance areas ranging from healthcare and medicine to manufacturing, agriculture, and the environment.</p>
@@ -71,20 +57,6 @@ const MODULE = {
           </ul>
         </div>
       `
-    },
-    {
-      id: "1.2c", type: "practice",
-      title: "Check Your Understanding: Biology vs. Engineering",
-      question: {
-        prompt: "Based on the matching exercise, which of these is the engineering example, not the biology example?",
-        options: [
-          { text: "Understanding how fibroblasts produce collagen", correct: false },
-          { text: "Inserting plasmids into cells to tune collagen production", correct: true },
-          { text: "Observing that a cell produces a certain protein", correct: false },
-          { text: "Measuring how much collagen a tissue naturally contains", correct: false }
-        ],
-        explanation: "Understanding how fibroblasts naturally produce collagen is biology (\"what does the system naturally do?\"); inserting plasmids to tune collagen production is engineering (\"how do we redesign the system?\")."
-      }
     },
     {
       id: "1.3r", type: "read", title: "Where Synthetic Biology Fits In",
@@ -101,20 +73,6 @@ const MODULE = {
       `
     },
     {
-      id: "1.3c", type: "practice",
-      title: "Check Your Understanding: Synthetic Biology",
-      question: {
-        prompt: "How does synthetic biology relate to genetic engineering, per this section?",
-        options: [
-          { text: "They are unrelated fields with no overlap.", correct: false },
-          { text: "Synthetic biology often uses genetic engineering, but asks the broader question of how to design a biological system for a useful function.", correct: true },
-          { text: "Genetic engineering is a subfield of environmental sensing.", correct: false },
-          { text: "Synthetic biology never involves altering DNA.", correct: false }
-        ],
-        explanation: "Synthetic biology often uses genetic engineering as a tool, but zooms out to ask the larger engineering question of how to design or redesign a biological system to perform a useful function."
-      }
-    },
-    {
       id: "1.4r", type: "read", title: "A Very Quick History of Synthetic Biology",
       html: `
         <h4>1961 — Learning how cells regulate genes</h4>
@@ -128,20 +86,6 @@ const MODULE = {
         <h4>Today</h4>
         <p>Synthetic biology now spans thousands of projects and applications — from medicine and agriculture to environmental engineering, manufacturing, computation, and space.</p>
       `
-    },
-    {
-      id: "1.4c", type: "practice",
-      title: "Check Your Understanding: History of SynBio",
-      question: {
-        prompt: "What happened in 2003–2004, according to this history?",
-        options: [
-          { text: "The genetic toggle switch was published.", correct: false },
-          { text: "iGEM began as a month-long MIT course, then grew into a summer competition with five teams.", correct: true },
-          { text: "The Haemophilus influenzae genome was sequenced.", correct: false },
-          { text: "Jacob and Monod published their gene-regulation model.", correct: false }
-        ],
-        explanation: "iGEM began in 2003 as a month-long MIT course, then grew in 2004 into a summer competition involving five teams — the direct predecessor of today's iGEM."
-      }
     },
     {
       id: "1.5r", type: "read", title: "The Many Applications of Synthetic Biology",
@@ -181,20 +125,6 @@ const MODULE = {
           </div>
         </div>
       `
-    },
-    {
-      id: "1.5c", type: "practice",
-      title: "Check Your Understanding: iGEM Villages",
-      question: {
-        prompt: "\"Prometheus: a large language model for synthetic biology\" (NJU, 2024) belongs to which iGEM village?",
-        options: [
-          { text: "Space", correct: false },
-          { text: "Software & AI", correct: true },
-          { text: "Biomanufacturing", correct: false },
-          { text: "Foundational Advance", correct: false }
-        ],
-        explanation: "Prometheus is a large language model project, which falls under the Software & AI village — one of the five villages in iGEM's Advancements area."
-      }
     },
     {
       id: "1.6r", type: "read", title: "Synthetic Biology Is Only One Part of Bioengineering",
@@ -239,20 +169,6 @@ const MODULE = {
           </ol>
         </div>
       `
-    },
-    {
-      id: "1.6c", type: "practice",
-      title: "Check Your Understanding: Beyond Synthetic Biology",
-      question: {
-        prompt: "Which of these is NOT one of the bioengineering areas described in this section?",
-        options: [
-          { text: "Biomedical devices", correct: false },
-          { text: "Tissue engineering & regenerative medicine", correct: false },
-          { text: "Quantum computing", correct: true },
-          { text: "Biomedical computation", correct: false }
-        ],
-        explanation: "This section describes biomedical devices, tissue engineering & regenerative medicine, biomedical computation, and synthetic & cellular engineering as areas of bioengineering — quantum computing isn't one of them."
-      }
     }
   ]
 };

@@ -213,16 +213,18 @@ function renderPageFooterNav(MODULE, index) {
       ? `Finish Module &rarr; Module ${nextModule.number}`
       : "Finish the Curriculum &rarr;";
 
+  const page = MODULE.pages[index];
+  const needsAnswer = page.type === "practice" && !isSectionComplete(MODULE.id, page.id);
+
   mount.innerHTML = `
     <button type="button" class="btn secondary" data-page-back ${isFirst ? "disabled" : ""}>&larr; Back</button>
-    <button type="button" class="btn" data-page-continue>${continueLabel}</button>
+    <button type="button" class="btn" data-page-continue ${needsAnswer ? "disabled" : ""} ${needsAnswer ? 'title="Answer the question correctly to continue"' : ""}>${continueLabel}</button>
   `;
 
   mount.querySelector("[data-page-back]").addEventListener("click", () => {
     if (!isFirst) renderPageAt(MODULE, index - 1);
   });
   mount.querySelector("[data-page-continue]").addEventListener("click", () => {
-    const page = MODULE.pages[index];
     if (page.type === "read" && !isSectionComplete(MODULE.id, page.id)) {
       markSectionComplete(MODULE.id, page.id);
       const meta = MODULES_META.find(m => m.id === MODULE.id);
@@ -295,6 +297,7 @@ function wireQuiz(MODULE, page, index) {
       const meta = MODULES_META.find(m => m.id === MODULE.id);
       refreshModuleProgressBar(MODULE, meta);
       renderPageNavMount(MODULE, index);
+      renderPageFooterNav(MODULE, index);
     }
   });
 }
