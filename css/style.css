@@ -368,6 +368,17 @@ a:hover { text-decoration: underline; }
 .unit-title { font-size: 1.1rem; font-weight: 700; color: var(--charcoal); }
 .unit-progress { display: flex; align-items: center; gap: 10px; min-width: 130px; }
 .unit-progress-pct { font-size: 0.85rem; font-weight: 700; color: var(--ink-soft); min-width: 34px; text-align: right; }
+.live-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--syn-green);
+  background: var(--syn-green-tint);
+  padding: 4px 10px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
 .progress-track.small { height: 7px; width: 90px; }
 .unit-body { padding: 0 20px 20px; border-top: 1px solid var(--border); }
 .unit-desc { color: var(--ink-soft); font-size: 0.9rem; margin: 14px 0 16px; }
@@ -382,6 +393,15 @@ a:hover { text-decoration: underline; }
 .syllabus-subhead:first-of-type { margin-top: 16px; }
 .syllabus-list { margin: 0 0 4px; padding-left: 20px; font-size: 0.9rem; color: var(--ink); }
 .syllabus-list li { margin-bottom: 4px; }
+.lesson-part-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-soft);
+  margin: 16px 0 4px;
+}
+.lesson-part-label:first-child { margin-top: 4px; }
 .lesson-group { border-top: 1px solid var(--border); }
 .lesson-group:last-of-type { margin-bottom: 16px; }
 .lesson-row {
@@ -491,6 +511,57 @@ a:hover { text-decoration: underline; }
 .video-block video { width: 100%; border-radius: 10px; display: block; }
 .watched-toggle { margin-top: 14px; display: flex; align-items: center; gap: 8px; font-size: 0.9rem; }
 
+/* ---------- Multi-page module viewport (Khan Academy-style lesson flow) ---------- */
+.page-nav-mount { margin: 24px 0 4px; }
+.page-part-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-soft);
+  margin-bottom: 10px;
+}
+.page-dot-row { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+.page-dot {
+  width: 11px; height: 11px;
+  border-radius: 50%;
+  border: none;
+  padding: 0;
+  background: #e0ded6;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: transform 0.15s ease;
+}
+.page-dot:hover { transform: scale(1.25); }
+.page-dot.done { background: var(--syn-green); }
+.page-dot.current { background: var(--syn-purple); width: 15px; height: 15px; }
+
+.page-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 26px 28px 30px;
+  margin: 14px 0;
+  animation: page-card-in 0.22s ease;
+}
+@keyframes page-card-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.page-card h2 { margin: 0 0 14px; font-size: 1.35rem; color: var(--charcoal); letter-spacing: -0.3px; }
+.page-practice h2 { font-size: 1.1rem; margin: 0 0 12px; }
+.page-practice .quiz-box { margin-top: 0; background: transparent; border: none; padding: 0; }
+
+.page-footer-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin: 4px 0 30px;
+}
+.page-footer-nav .btn:disabled { visibility: hidden; }
+
 /* ---------- Topic article ---------- */
 .topic-article {
   background: var(--card);
@@ -539,6 +610,52 @@ a:hover { text-decoration: underline; }
 .topic-text p { margin: 0 0 12px; font-size: 0.96rem; }
 .topic-text ul { margin: 0 0 12px; padding-left: 22px; font-size: 0.96rem; }
 .topic-text strong { color: var(--charcoal); }
+.topic-text h4 { margin: 18px 0 6px; font-size: 1rem; color: var(--charcoal); }
+
+.topic-callout {
+  margin: 4px 0 16px;
+  padding: 14px 16px;
+  background: #f7f4ea;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--syn-green);
+  border-radius: 8px;
+}
+.topic-callout-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--syn-green);
+  margin-bottom: 6px;
+}
+.topic-callout p, .topic-callout ul { margin: 0 0 8px; font-size: 0.92rem; }
+.topic-callout p:last-child, .topic-callout ul:last-child { margin-bottom: 0; }
+
+.topic-match-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  margin: 4px 0 16px;
+}
+.topic-match-grid h5 { margin: 0 0 6px; font-size: 0.82rem; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; }
+.topic-match-grid ul { margin: 0; padding-left: 18px; font-size: 0.9rem; }
+.topic-match-grid ul li { margin-bottom: 4px; }
+@media (max-width: 640px) {
+  .topic-match-grid { grid-template-columns: 1fr; }
+}
+
+.topic-source-list {
+  margin: 4px 0 0;
+  padding-left: 18px;
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+  columns: 2;
+  column-gap: 24px;
+}
+.topic-source-list li { margin-bottom: 6px; break-inside: avoid; }
+@media (max-width: 640px) {
+  .topic-source-list { columns: 1; }
+}
 
 /* ---------- Quiz ---------- */
 .quiz-box {
@@ -886,6 +1003,15 @@ a:hover { text-decoration: underline; }
 .portfolio-student { font-size: 0.82rem; font-weight: 700; color: var(--ink-soft); }
 .portfolio-body p { margin: 0; font-size: 0.88rem; color: var(--ink-soft); flex: 1; }
 .portfolio-link { font-size: 0.86rem; font-weight: 700; margin-top: 4px; }
+.unit-empty-state, .explore-empty {
+  text-align: center;
+  padding: 50px 24px;
+  color: var(--ink-soft);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  margin: 26px 0 48px;
+  grid-column: 1 / -1;
+}
 .portfolio-empty {
   text-align: center;
   padding: 50px 24px;

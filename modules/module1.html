@@ -3,233 +3,255 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Module 1: Biology of Cells — SynBase</title>
-<link rel="stylesheet" href="../css/style.css?v=48">
+<title>Module 1: Introduction to iGEM &amp; Bioengineering — SynBase</title>
+<link rel="stylesheet" href="../css/style.css?v=51">
 </head>
 <body>
 
 <header class="site-header" id="site-header"></header>
 <section class="module-hero" id="module-hero"></section>
-<div id="video-block"></div>
-
-<main class="container narrow" id="topic-sections"></main>
 
 <div class="container narrow">
-  <div class="module-footer-nav" id="module-footer-nav"></div>
+  <div class="page-nav-mount" id="page-nav-mount"></div>
+</div>
+<main class="container narrow" id="page-viewport"></main>
+<div class="container narrow">
+  <div class="page-footer-nav" id="page-footer-nav"></div>
 </div>
 
-<footer class="site-footer">
-  Adapted from Stanford iGEM SiBRP Session 2. Figures from Biorender and LibreTexts.
-</footer>
-
-<script src="../js/modules-meta.js?v=6"></script>
-<script src="../js/progress.js?v=19"></script>
-<script src="../js/quiz-engine.js?v=9"></script>
+<script src="../js/modules-meta.js?v=10"></script>
+<script src="../js/progress.js?v=21"></script>
+<script src="../js/quiz-engine.js?v=13"></script>
 <script>
 const MODULE = {
   id: "module1",
   number: 1,
-  title: "Biology of Cells",
-  lede: "Cells are the building blocks of biological life. Before diving into DNA, RNA, and engineering, this module covers what cells are, how they're categorized, and the parts that make them work.",
-  sections: [
+  title: "Introduction to iGEM & Bioengineering",
+  lede: "Before we get into the biology and engineering that make synthetic biology possible, it helps to zoom out: what is bioengineering, what makes synthetic biology different, and where does iGEM fit into all of this?",
+  pages: [
     {
-      id: "1.1",
-      title: "Cells: The Building Blocks of Life",
-      img: "../assets/img/module1/cells-building-blocks.png",
-      imgAlt: "Illustration of cells as the building blocks of biological life",
-      caption: "Cells are the fundamental building blocks of biological life. (Image from Biorender)",
+      id: "1.1r", type: "read", title: "What Is Stanford iGEM?",
       html: `
-        <p>Every living organism — from a single bacterium to a human being — is built from <strong>cells</strong>, the smallest unit that can carry out the functions of life. Just as bricks combine to form a building, cells combine and specialize to form tissues, organs, and entire organisms.</p>
-        <p>Inside nearly every cell is a molecule called <strong>DNA (deoxyribonucleic acid)</strong>, which acts as an instructional manual for the cell. DNA doesn't just make an organism function — it makes that organism uniquely itself, since the instructions encoded in DNA are passed down from parent to offspring.</p>
-        <p>Life is also far more diverse than a single "typical" cell. Bacteria, plants, fungi, and animals all package their DNA differently, which is the next idea we'll explore.</p>
-      `,
+        <p><a href="https://igem.stanford.edu" target="_blank" rel="noopener">Stanford iGEM</a> is an interdisciplinary team of Stanford undergraduates competing in <strong>iGEM</strong> (International Genetically Engineered Machine — not the most straightforward acronym, we know), an organization centered around an annual synthetic biology competition.</p>
+        <p>iGEM describes itself as the "beating heart of synthetic biology." Since the founding of iGEM in 2003, <strong>100,000+ iGEMers</strong> have worked on <strong>5,000+ synthetic biology projects</strong>. Biological parts from these projects are deposited in the <a href="https://registry.igem.org/" target="_blank" rel="noopener">iGEM Registry</a>, which now contains more than <strong>84,000 documented parts</strong>, to promote collaboration between bioengineers. iGEM alumni have also founded <strong>300+ ventures</strong>, including major companies like <a href="https://www.benchling.com/" target="_blank" rel="noopener">Benchling</a> and <a href="https://www.ginkgo.bio/" target="_blank" rel="noopener">Ginkgo Bioworks</a>.</p>
+        <p>iGEM's work broadly spans four foundational areas — <strong>Community, Technology, Responsibility, and Innovation</strong> — all with the hope of ultimately using synthetic biology to benefit humanity and our planet.</p>
+        <p>These are the same four principles that guide our work at Stanford iGEM. Our educational initiatives range from the site you're on right now to the Stanford iGEM Bioengineering Research Program (SiBRP) and <a href="https://knockdev.itch.io/phils-laberia" target="_blank" rel="noopener">Phil's Laberia</a> (check it out!), a video game teaching foundational lab skills and their underlying principles in a fun, accessible way. Our team members come together to dream up a new project each year, building new, innovative technologies while integrating bigger-picture implications and ethics throughout the entire design process.</p>
+        <p>As a team, we're all deeply interested in bioengineering, but we study everything from data science to English and electrical engineering. We believe diversity in thought and experience is necessary to achieve comprehensive understanding and resolution of the problems we face — another reason why we believe in equipping you with the tools to join the hopeful world of synthetic biology.</p>
+        <div class="topic-callout">
+          <div class="topic-callout-label">From the Source Material</div>
+          <p>Dr. Drew Endy, Stanford professor of bioengineering and co-founder of iGEM, spoke about iGEM during the first session of Stanford iGEM's 2026 summer program: <a href="https://www.youtube.com/watch?v=3Gg5VWrSFUQ" target="_blank" rel="noopener"><em>"SiBRP '26: Introduction to SynBio/iGEM by Guest Speaker Dr. Drew Endy."</em></a></p>
+        </div>
+      `
+    },
+    {
+      id: "1.1c", type: "practice",
+      title: "Check Your Understanding: Stanford iGEM",
       question: {
-        prompt: "What best describes the relationship between cells and DNA?",
+        prompt: "According to this section, what have iGEM alumni founded more than 300 of?",
         options: [
-          { text: "DNA is found outside of cells, in the extracellular matrix.", correct: false },
-          { text: "Cells are the building blocks of life, and DNA inside them acts as an instructional manual.", correct: true },
-          { text: "Cells are made of DNA, but DNA does not control the cell's function.", correct: false },
-          { text: "Only bacterial cells contain DNA.", correct: false }
+          { text: "Registry parts", correct: false },
+          { text: "Ventures — including companies like Benchling and Ginkgo Bioworks", correct: true },
+          { text: "Villages", correct: false },
+          { text: "Countries", correct: false }
         ],
-        explanation: "Cells are the basic building blocks of biological life, and the DNA housed inside them stores the instructions that make each organism — and each of us — unique."
+        explanation: "iGEM alumni have founded more than 300 ventures, including companies like Benchling and Ginkgo Bioworks — one of several stats (100,000+ iGEMers, 5,000+ projects, 84,000+ registry parts) that show the scale of the iGEM community."
       }
     },
     {
-      id: "1.2",
-      title: "DNA Is Housed Within Cells",
-      img: "../assets/img/module1/dna-housed-in-cells.png",
-      imgAlt: "Diagram showing DNA housed within a cell",
-      caption: "DNA is stored inside cells and carries the genetic instructions unique to each organism. (Image from Biorender)",
+      id: "1.2r", type: "read", title: "From Biology to Engineering",
       html: `
-        <p>DNA doesn't float freely in the environment — it is packaged and housed within cells, protected from the outside world. This genetic material contains the complete set of instructions for building and operating an organism.</p>
-        <p>Because DNA is passed from parent to offspring and varies slightly between individuals, it's responsible for the traits that make each person — and each species — distinct. Understanding where DNA lives inside the cell is the foundation for everything else in this curriculum, from transcription and translation to modern gene-editing technology.</p>
-        <p>Biology, however, doesn't stop at one generic cell. Life is organized into broad categories of cells, each with a different way of storing and using their DNA — which is what we'll look at next.</p>
-      `,
+        <p>Bioengineering is a very, very broad field. At its core, it applies engineering principles of design and analysis to biological systems and biomedical technologies. <a href="https://bioengineering.stanford.edu/" target="_blank" rel="noopener">Stanford Bioengineering</a> similarly describes the field as bringing together life sciences and engineering to advance areas ranging from healthcare and medicine to manufacturing, agriculture, and the environment.</p>
+        <p>That means two people can both call themselves bioengineers while doing work that looks quite different. But regardless of what you're engineering, the shift in mindset is similar. While biology asks, <em>"What does the system naturally do?"</em>, engineering focuses on <em>"How can we redesign the system?"</em></p>
+        <div class="topic-callout">
+          <div class="topic-callout-label">Matching Exercise, from the Source Material</div>
+          <p>Which of the following falls under the example of biology versus engineering?</p>
+          <ul>
+            <li>Understanding how fibroblasts produce collagen — <em>Biology</em></li>
+            <li>Inserting plasmids into cells to tune collagen production — <em>Engineering</em></li>
+          </ul>
+        </div>
+      `
+    },
+    {
+      id: "1.2c", type: "practice",
+      title: "Check Your Understanding: Biology vs. Engineering",
       question: {
-        prompt: "Why is it significant that DNA is housed within cells rather than floating freely in the environment?",
+        prompt: "Based on the matching exercise, which of these is the engineering example, not the biology example?",
         options: [
-          { text: "Being housed inside the cell protects DNA and keeps each organism's genetic instructions organized and functional.", correct: true },
-          { text: "DNA housed inside cells cannot be copied or read.", correct: false },
-          { text: "DNA is only housed inside cells in bacteria.", correct: false },
-          { text: "Housing DNA inside cells prevents it from controlling the organism's traits.", correct: false }
+          { text: "Understanding how fibroblasts produce collagen", correct: false },
+          { text: "Inserting plasmids into cells to tune collagen production", correct: true },
+          { text: "Observing that a cell produces a certain protein", correct: false },
+          { text: "Measuring how much collagen a tissue naturally contains", correct: false }
         ],
-        explanation: "DNA is housed inside cells, which protects the genetic material and keeps the instructions for building and running the organism organized and accessible."
+        explanation: "Understanding how fibroblasts naturally produce collagen is biology (\"what does the system naturally do?\"); inserting plasmids to tune collagen production is engineering (\"how do we redesign the system?\")."
       }
     },
     {
-      id: "1.3",
-      title: "The Three Domains of Life",
-      img: "../assets/img/module1/three-domains-of-life.png",
-      imgAlt: "Diagram of the three domains of life: Eukarya, Bacteria, and Archaea",
-      caption: "Eukarya, Bacteria, and Archaea are the three domains of life, distinguished by their membranes and cell walls. (Images from Biorender, LibreTexts)",
+      id: "1.3r", type: "read", title: "Where Synthetic Biology Fits In",
       html: `
-        <p>All known life fits into three broad domains: <strong>Eukarya</strong>, <strong>Bacteria</strong>, and <strong>Archaea</strong>. These domains are distinguished largely by the structure of their cell membranes and, in some cases, their cell walls.</p>
+        <p>Synthetic biology is one area within the much larger world of bioengineering.</p>
+        <p>The <a href="https://www.genome.gov/about-genomics/policy-issues/Synthetic-Biology" target="_blank" rel="noopener">National Human Genome Research Institute</a> defines <strong>synthetic biology</strong> as redesigning organisms for useful purposes by engineering them to have new abilities. Researchers have applied this idea to problems in medicine, manufacturing, agriculture, environmental sensing, and more.</p>
+        <p>You may also hear the term <a href="https://www.genome.gov/genetics-glossary/Genetic-Engineering" target="_blank" rel="noopener"><strong>genetic engineering</strong></a>, which refers to laboratory techniques that alter the DNA makeup of an organism — for example, changing a DNA sequence, removing a region, or adding new DNA.</p>
+        <p>Synthetic biology often uses genetic engineering, but tends to zoom out and ask a larger engineering question: <strong>How can we design or redesign a biological system to perform a useful function?</strong> Examples include:</p>
         <ul>
-          <li><strong>Eukarya</strong> have a nuclear membrane enclosing their DNA, in addition to a cell membrane.</li>
-          <li><strong>Bacteria</strong> have no nuclear membrane, but have a cell membrane plus a cell wall built from peptidoglycan.</li>
-          <li><strong>Archaea</strong> also lack a nuclear membrane and have a cell membrane; some have cell walls, but without peptidoglycan.</li>
+          <li>Microorganisms that produce useful medicines or materials</li>
+          <li>Biological systems that detect something in the environment</li>
+          <li>Organisms with new or altered traits for agriculture or manufacturing</li>
         </ul>
-        <p>These structural differences determine which lab tools and techniques work on which organisms — a theme that becomes important later in this curriculum.</p>
-      `,
+      `
+    },
+    {
+      id: "1.3c", type: "practice",
+      title: "Check Your Understanding: Synthetic Biology",
       question: {
-        prompt: "Which feature distinguishes Bacteria from Eukarya?",
+        prompt: "How does synthetic biology relate to genetic engineering, per this section?",
         options: [
-          { text: "Bacteria have a nuclear membrane; Eukarya do not.", correct: false },
-          { text: "Bacteria lack a nuclear membrane and have peptidoglycan in their cell wall; Eukarya have a nuclear membrane.", correct: true },
-          { text: "Bacteria and Eukarya have identical membrane structures.", correct: false },
-          { text: "Only Eukarya contain DNA.", correct: false }
+          { text: "They are unrelated fields with no overlap.", correct: false },
+          { text: "Synthetic biology often uses genetic engineering, but asks the broader question of how to design a biological system for a useful function.", correct: true },
+          { text: "Genetic engineering is a subfield of environmental sensing.", correct: false },
+          { text: "Synthetic biology never involves altering DNA.", correct: false }
         ],
-        explanation: "Eukarya have a nuclear membrane surrounding their DNA. Bacteria lack a nuclear membrane but have a cell wall containing peptidoglycan — a feature Archaea cell walls lack."
+        explanation: "Synthetic biology often uses genetic engineering as a tool, but zooms out to ask the larger engineering question of how to design or redesign a biological system to perform a useful function."
       }
     },
     {
-      id: "1.4",
-      title: "Model Organisms in Bioengineering",
-      img: "../assets/img/module1/model-organisms.png",
-      imgAlt: "Bacterial, mammalian, and plant model organism cells",
-      caption: "Bacterial (E. coli), mammalian (HEK 293), and plant (BY-2) cells are common model organisms in bioengineering. (Image from Biorender)",
+      id: "1.4r", type: "read", title: "A Very Quick History of Synthetic Biology",
       html: `
-        <p>Bioengineers rely heavily on a small set of <strong>model organisms</strong> — organisms with relatively simple, well-understood cell structures that still share key features with more complex life. Three of the most common are:</p>
-        <ul>
-          <li><strong>Bacterial cells</strong>, such as <em>E. coli</em></li>
-          <li><strong>Mammalian cells</strong>, such as HEK 293 (human embryonic kidney cells)</li>
-          <li><strong>Plant cells</strong>, such as BY-2 (tobacco) cells</li>
-        </ul>
-        <p>Because these organisms are easy to grow, well-characterized, and genetically manipulable, they make experimentation faster and more reliable — which is why they show up again and again in later modules on engineering DNA, RNA, and proteins.</p>
-      `,
+        <h4>1961 — Learning how cells regulate genes</h4>
+        <p>François Jacob and Jacques Monod published a landmark model describing genetic regulation in bacteria. Their work helped establish the idea that cells contain regulatory systems that can turn genes on and off in response to changing conditions.</p>
+        <h4>1995 — Reading an entire microbial genome</h4>
+        <p>Researchers reported the complete genome sequence of <em>Haemophilus influenzae</em>, the first complete genome sequence from a free-living organism. Being able to read increasingly large amounts of DNA gave researchers a much larger foundation for understanding — and eventually redesigning — biological systems.</p>
+        <h4>2000 — Building synthetic genetic circuits</h4>
+        <p>Two landmark papers demonstrated that researchers could deliberately construct simple genetic circuits inside <em>E. coli</em>: a genetic toggle switch that could switch between stable states, and the repressilator, a synthetic network that produced oscillating gene expression.</p>
+        <h4>2003–2004 — iGEM begins</h4>
+        <p>iGEM began in 2003 as a month-long course at MIT in which students tried to design biological systems that made cells blink. In 2004, that course grew into a summer competition involving five teams.</p>
+        <h4>Today</h4>
+        <p>Synthetic biology now spans thousands of projects and applications — from medicine and agriculture to environmental engineering, manufacturing, computation, and space.</p>
+      `
+    },
+    {
+      id: "1.4c", type: "practice",
+      title: "Check Your Understanding: History of SynBio",
       question: {
-        prompt: "Why do bioengineers frequently use model organisms like E. coli or HEK 293 cells?",
+        prompt: "What happened in 2003–2004, according to this history?",
         options: [
-          { text: "Because they have simpler, well-understood cell structures while sharing key features with more complex organisms, making experimentation easier.", correct: true },
-          { text: "Because they are the only cells that contain DNA.", correct: false },
-          { text: "Because they cannot be genetically modified, making them safe to study.", correct: false },
-          { text: "Because they are identical in structure to human cells.", correct: false }
+          { text: "The genetic toggle switch was published.", correct: false },
+          { text: "iGEM began as a month-long MIT course, then grew into a summer competition with five teams.", correct: true },
+          { text: "The Haemophilus influenzae genome was sequenced.", correct: false },
+          { text: "Jacob and Monod published their gene-regulation model.", correct: false }
         ],
-        explanation: "Model organisms like E. coli, HEK 293, and BY-2 cells have simpler cell structures but share enough similarity with more complex organisms to make them convenient and reliable for experimentation."
+        explanation: "iGEM began in 2003 as a month-long MIT course, then grew in 2004 into a summer competition involving five teams — the direct predecessor of today's iGEM."
       }
     },
     {
-      id: "1.5",
-      title: "Anatomy of a Bacterial Cell",
-      img: "../assets/img/module1/bacterial-cell-parts.png",
-      imgAlt: "Labeled diagram of a bacterial cell's parts",
-      caption: "Key parts of a bacterial cell: nucleoid, cytoplasm, ribosomes, plasmid, and cell wall. (Image from Biorender)",
+      id: "1.5r", type: "read", title: "The Many Applications of Synthetic Biology",
       html: `
-        <p>Bacterial cells package several important structures inside a protective cell wall:</p>
-        <ul>
-          <li><strong>Nucleoid:</strong> hosts the cell's genetic material as circular DNA — note that bacteria have no nuclear membrane.</li>
-          <li><strong>Cytoplasm:</strong> the gel-like fluid enclosed by the cell membrane, where cellular reactions happen.</li>
-          <li><strong>Plasmid:</strong> a small, circular piece of DNA separate from the main chromosome, often carrying antibiotic-resistance genes.</li>
-          <li><strong>Ribosomes:</strong> synthesize proteins from genetic material.</li>
-          <li><strong>Cell wall:</strong> protects the cell and maintains its shape.</li>
-        </ul>
-        <p>Plasmids in particular will come back later in this curriculum — their small, circular, easy-to-insert structure makes them one of the most important tools for inserting foreign DNA into cells.</p>
-      `,
+        <p>iGEM organizes the many areas of focus within synthetic biology by "village." As of 2026, iGEM has 15 villages across the three broader areas of <strong>Environment, Healthcare, and Advancements</strong> — see the full list at <a href="https://villages.igem.org/" target="_blank" rel="noopener">iGEM Villages</a>.</p>
+        <p>Here's one real past iGEM project for each village. Each links to its team's official iGEM wiki, so feel free to click around if one catches your attention:</p>
+        <div class="topic-match-grid" style="grid-template-columns:1fr;">
+          <div>
+            <h5>Environment</h5>
+            <ul>
+              <li><strong>Agriculture</strong> — <a href="https://2023.igem.wiki/szu-china/index.html" target="_blank" rel="noopener">PolycoBead: RNA-biopesticides for tomato gray mold disease</a> (SZU China, 2023)</li>
+              <li><strong>Bioremediation</strong> — <a href="https://2025.igem.wiki/lyon/index.html" target="_blank" rel="noopener">Engineered bacteria for PFAS degradation and detection</a> (Lyon, 2025)</li>
+              <li><strong>Climate Crisis</strong> — <a href="https://2024.igem.wiki/xmu-china/" target="_blank" rel="noopener">REPARO: eco-friendly paper-purification and recovery</a> (XMU China, 2024)</li>
+              <li><strong>Conservation</strong> — <a href="https://2023.igem.wiki/estonia-tuit/" target="_blank" rel="noopener">BeeYeast: yeast engineering to fight bee viral infections</a> (Estonia, 2023)</li>
+              <li><strong>Fashion &amp; Cosmetics</strong> — <a href="https://2025.igem.wiki/dtu-denmark/" target="_blank" rel="noopener">NomNomNylon: a sustainable future for nylon waste</a> (DTU Denmark, 2025)</li>
+              <li><strong>Food &amp; Nutrition</strong> — <a href="https://2025.igem.wiki/unicamp-brazil/" target="_blank" rel="noopener">PepCitrus: combating citrus greening with antimicrobial peptides</a> (UNICAMP-Brazil, 2025)</li>
+            </ul>
+          </div>
+          <div>
+            <h5>Healthcare</h5>
+            <ul>
+              <li><strong>Diagnostics</strong> — <a href="https://2025.igem.wiki/munich/" target="_blank" rel="noopener">InkSight: living diagnostic tattoos using engineered mammalian cells</a> (Munich, 2025)</li>
+              <li><strong>Infectious Diseases</strong> — <a href="https://2024.igem.wiki/uchicago/" target="_blank" rel="noopener">VIPR: a virus-inspired particle vaccine for schistosomiasis</a> (UChicago, 2024)</li>
+              <li><strong>Oncology</strong> — <a href="https://2024.igem.wiki/aachen/" target="_blank" rel="noopener">OncoBiotica: microbiota-directed cancer therapy</a> (Aachen Germany, 2024)</li>
+              <li><strong>Therapeutics</strong> — <a href="https://2023.igem.wiki/uni-padua-it/" target="_blank" rel="noopener">PASTA: a phage-assisted silencing tool against antimicrobial resistance</a> (Uni-Padua-IT, 2023)</li>
+            </ul>
+          </div>
+          <div>
+            <h5>Advancements</h5>
+            <ul>
+              <li><strong>Art &amp; Design</strong> — <a href="https://2004.igem.org/austin.html" target="_blank" rel="noopener">World's first biological photographic film</a> (UT Austin, 2004)</li>
+              <li><strong>Biomanufacturing</strong> — <a href="https://2024.igem.wiki/vilnius-lithuania/" target="_blank" rel="noopener">SYNHESION: natural bacterial adhesives</a> (Vilnius-Lithuania, 2024)</li>
+              <li><strong>Foundational Advance</strong> — <a href="https://2024.igem.wiki/heidelberg/" target="_blank" rel="noopener">PICasSO: CRISPR/Cas-mediated 3D genome engineering</a> (Heidelberg, 2024)</li>
+              <li><strong>Software &amp; AI</strong> — <a href="https://2024.igem.wiki/nju-china/home" target="_blank" rel="noopener">Prometheus: a large language model for synthetic biology</a> (NJU, 2024)</li>
+              <li><strong>Space</strong> — <a href="https://2025.igem.wiki/cornell/index.html" target="_blank" rel="noopener">Scalable perchlorate removal in Martian regolith</a> (Cornell, 2025)</li>
+            </ul>
+          </div>
+        </div>
+      `
+    },
+    {
+      id: "1.5c", type: "practice",
+      title: "Check Your Understanding: iGEM Villages",
       question: {
-        prompt: "Which bacterial structure is a small, circular piece of DNA separate from the main chromosome, often carrying antibiotic-resistance genes?",
+        prompt: "\"Prometheus: a large language model for synthetic biology\" (NJU, 2024) belongs to which iGEM village?",
         options: [
-          { text: "Nucleoid", correct: false },
-          { text: "Ribosome", correct: false },
-          { text: "Plasmid", correct: true },
-          { text: "Cell wall", correct: false }
+          { text: "Space", correct: false },
+          { text: "Software & AI", correct: true },
+          { text: "Biomanufacturing", correct: false },
+          { text: "Foundational Advance", correct: false }
         ],
-        explanation: "The plasmid is a small, circular DNA molecule distinct from the main chromosomal DNA in the nucleoid. Plasmids often carry antibiotic-resistance genes and are easy to insert into cells."
+        explanation: "Prometheus is a large language model project, which falls under the Software & AI village — one of the five villages in iGEM's Advancements area."
       }
     },
     {
-      id: "1.6",
-      title: "Anatomy of a Eukaryotic Cell",
-      img: "../assets/img/module1/eukaryotic-cell-parts.png",
-      imgAlt: "Labeled diagram of a eukaryotic cell's parts",
-      caption: "Key parts of a eukaryotic cell: nucleus, ribosomes, cell membrane, and cytoplasm. (Image from Biorender)",
+      id: "1.6r", type: "read", title: "Synthetic Biology Is Only One Part of Bioengineering",
       html: `
-        <p>Eukaryotic cells — found in plants, animals, and fungi — organize their contents differently from bacteria:</p>
-        <ul>
-          <li><strong>Nucleus:</strong> hosts the cell's genetic material (DNA), enclosed by its own nuclear membrane.</li>
-          <li><strong>Ribosomes:</strong> synthesize proteins from genetic material, just as in bacteria.</li>
-          <li><strong>Cell membrane:</strong> regulates what moves into and out of the cell.</li>
-          <li><strong>Cytoplasm:</strong> the gel-like fluid enclosed by the cell membrane.</li>
-        </ul>
-        <p>The key structural difference from bacteria is the nucleus: eukaryotic DNA is enclosed by a dedicated nuclear membrane, whereas bacterial DNA sits in the nucleoid with no such membrane.</p>
-      `,
-      question: {
-        prompt: "Which part of the cell is known for storing the body's main genetic DNA?",
-        options: [
-          { text: "The Cell Membrane", correct: false },
-          { text: "The Nucleus", correct: true },
-          { text: "The Extracellular Matrix", correct: false },
-          { text: "Ribosomes", correct: false }
-        ],
-        explanation: "The nucleus hosts the cell's long-term genetic material (DNA), enclosed by a nuclear membrane — a defining feature of eukaryotic cells."
-      }
+        <p>Bioengineers also work on things like:</p>
+        <h4>Biomedical devices</h4>
+        <p>Engineering physical or electronic technologies for biological research, diagnosis, monitoring, or treatment. Examples include medical imaging systems, portable diagnostic devices, biosensors, and wearable technologies.</p>
+        <h4>Tissue engineering &amp; regenerative medicine</h4>
+        <p>Using engineering principles to understand and control how cells and tissues behave — with goals that can include repairing damaged tissue or creating engineered tissues with useful functions.</p>
+        <h4>Biomedical computation</h4>
+        <p>Building computational models and tools to analyze biological and medical information. That can include everything from large-scale genomic data analysis to computational models of biological systems.</p>
+        <h4>Synthetic &amp; cellular engineering</h4>
+        <p>Designing or modifying biological systems themselves — including the engineered organisms, genetic circuits, biosensors, and biological factories we just spent much of this module exploring.</p>
+        <p>These areas can merge, too! A single project could involve a genetically engineered cell, a computational model that predicts its behavior, a physical device that delivers it, and a clinical study evaluating whether it works — that's part of what makes all of this so exciting.</p>
+        <p>Over the rest of this course, we're going to start building the biological and engineering toolkit needed to understand how projects like these actually work. Up first: <strong>the biology itself.</strong></p>
+        <div class="topic-callout">
+          <div class="topic-callout-label">Sources</div>
+          <ol class="topic-source-list">
+            <li><a href="https://igem.org/" target="_blank" rel="noopener">iGEM — Main Website</a></li>
+            <li><a href="https://innovation.igem.org/ecosystem/venture-portfolio" target="_blank" rel="noopener">iGEM Innovation — Venture Portfolio</a></li>
+            <li><a href="https://registry.igem.org/" target="_blank" rel="noopener">iGEM Registry of Standard Biological Parts</a></li>
+            <li><a href="https://igem.org/vision" target="_blank" rel="noopener">iGEM — Vision</a></li>
+            <li><a href="https://igem.stanford.edu/" target="_blank" rel="noopener">Stanford iGEM</a></li>
+            <li><a href="https://bioengineering.stanford.edu/news/phils-laberia-game-changer-bioengineering-education" target="_blank" rel="noopener">Stanford Bioengineering — Phil's Laberia</a></li>
+            <li><a href="https://competition.igem.org/" target="_blank" rel="noopener">iGEM Competition — Grand Jamboree</a></li>
+            <li><a href="https://www.youtube.com/watch?v=3Gg5VWrSFUQ" target="_blank" rel="noopener">Stanford iGEM — SiBRP '26: Dr. Drew Endy (YouTube)</a></li>
+            <li><a href="https://bioeng.berkeley.edu/about-us/what-is-bioengineering" target="_blank" rel="noopener">UC Berkeley Bioengineering — What is Bioengineering?</a></li>
+            <li><a href="https://bioengineering.stanford.edu/research-impact" target="_blank" rel="noopener">Stanford Bioengineering — Research &amp; Impact</a></li>
+            <li><a href="https://bioengineering.stanford.edu/academics-admission/graduate-programs/masters-program" target="_blank" rel="noopener">Stanford Bioengineering — Focus Areas</a></li>
+            <li><a href="https://bioeng.berkeley.edu/undergrad/program/devices" target="_blank" rel="noopener">UC Berkeley Bioengineering — Biomedical Devices</a></li>
+            <li><a href="https://bioengineering.stanford.edu/academics-admission/undergraduate/bs-biomedical-computation" target="_blank" rel="noopener">Stanford Bioengineering — Biomedical Computation</a></li>
+            <li><a href="https://www.genome.gov/about-genomics/policy-issues/Synthetic-Biology" target="_blank" rel="noopener">NHGRI — Synthetic Biology</a></li>
+            <li><a href="https://www.genome.gov/genetics-glossary/Genetic-Engineering" target="_blank" rel="noopener">NHGRI — Genetic Engineering</a></li>
+            <li><a href="https://pubmed.ncbi.nlm.nih.gov/13718526/" target="_blank" rel="noopener">Jacob &amp; Monod (1961) — PubMed</a></li>
+            <li><a href="https://pubmed.ncbi.nlm.nih.gov/7542800/" target="_blank" rel="noopener">Fleischmann et al. (1995) — PubMed</a></li>
+            <li><a href="https://www.nature.com/articles/35002131" target="_blank" rel="noopener">Gardner, Cantor &amp; Collins (2000) — Nature</a></li>
+            <li><a href="https://www.nature.com/articles/35002125" target="_blank" rel="noopener">Elowitz &amp; Leibler (2000) — Nature</a></li>
+            <li><a href="https://competition.igem.org/about/previous-years" target="_blank" rel="noopener">iGEM Competition — History</a></li>
+            <li><a href="https://villages.igem.org/" target="_blank" rel="noopener">iGEM — Villages</a></li>
+            <li><a href="https://2024.igem.wiki/nju-china/engineering" target="_blank" rel="noopener">NJU-China 2024 — Prometheus Engineering</a></li>
+            <li><a href="https://bioeng.berkeley.edu/research/cell-tissue" target="_blank" rel="noopener">UC Berkeley Bioengineering — Cell &amp; Tissue Engineering</a></li>
+          </ol>
+        </div>
+      `
     },
     {
-      id: "1.7",
-      title: "The Extracellular Matrix",
-      img: "../assets/img/module1/extracellular-matrix.png",
-      imgAlt: "Diagram of the extracellular matrix surrounding cells",
-      caption: "Collagen, a common ECM protein, provides structure and strength to skin, muscle, and bone. (Image from Biorender)",
-      html: `
-        <p>Not everything important to a cell's function happens inside it. The <strong>extracellular matrix (ECM)</strong> is a network of proteins and molecules found outside the cell that provides structural support to tissues.</p>
-        <p><strong>Collagen</strong> is one of the most common ECM proteins. It gives structure and strength to skin, muscles, and bones, and is a good example of how biology extends beyond the boundaries of a single cell to build entire tissues and organs.</p>
-      `,
+      id: "1.6c", type: "practice",
+      title: "Check Your Understanding: Beyond Synthetic Biology",
       question: {
-        prompt: "What is the extracellular matrix (ECM) primarily responsible for?",
+        prompt: "Which of these is NOT one of the bioengineering areas described in this section?",
         options: [
-          { text: "Storing genetic material outside the cell.", correct: false },
-          { text: "Providing structural support, like collagen does for skin, muscle, and bone.", correct: true },
-          { text: "Producing proteins from RNA.", correct: false },
-          { text: "Separating bacterial cells from Eukarya.", correct: false }
+          { text: "Biomedical devices", correct: false },
+          { text: "Tissue engineering & regenerative medicine", correct: false },
+          { text: "Quantum computing", correct: true },
+          { text: "Biomedical computation", correct: false }
         ],
-        explanation: "The ECM is a network found outside the cell — collagen, a common ECM protein, provides structure and strength to tissues like skin, muscle, and bone."
-      }
-    },
-    {
-      id: "1.8",
-      title: "The Cell Membrane and the Phospholipid Bilayer",
-      img: "../assets/img/module1/phospholipid-bilayer-full.png",
-      imgAlt: "Diagram of the phospholipid bilayer with protein channels and integral proteins",
-      caption: "The phospholipid bilayer, with protein channels and integral proteins embedded in it. (Image from Biorender)",
-      html: `
-        <p>The <strong>cell membrane</strong> is the gate that separates the cell from its environment. Its foundation is the <strong>phospholipid bilayer</strong>: each phospholipid has a hydrophilic (water-loving) phosphate head and hydrophobic (water-fearing) hydrocarbon tails. In water, the hydrophilic heads face outward toward the extracellular and intracellular spaces, while the hydrophobic tails face each other in the middle — following the principle that "like dissolves with like."</p>
-        <p>This arrangement makes the membrane <strong>semipermeable</strong>: small, nonpolar molecules can slip through unassisted, but larger or charged/polar molecules cannot cross on their own. To handle those, the membrane relies on:</p>
-        <ul>
-          <li><strong>Protein channels:</strong> allow movement of large or hydrophilic molecules.</li>
-          <li><strong>Integral proteins:</strong> help the cell communicate with its environment (e.g., receptors, cell adhesion molecules).</li>
-        </ul>
-      `,
-      question: {
-        prompt: "What molecules can pass through the phospholipid bilayer unassisted?",
-        options: [
-          { text: "Glucose", correct: false },
-          { text: "K+", correct: false },
-          { text: "CO2", correct: true },
-          { text: "Na+", correct: false }
-        ],
-        explanation: "Small, nonpolar molecules like CO2 can diffuse directly through the hydrophobic core of the phospholipid bilayer. Charged ions (K+, Na+) and larger polar molecules (glucose) need protein channels to cross."
-      },
-      freeResponse: {
-        prompt: "In your own words, explain why the phospholipid bilayer is described as \"semipermeable,\" and describe one example of a molecule that needs help to cross it."
+        explanation: "This section describes biomedical devices, tissue engineering & regenerative medicine, biomedical computation, and synthetic & cellular engineering as areas of bioengineering — quantum computing isn't one of them."
       }
     }
   ]

@@ -52,30 +52,16 @@ function isSectionComplete(moduleId, sectionId) {
 }
 
 function markSectionComplete(moduleId, sectionId) {
-  if (!PROGRESS_CACHE[moduleId]) PROGRESS_CACHE[moduleId] = { sections: {}, videoWatched: false };
+  if (!PROGRESS_CACHE[moduleId]) PROGRESS_CACHE[moduleId] = { sections: {} };
   if (!PROGRESS_CACHE[moduleId].sections) PROGRESS_CACHE[moduleId].sections = {};
   PROGRESS_CACHE[moduleId].sections[sectionId] = true;
   syncProgress(moduleId, { sectionId });
 }
 
-function isVideoWatched(moduleId) {
-  const mod = PROGRESS_CACHE[moduleId];
-  return !!(mod && mod.videoWatched);
-}
-
-function setVideoWatched(moduleId, watched) {
-  if (!PROGRESS_CACHE[moduleId]) PROGRESS_CACHE[moduleId] = { sections: {}, videoWatched: false };
-  PROGRESS_CACHE[moduleId].videoWatched = watched;
-  syncProgress(moduleId, { videoWatched: watched });
-}
-
-// total units = sections + 1 (the intro video) so watching the video counts toward progress
 function moduleProgress(moduleId, sectionCount) {
-  const mod = PROGRESS_CACHE[moduleId] || { sections: {}, videoWatched: false };
-  const completedSections = Object.keys(mod.sections || {}).filter(k => mod.sections[k]).length;
-  const total = sectionCount + 1;
-  const completed = completedSections + (mod.videoWatched ? 1 : 0);
-  return { completed, total, pct: Math.round((completed / total) * 100) };
+  const mod = PROGRESS_CACHE[moduleId] || { sections: {} };
+  const completed = Object.keys(mod.sections || {}).filter(k => mod.sections[k]).length;
+  return { completed, total: sectionCount, pct: Math.round((completed / sectionCount) * 100) };
 }
 
 function overallProgress() {
@@ -127,7 +113,8 @@ function lockedModuleInfo(moduleId) {
 // here for module chips and per-lesson index circles.
 const MODULE_ACCENT_CYCLE = ["teal", "gold", "cardinal"];
 function moduleAccentClass(number) {
-  return MODULE_ACCENT_CYCLE[(number - 1) % MODULE_ACCENT_CYCLE.length];
+  const len = MODULE_ACCENT_CYCLE.length;
+  return MODULE_ACCENT_CYCLE[((number - 1) % len + len) % len];
 }
 
 // Small red-bar/gold-bar mark echoing the corner ornament repeated on every slide.

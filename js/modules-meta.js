@@ -1,47 +1,31 @@
 // Shared metadata about every module — used by the homepage to render the
 // course overview and by each module page to know its own identity/neighbors.
-// Section counts must match the number of sections defined in that module's
-// own inline data (modules/moduleN.html) and in course-outline.js.
+// sectionCount must equal the number of pages in that module's own inline
+// data (modules/moduleN.html) — reading pages and practice pages both count.
 // href is written relative to index.html, since only the homepage uses it.
 const MODULES_META = [
   {
+    id: "module0",
+    number: 0,
+    title: "Introduction to SynBase",
+    description: "A short welcome to SynBase — what this curriculum covers, how it's structured, and what completing it unlocks.",
+    href: "modules/module0.html",
+    sectionCount: 2
+  },
+  {
     id: "module1",
     number: 1,
-    title: "Biology of Cells",
-    description: "Cells as the building blocks of life, the three domains of life, model organisms, and the parts that make up bacterial and eukaryotic cells.",
+    title: "Introduction to iGEM & Bioengineering",
+    description: "What Stanford iGEM is, how bioengineering and synthetic biology relate, a brief history of the field, and real examples of synthetic biology's impact.",
     href: "modules/module1.html",
-    sectionCount: 8
+    sectionCount: 12
   },
   {
     id: "module2",
     number: 2,
-    title: "Biology of DNA",
-    description: "The central dogma, nucleotides, complementary base-pairing, transcription, and translation of RNA into protein.",
+    title: "Core Concepts in Molecular and Cellular Biology",
+    description: "The biology of cells and DNA, engineering applications in molecular biology (with a p53 discussion activity), and how foreign DNA gets inserted into cells.",
     href: "modules/module2.html",
-    sectionCount: 13
-  },
-  {
-    id: "module3",
-    number: 3,
-    title: "Engineering Applications in Molecular Biology",
-    description: "Real-world bioengineering built on DNA, RNA, and protein engineering, plus a guided p53 protein case study and CRISPR-Cas9.",
-    href: "modules/module3.html",
-    sectionCount: 6
-  },
-  {
-    id: "module4",
-    number: 4,
-    title: "Inserting DNA Into Cells",
-    description: "How synthetic biology delivers foreign genetic material into cells, stable vs. transient expression, and plasmids.",
-    href: "modules/module4.html",
-    sectionCount: 5
-  },
-  {
-    id: "module5",
-    number: 5,
-    title: "Review & Wrap-Up",
-    description: "Pulling it all together: a recap of cells, DNA, and synthetic biology, plus what's next in the SiBRP curriculum.",
-    href: "modules/module5.html",
-    sectionCount: 2
+    sectionCount: 38
   }
 ];

@@ -3,327 +3,434 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Module 2: Biology of DNA — SynBase</title>
-<link rel="stylesheet" href="../css/style.css?v=48">
+<title>Module 2: Core Concepts in Molecular and Cellular Biology — SynBase</title>
+<link rel="stylesheet" href="../css/style.css?v=51">
 </head>
 <body>
 
 <header class="site-header" id="site-header"></header>
 <section class="module-hero" id="module-hero"></section>
-<div id="video-block"></div>
-
-<main class="container narrow" id="topic-sections"></main>
 
 <div class="container narrow">
-  <div class="module-footer-nav" id="module-footer-nav"></div>
+  <div class="page-nav-mount" id="page-nav-mount"></div>
+</div>
+<main class="container narrow" id="page-viewport"></main>
+<div class="container narrow">
+  <div class="page-footer-nav" id="page-footer-nav"></div>
 </div>
 
-<footer class="site-footer">
-  Adapted from Stanford iGEM SiBRP Session 2. Figures from Biorender, Khan Academy, and the City University of Hong Kong.
-</footer>
-
-<script src="../js/modules-meta.js?v=6"></script>
-<script src="../js/progress.js?v=19"></script>
-<script src="../js/quiz-engine.js?v=9"></script>
+<script src="../js/modules-meta.js?v=10"></script>
+<script src="../js/progress.js?v=21"></script>
+<script src="../js/quiz-engine.js?v=13"></script>
 <script>
+const PART1 = "Part 1: Biology of Cells";
+const PART2 = "Part 2: Exploring DNA";
+const PART3 = "Part 3: Engineering Applications in Molecular Biology";
+const PART4 = "Part 4: Inserting Foreign DNA Into Cells";
+
 const MODULE = {
   id: "module2",
   number: 2,
-  title: "Biology of DNA",
-  lede: "DNA holds the instruction manual for biological life. This module walks through the central dogma — replication, transcription, and translation — from nucleotides all the way to finished proteins.",
-  sections: [
+  title: "Core Concepts in Molecular and Cellular Biology",
+  lede: "This module is split into four parts: the biology of cells, the biology of DNA, engineering applications in molecular biology, and inserting foreign DNA into cells — the toolkit for everything else in this course.",
+  pages: [
+    // ---------------- Part 1: Biology of Cells ----------------
     {
-      id: "2.1",
-      title: "The Central Dogma Overview",
-      img: "../assets/img/module2/central-dogma.png",
-      imgAlt: "Diagram of the central dogma of molecular biology",
-      caption: "The central dogma of molecular biology: DNA is replicated, transcribed into RNA, and translated into protein. (Image from the City University of Hong Kong)",
+      id: "c1r", type: "read", part: PART1, title: "Cells and DNA: An Overview",
       html: `
-        <p>DNA doesn't do its job alone — it works through a well-defined pipeline called the <strong>central dogma of molecular biology</strong>. This pipeline has three core steps:</p>
-        <ul>
-          <li><strong>Replication:</strong> DNA is copied to form more DNA.</li>
-          <li><strong>Transcription:</strong> DNA is used as a template to build RNA.</li>
-          <li><strong>Translation:</strong> RNA is read to build proteins.</li>
-        </ul>
-        <p>Everything else in this module — nucleotides, base-pairing, transcription, and translation — is really just a closer look at one of these three steps. Keep this big picture in mind as we zoom in.</p>
-      `,
+        <p>This module is split into four parts: 1) the biology of cells, 2) the biology of DNA, 3) engineering applications in molecular biology, and 4) inserting DNA into cells.</p>
+        <p><strong>Cells</strong> are the building blocks of biological life. They are the smallest biological units that can live, grow, and replicate. Humans, plants, animals, and bacteria are all made up of cells.</p>
+        <p><strong>DNA</strong> (short for Deoxyribonucleic Acid) contains the instruction manual for all biological life. In us humans, it encodes our personalities, appearances, metabolism, immune responses, thoughts, and so many other traits. DNA makes you, <em>you</em>.</p>
+      `
+    },
+    {
+      id: "c1c", type: "practice", part: PART1, title: "Check Your Understanding: Cells and DNA",
       question: {
-        prompt: "In the central dogma of molecular biology, what is the correct order of information flow?",
+        prompt: "What best describes the relationship between cells and DNA, according to this section?",
+        options: [
+          { text: "DNA is found outside of cells, in the extracellular matrix.", correct: false },
+          { text: "Cells are the building blocks of life, and the DNA inside them is the instruction manual that makes each organism unique.", correct: true },
+          { text: "Cells are made entirely of DNA.", correct: false },
+          { text: "Only bacterial cells contain DNA.", correct: false }
+        ],
+        explanation: "Cells are the smallest units that can live, grow, and replicate. The DNA housed inside them is the instruction manual encoding traits like personality, appearance, and metabolism."
+      }
+    },
+    {
+      id: "c2r", type: "read", part: PART1, title: "The Three Domains of Life",
+      html: `
+        <p>Life is separated into three domains: Eukarya, Bacteria, and Archaea.</p>
+        <p><strong>Eukarya</strong> consists of organisms that have cells containing a <strong>membrane-bound nucleus</strong>. They include plant, human, animal, fungal, or protist cells.</p>
+        <p><strong>Bacteria</strong> consist of single-celled organisms that do not contain a nucleus. All of them have a cell wall that contains peptidoglycan.</p>
+        <p><strong>Archaea</strong> consist of single-celled organisms that do not contain a nucleus. Unlike organisms in the Bacteria domain, those in the Archaea domain have a cell wall that does not contain peptidoglycan.</p>
+        <p>In this course, we'll focus on <strong>Eukarya</strong> and <strong>Bacteria</strong>, because they're more commonly used in synthetic biology experiments. Within those domains, there are three types of cells we frequently use in synthetic biology: bacterial cells, mammalian cells, and plant cells.</p>
+        <p>Bacterial cells belong to the Bacteria domain, while mammalian and plant cells belong to the Eukarya domain.</p>
+      `
+    },
+    {
+      id: "c2c", type: "practice", part: PART1, title: "Check Your Understanding: Domains of Life",
+      question: {
+        prompt: "Which domain of life lacks a membrane-bound nucleus AND has a cell wall containing peptidoglycan?",
+        options: [
+          { text: "Eukarya", correct: false },
+          { text: "Bacteria", correct: true },
+          { text: "Archaea", correct: false },
+          { text: "None of these", correct: false }
+        ],
+        explanation: "Bacteria lack a nuclear membrane and have a cell wall containing peptidoglycan. Archaea also lack a nucleus, but their cell walls do not contain peptidoglycan — that's what distinguishes the two domains."
+      }
+    },
+    {
+      id: "c3r", type: "read", part: PART1, title: "Model Cell Lines",
+      html: `
+        <p>Model cell lines are simple cell populations used to represent other, more complex cells of interest. They are used because they are easy to culture, samples are highly uniform, and they have high growth rates. They can be cultured for many cycles in cell dishes if well maintained.</p>
+        <p><em>E. coli</em> is a common model cell line for bacterial cells. These cells are found in the intestines of humans and warm-blooded animals, as well as in contaminated water or raw meat (<a href="https://www.cdc.gov/ecoli/about/index.html" target="_blank" rel="noopener">CDC</a>).</p>
+        <p><em>HEK 293</em> (human embryonic kidney cells) is a common model organism for mammalian cells. These cells are derived from human embryonic kidney tissue, through transfection of normal human embryonic kidney cells with adenovirus 5 DNA (<a href="https://www.beckman.com/resources/product-applications/lead-optimization/cell-line-development/human-embryonic-kidney-293" target="_blank" rel="noopener">Beckman</a>).</p>
+        <p><em>BY-2</em> is a common model organism for plant cells. These cells are derived from the tobacco Bright Yellow 2 line (<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10587202/" target="_blank" rel="noopener">PMC</a>).</p>
+      `
+    },
+    {
+      id: "c3c", type: "practice", part: PART1, title: "Check Your Understanding: Model Cell Lines",
+      question: {
+        prompt: "Which model cell line is commonly used to represent mammalian cells in synthetic biology?",
+        options: [
+          { text: "E. coli", correct: false },
+          { text: "HEK 293", correct: true },
+          { text: "BY-2", correct: false },
+          { text: "Archaea", correct: false }
+        ],
+        explanation: "HEK 293 (human embryonic kidney) cells are a common mammalian model cell line. E. coli models bacterial cells, and BY-2 (tobacco) models plant cells."
+      }
+    },
+    {
+      id: "c4r", type: "read", part: PART1, title: "Anatomy of a Bacterial Cell",
+      html: `
+        <p>A bacterial cell is encapsulated by a <strong>cell wall</strong>, which protects and maintains the shape of the cell. Inside the cell is the <strong>cytoplasm</strong>, a gel-like fluid enclosed by the cell membrane. <strong>Ribosomes</strong> synthesize proteins from genetic material. A <strong>plasmid</strong> is small, circular DNA that typically contains an antibiotic-resistance gene. The <strong>nucleoid</strong> hosts genetic material — note that it does not have a nuclear membrane.</p>
+      `
+    },
+    {
+      id: "c4c", type: "practice", part: PART1, title: "Check Your Understanding: Bacterial Cell Anatomy",
+      question: {
+        prompt: "Which bacterial cell structure is small, circular DNA separate from the main chromosome, often carrying an antibiotic-resistance gene?",
+        options: [
+          { text: "Nucleoid", correct: false },
+          { text: "Plasmid", correct: true },
+          { text: "Ribosome", correct: false },
+          { text: "Cell wall", correct: false }
+        ],
+        explanation: "The plasmid is a small, circular piece of DNA distinct from the main chromosomal DNA in the nucleoid, often carrying an antibiotic-resistance gene."
+      }
+    },
+    {
+      id: "c5r", type: "read", part: PART1, title: "Anatomy of a Eukaryotic Cell",
+      html: `
+        <p>A eukaryotic cell is encapsulated by a <strong>cell membrane</strong>, which regulates movement in and out of the cell (note that plant cells also have a cell wall). The <strong>cytoplasm</strong> is gel-like fluid enclosed by the cell membrane. <strong>Ribosomes</strong> synthesize proteins from genetic material, just as in bacteria. The <strong>nucleus</strong> hosts genetic material (DNA).</p>
+      `
+    },
+    {
+      id: "c5c", type: "practice", part: PART1, title: "Check Your Understanding: Eukaryotic Cell Anatomy",
+      question: {
+        prompt: "What is the key structural difference between a eukaryotic cell and a bacterial cell?",
+        options: [
+          { text: "Eukaryotic cells have a nucleus hosting their genetic material; bacterial cells do not.", correct: true },
+          { text: "Only bacterial cells have ribosomes.", correct: false },
+          { text: "Only eukaryotic cells have cytoplasm.", correct: false },
+          { text: "Bacterial cells have a nucleus, but eukaryotic cells do not.", correct: false }
+        ],
+        explanation: "Eukaryotic cells host their DNA in a nucleus. Bacterial cells lack a nucleus — their DNA sits in the nucleoid instead."
+      }
+    },
+    {
+      id: "c6r", type: "read", part: PART1, title: "Outside the Cell: The ECM and Cell Membrane",
+      html: `
+        <p>The extracellular matrix (ECM) is a complex network of proteins found outside the cell. Collagen is a common ECM protein, responsible for providing structure and strength to skin, muscles, and bones.</p>
+        <p>The cell membrane is the gate that separates the cell from the environment. Many membrane proteins are embedded in the cell membrane, including <strong>protein channels</strong>, which facilitate movement of large or hydrophilic molecules, and <strong>integral proteins</strong>, which help the cell communicate with the extracellular environment (e.g., receptors, cell adhesion molecules). The membrane is made up of a <strong>phospholipid bilayer</strong>, which contains hydrophilic heads that face out, and hydrophobic tails that face inward.</p>
+        <p>The principle of "like dissolves like" means that substances with similar polarities can attract and dissolve each other. Both the extracellular matrix and the cytoplasm are largely hydrophilic, which is why the phospholipid bilayer's hydrophilic heads face outward toward them, while the hydrophobic tails tuck away in the middle.</p>
+      `
+    },
+    {
+      id: "c6c", type: "practice", part: PART1, title: "Check Your Understanding: The Cell Membrane",
+      question: {
+        prompt: "What principle explains why the phospholipid bilayer's hydrophilic heads face outward and its hydrophobic tails face inward?",
+        options: [
+          { text: "The central dogma", correct: false },
+          { text: "\"Like dissolves like\"", correct: true },
+          { text: "Complementary base-pairing", correct: false },
+          { text: "Codon redundancy", correct: false }
+        ],
+        explanation: "\"Like dissolves like\": the hydrophilic heads face the largely hydrophilic ECM and cytoplasm, while the hydrophobic tails avoid them by facing inward."
+      }
+    },
+
+    // ---------------- Part 2: Exploring DNA ----------------
+    {
+      id: "d1r", type: "read", part: PART2, title: "The Central Dogma",
+      html: `
+        <p>The central dogma of molecular biology consists of DNA undergoing <strong>transcription</strong> to become RNA, and RNA undergoing <strong>translation</strong> to become proteins. DNA can also undergo <strong>replication</strong> to result in more DNA.</p>
+      `
+    },
+    {
+      id: "d1c", type: "practice", part: PART2, title: "Check Your Understanding: The Central Dogma",
+      question: {
+        prompt: "What are the three steps of the central dogma, in order?",
         options: [
           { text: "Protein → RNA → DNA", correct: false },
-          { text: "DNA → RNA → Protein", correct: true },
-          { text: "RNA → Protein → DNA", correct: false },
-          { text: "DNA and RNA are produced simultaneously from protein.", correct: false }
+          { text: "DNA → RNA (transcription) → protein (translation)", correct: true },
+          { text: "RNA → DNA → protein", correct: false },
+          { text: "DNA → protein (translation) → RNA (transcription)", correct: false }
         ],
-        explanation: "The central dogma flows from DNA (replicated into more DNA), to RNA (via transcription), to protein (via translation)."
+        explanation: "The central dogma flows DNA → RNA via transcription, then RNA → protein via translation. DNA can also replicate into more DNA."
       }
     },
     {
-      id: "2.2",
-      title: "Nucleotides: Building Blocks of DNA",
-      img: "../assets/img/module2/dna-nucleotide.png",
-      imgAlt: "Diagram of a DNA nucleotide's structure",
-      caption: "A DNA nucleotide is built from a phosphate group, a sugar, and a nucleobase, linked into a sugar-phosphate backbone. (Image from Biorender)",
+      id: "d2r", type: "read", part: PART2, title: "DNA and RNA Bases",
       html: `
-        <p>DNA is built from repeating units called <strong>nucleotides</strong>. Each nucleotide has three parts: a phosphate group, a sugar, and a nitrogen-containing <strong>nucleobase</strong>. Chains of nucleotides link together through their sugar and phosphate groups, forming the <strong>sugar-phosphate backbone</strong> that runs along the outside of the DNA molecule.</p>
-        <p>The nucleobase is the variable part of each nucleotide — different sequences of bases are what encode different genetic instructions, similar to how different sequences of letters spell different words.</p>
-      `,
-      question: {
-        prompt: "What three components make up a single DNA nucleotide?",
-        options: [
-          { text: "A phosphate group, a sugar, and a nucleobase", correct: true },
-          { text: "Two nucleobases joined by a hydrogen bond", correct: false },
-          { text: "A ribosome, an amino acid, and a codon", correct: false },
-          { text: "A phospholipid head and two hydrocarbon tails", correct: false }
-        ],
-        explanation: "Each DNA nucleotide is composed of a phosphate group, a sugar, and a nucleobase. Chains of these nucleotides form the sugar-phosphate backbone."
-      }
+        <p>DNA has four bases: Adenine, Cytosine, Guanine, and Thymine.</p>
+        <p>RNA has the same bases as DNA, except Uracil replaces Thymine.</p>
+        <p>In DNA, A binds to T, while C binds to G. Note that A binds to U in RNA.</p>
+        <p>GC-pairing has 3 hydrogen bonds, while AT-pairing has 2 hydrogen bonds.</p>
+      `
     },
     {
-      id: "2.3",
-      title: "Nucleotides: Building Blocks of RNA",
-      img: "../assets/img/module2/rna-nucleotide.png",
-      imgAlt: "Diagram of an RNA nucleotide's structure",
-      caption: "RNA nucleotides are similar to DNA nucleotides, but use uracil in place of thymine. (Image from Biorender)",
-      html: `
-        <p>RNA nucleotides are built the same way as DNA nucleotides — a phosphate group, a sugar, and a nucleobase — but with one key difference: RNA uses the base <strong>uracil (U)</strong> in place of the <strong>thymine (T)</strong> found in DNA.</p>
-        <p>This small substitution is one of the ways cells (and scientists) can tell RNA and DNA apart, and it becomes important later when we translate an RNA sequence using a codon table.</p>
-      `,
+      id: "d2c", type: "practice", part: PART2, title: "Check Your Understanding: DNA and RNA Bases",
       question: {
-        prompt: "Which base is unique to RNA and replaces thymine from DNA?",
+        prompt: "Which base pairs with adenine (A) in RNA?",
         options: [
-          { text: "Adenine", correct: false },
-          { text: "Guanine", correct: false },
+          { text: "Thymine", correct: false },
+          { text: "Uracil", correct: true },
           { text: "Cytosine", correct: false },
-          { text: "Uracil", correct: true }
+          { text: "Guanine", correct: false }
         ],
-        explanation: "RNA nucleotides use uracil (U) in place of DNA's thymine (T). The other three bases — adenine, guanine, and cytosine — are shared between DNA and RNA."
+        explanation: "RNA substitutes Uracil for Thymine, so adenine pairs with uracil in RNA (versus adenine-thymine pairing in DNA)."
       }
     },
     {
-      id: "2.4",
-      title: "Complementary Base-Pairing",
-      img: "../assets/img/module2/complementary-base-pairing.png",
-      imgAlt: "Diagram of complementary base pairing between A-T and C-G",
-      caption: "Complementary base-pairing: A pairs with T, and C pairs with G, with GC-pairing forming three hydrogen bonds versus two for AT. (Image from Biorender)",
+      id: "d3r", type: "read", part: PART2, title: "The Double Helix and Antiparallel Strands",
       html: `
-        <p>DNA's four bases — <strong>A, T, C, and G</strong> — don't pair randomly. Adenine (A) always pairs with thymine (T), and cytosine (C) always pairs with guanine (G). This is called <strong>complementary base-pairing</strong>, and it's what allows the two strands of DNA to zip together into a stable double helix.</p>
-        <p>Not all pairs are equally strong: <strong>GC-pairing</strong> forms three hydrogen bonds, while <strong>AT-pairing</strong> forms only two. That means DNA sequences with a higher GC-content require more energy (or higher temperature) to separate than sequences rich in A and T.</p>
-      `,
+        <p>DNA operates under a double-helix structure and runs in antiparallel directions. The 5' end of one strand binds to the 3' end of the other strand.</p>
+        <p>DNA has two strands — the coding strand and the template strand. The coding strand is the DNA strand found in databases, and it's also the same sequence (except Thymine becomes Uracil) as the RNA produced after transcription.</p>
+        <p>The template strand is the complement of the coding strand — the transcribed RNA is the RNA-complement of this template sequence.</p>
+        <p>In more detail: if the original DNA coding base is A, the corresponding template base is T, and the resulting RNA base is A. If the original DNA coding base is T, the corresponding template base is A, and the resulting RNA base is U.</p>
+      `
+    },
+    {
+      id: "d3c", type: "practice", part: PART2, title: "Check Your Understanding: Coding vs. Template Strand",
       question: {
-        prompt: "If two double-stranded DNA molecules were heated up, which would separate first: one with a higher AT content, or one with a higher GC content?",
+        prompt: "How does the transcribed RNA sequence relate to the coding and template strands?",
         options: [
-          { text: "The one with higher AT content, because AT pairs form fewer hydrogen bonds and are weaker.", correct: true },
-          { text: "The one with higher GC content, because GC pairs form fewer hydrogen bonds.", correct: false },
-          { text: "Both sequences separate at exactly the same temperature.", correct: false },
-          { text: "Neither sequence separates; DNA cannot be melted by heat.", correct: false }
+          { text: "RNA matches the template strand exactly, including Thymine.", correct: false },
+          { text: "RNA matches the coding strand's sequence, with Uracil in place of Thymine — it's the complement of the template strand.", correct: true },
+          { text: "RNA is unrelated to either strand.", correct: false },
+          { text: "RNA matches both strands identically.", correct: false }
         ],
-        explanation: "AT base pairs form only 2 hydrogen bonds, while GC pairs form 3. A sequence with higher AT content has weaker overall bonding between its strands, so it separates ('melts') at a lower temperature."
+        explanation: "The template strand is the complement of the coding strand. RNA is transcribed as the complement of the template strand — which makes it match the coding strand's sequence, just with U instead of T."
       }
     },
     {
-      id: "2.5",
-      title: "The Double Helix & Antiparallel Strands",
-      img: "../assets/img/module2/double-helix-antiparallel.png",
-      imgAlt: "Diagram of DNA's double helix with antiparallel strands",
-      caption: "DNA's two strands run in antiparallel directions, from 5' to 3' and 3' to 5'. (Image from Biorender)",
+      id: "d4r", type: "read", part: PART2, title: "From DNA to mRNA: Leaving the Nucleus",
       html: `
-        <p>DNA doesn't exist as a single strand — it operates as a <strong>double helix</strong>, two strands wound around each other and held together by complementary base-pairing. Each strand has a direction, defined by the chemistry of its sugar-phosphate backbone, running from a <strong>5' (five-prime) end</strong> to a <strong>3' (three-prime) end</strong>.</p>
-        <p>Critically, the two strands run in <strong>antiparallel</strong> directions — one strand runs 5' to 3', while its partner runs 3' to 5' alongside it. This directionality matters once we get to transcription, where enzymes read and build strands in a specific direction.</p>
-      `,
+        <p>After transcription, several modifications are made. First, the RNA has to leave the nucleus. mRNA, short for messenger RNA, moves out of the nucleus to find a ribosome within the cytoplasm that can help make proteins. The ribosome is the site where translation (the process of making protein from RNA) occurs. mRNA is also structured to be resistant to degradation in the cytoplasm.</p>
+      `
+    },
+    {
+      id: "d4c", type: "practice", part: PART2, title: "Check Your Understanding: mRNA",
       question: {
-        prompt: "What does it mean that DNA's two strands are \"antiparallel\"?",
+        prompt: "Why must mRNA leave the nucleus after transcription?",
         options: [
-          { text: "Both strands run in the same 5' to 3' direction.", correct: false },
-          { text: "The two strands run in opposite directions — one 5' to 3', the other 3' to 5'.", correct: true },
-          { text: "The two strands are not connected to each other at all.", correct: false },
-          { text: "Only one strand has a 5' and 3' end.", correct: false }
+          { text: "To be degraded and recycled.", correct: false },
+          { text: "To reach a ribosome in the cytoplasm, where translation into protein occurs.", correct: true },
+          { text: "To undergo replication into more DNA.", correct: false },
+          { text: "It doesn't — mRNA stays in the nucleus.", correct: false }
         ],
-        explanation: "DNA's two strands run in opposite (antiparallel) directions: while one strand reads 5' to 3', its complementary partner runs 3' to 5'."
+        explanation: "mRNA moves out of the nucleus into the cytoplasm to find a ribosome, the site where translation (making protein from RNA) occurs."
       }
     },
     {
-      id: "2.6",
-      title: "Transcription: DNA to RNA",
-      img: "../assets/img/module2/transcription-output.png",
-      imgAlt: "Diagram of transcription producing an RNA strand from a DNA template",
-      caption: "Transcription produces a single-stranded RNA molecule carrying the new genetic code copied from the DNA template strand. (Image from Biorender)",
+      id: "d5r", type: "read", part: PART2, title: "Translation: Ribosomes, tRNA, and the Codon Table",
       html: `
-        <p>DNA has two strands with different jobs during transcription: the <strong>coding strand</strong> (the sequence you'd find written in a database) and the <strong>template strand</strong> (the complementary strand actually used to build RNA).</p>
-        <p>An enzyme called <strong>RNA polymerase</strong> attaches to the DNA template strand, separates the two DNA strands, and builds a new, complementary strand using RNA bases. Because the template strand pairs with RNA bases the same way it would pair with DNA (except using U instead of T), the resulting RNA strand ends up matching the original coding strand — with U substituted for T.</p>
-        <p>The output of transcription is a single-stranded RNA molecule carrying the same genetic message as the DNA coding strand.</p>
-      `,
+        <p>Ribosomes are tiny "protein factories" within the cytoplasm. In ribosomes, codons are read, and proteins are synthesized from the codon sequence. Codons are three-base sequences that code for a particular amino acid.</p>
+        <p>tRNAs (which carry amino acids corresponding to the codon of the mRNA) have complementary anticodons. They base-pair with the mRNA codons, then add new amino acids to the growing protein chain.</p>
+        <p>The codon table specifies the codons that map to each amino acid. Some amino acids can be coded for by multiple codons.</p>
+      `
+    },
+    {
+      id: "d5c", type: "practice", part: PART2, title: "Check Your Understanding: Translation",
       question: {
-        prompt: "During transcription, what does RNA polymerase use as its template?",
+        prompt: "What do tRNAs carry to the ribosome during translation?",
         options: [
-          { text: "The DNA coding strand", correct: false },
-          { text: "The DNA template strand", correct: true },
-          { text: "An existing RNA molecule", correct: false },
-          { text: "A finished protein", correct: false }
+          { text: "Copies of the DNA template strand", correct: false },
+          { text: "Amino acids, matched to mRNA codons via complementary anticodons", correct: true },
+          { text: "Extra ribosomes", correct: false },
+          { text: "The original coding strand", correct: false }
         ],
-        explanation: "RNA polymerase attaches to the DNA template strand and builds a complementary RNA strand from it, which ends up matching the original coding strand (with U instead of T)."
+        explanation: "tRNAs carry amino acids and have anticodons that base-pair with mRNA codons, adding the matching amino acid to the growing protein chain."
+      }
+    },
+
+    // ---------------- Part 3: Engineering Applications in Molecular Biology ----------------
+    {
+      id: "e1r", type: "read", part: PART3, title: "DNA Engineering Examples",
+      html: `
+        <p>The first example is genetically modified wheat. In this example, wheat is genetically modified with Hahb4, a drought-resistant gene present in sunflower seeds, to enable wheat to overcome drought seasons. In 2024, the USDA approved this genetic modification for wheat.</p>
+        <p>Sickle cell disease is an abnormal blood disorder that affects hemoglobin, the oxygen carrier in red blood cells, and can affect blood flow to the rest of the body. Casgevy is a CRISPR-Cas9 treatment that suppresses the BCL11A enhancer, causing elevated production of hemoglobin.</p>
+      `
+    },
+    {
+      id: "e1c", type: "practice", part: PART3, title: "Check Your Understanding: DNA Engineering",
+      question: {
+        prompt: "What gene is inserted into wheat to help it resist drought, according to this section?",
+        options: [
+          { text: "BCL11A", correct: false },
+          { text: "Hahb4, a drought-resistant gene from sunflower", correct: true },
+          { text: "TP53", correct: false },
+          { text: "Cas9", correct: false }
+        ],
+        explanation: "Hahb4, a drought-resistant gene present in sunflower seeds, was inserted into wheat to help it withstand drought — approved by the USDA in 2024."
       }
     },
     {
-      id: "2.7",
-      title: "mRNA Modifications",
-      img: "../assets/img/module2/transcription-modifications.png",
-      imgAlt: "Diagram of RNA being modified into mature mRNA",
-      caption: "Newly transcribed RNA is modified into mature messenger RNA (mRNA) before translation. (Image from Biorender)",
+      id: "e2r", type: "read", part: PART3, title: "RNA Engineering Examples",
       html: `
-        <p>The RNA that comes straight out of transcription isn't immediately ready for translation. It undergoes modifications that convert it into mature <strong>messenger RNA (mRNA)</strong>. These modifications serve three main purposes:</p>
+        <p>Perhaps the most famous example is the COVID-19 vaccine. This technology uses engineered mRNA to produce virus-like particles and antibodies to fight it, making the immune system more prepared to fight infections.</p>
+        <p>Patisiran uses RNA interference to reduce levels of transthyretin, helping treat transthyretin-mediated amyloidosis.</p>
+      `
+    },
+    {
+      id: "e2c", type: "practice", part: PART3, title: "Check Your Understanding: RNA Engineering",
+      question: {
+        prompt: "How does Patisiran work, according to this section?",
+        options: [
+          { text: "It edits DNA directly using CRISPR-Cas9.", correct: false },
+          { text: "It uses RNA interference to reduce levels of transthyretin, treating transthyretin-mediated amyloidosis.", correct: true },
+          { text: "It delivers virus-like particles to train the immune system.", correct: false },
+          { text: "It predicts 3D protein structures.", correct: false }
+        ],
+        explanation: "Patisiran uses RNA interference (RNAi) to reduce transthyretin levels, treating transthyretin-mediated amyloidosis."
+      }
+    },
+    {
+      id: "e3r", type: "read", part: PART3, title: "Protein Engineering Examples",
+      html: `
+        <p>Stanford Bioengineering Professor Michael Jewett's lab engineered enzymes that can convert waste carbon dioxide into useful body metabolites. The system is called the Reductive Formate Pathway (abbreviated ReForm). This research is inspiring other scientists to develop other ways to convert CO2 into useful energy.</p>
+        <p>CAR-T therapy is a type of protein engineering that engineers an individual's T-cells by adding a chimeric antigen receptor so they can recognize and degrade tumor cells.</p>
+        <p>AlphaFold is a software by Google DeepMind that can generate 3D protein structure predictions.</p>
+      `
+    },
+    {
+      id: "e3c", type: "practice", part: PART3, title: "Check Your Understanding: Protein Engineering",
+      question: {
+        prompt: "What does AlphaFold do?",
+        options: [
+          { text: "Edits DNA directly using guide RNA and Cas9.", correct: false },
+          { text: "Generates 3D protein structure predictions.", correct: true },
+          { text: "Delivers mRNA vaccines.", correct: false },
+          { text: "Engineers T-cells to recognize tumor cells.", correct: false }
+        ],
+        explanation: "AlphaFold, from Google DeepMind, generates 3D protein structure predictions — distinct from CAR-T therapy (engineered T-cells) and ReForm (engineered CO2-converting enzymes)."
+      }
+    },
+    {
+      id: "e4r", type: "read", part: PART3, title: "What Is p53?",
+      html: `
+        <p>p53 is a critical tumor-suppression protein. It is encoded by the gene TP53. When it is mutated, it suppresses the cell-division checkpoint, making cancerous cells more likely to accumulate.</p>
+        <p>For the discussion activity on the next page, you'll work with two references:</p>
         <ul>
-          <li>Signal to the cell that the RNA is ready to leave the nucleus</li>
-          <li>Prevent the RNA from being degraded in the cytoplasm</li>
-          <li>Help initiate translation once the RNA reaches a ribosome</li>
+          <li>The DNA sequence for TP53: <a href="https://www.ncbi.nlm.nih.gov/nuccore/NM_000546.6?report=fasta" target="_blank" rel="noopener">NCBI GenBank (FASTA)</a></li>
+          <li>The p53 protein structure: <a href="https://www.rcsb.org/structure/3TS8" target="_blank" rel="noopener">Protein Data Bank — 3TS8</a></li>
         </ul>
-      `,
+      `
+    },
+    {
+      id: "e4f", type: "freeresponse", part: PART3, title: "Discussion: Designing with p53",
+      freeResponse: {
+        prompt: "Using the TP53 sequence and p53 structure linked on the previous page:<br>1. Write out the transcribed RNA sequence (feel free to use an online tool to help with the DNA-to-RNA conversion).<br>2. Find the GC content (an online GC-calculator can help).<br>3. Identify the start and stop codons and the base numbers used to identify them, using the GenBank record.<br>4. Look up the p53 structure in the Protein Data Bank. p53 is a tetramer — explain what that means.<br><br>After posting, take a look at what your classmates wrote."
+      }
+    },
+
+    // ---------------- Part 4: Inserting Foreign DNA Into Cells ----------------
+    {
+      id: "i1r", type: "read", part: PART4, title: "Why and How We Edit DNA",
+      html: `
+        <p>Synthetic biology often involves editing damaged DNA or cell features, often involving adding, removing, or replacing certain parts of a DNA sequence.</p>
+        <p>One classic example is CRISPR-Cas9. CRISPR-Cas9 is a gene-editing technology that involves recruiting a guide RNA that recognizes the target DNA sequence, recruits a Cas9 enzyme to cut at that site, and then the cell's repair machinery edits the DNA by adding, deleting, or swapping DNA sequences.</p>
+        <p>To make edits, foreign genetic material is often inserted into cells. That genetic material can be DNA or RNA.</p>
+      `
+    },
+    {
+      id: "i1c", type: "practice", part: PART4, title: "Check Your Understanding: CRISPR-Cas9",
       question: {
-        prompt: "What is one purpose of the modifications that convert new RNA into mature mRNA?",
+        prompt: "In CRISPR-Cas9 gene editing, what does the guide RNA do?",
         options: [
-          { text: "To prevent the RNA from ever leaving the nucleus", correct: false },
-          { text: "To protect the RNA from degradation in the cytoplasm and help initiate translation", correct: true },
-          { text: "To convert the RNA back into DNA", correct: false },
-          { text: "To change the RNA's nucleobases from uracil back to thymine", correct: false }
+          { text: "It directly replaces the target DNA sequence.", correct: false },
+          { text: "It recognizes the target DNA sequence and recruits the Cas9 enzyme to cut it.", correct: true },
+          { text: "It repairs DNA after the cut is made.", correct: false },
+          { text: "It converts DNA into a plasmid.", correct: false }
         ],
-        explanation: "mRNA modifications signal that the RNA is ready to leave the nucleus, protect it from degradation in the cytoplasm, and help initiate translation."
+        explanation: "The guide RNA recognizes the target DNA sequence and recruits Cas9 to cut it there — the cell's own repair machinery then makes the edit."
       }
     },
     {
-      id: "2.8",
-      title: "Where Transcription Happens",
-      img: "../assets/img/module2/transcription-location.png",
-      imgAlt: "Diagram showing transcription location in the nucleus versus cytoplasm",
-      caption: "Transcription occurs in the nucleus for plant and mammalian cells, and in the cytoplasm for bacterial cells (which have no nucleus). (Image from Biorender)",
+      id: "i2r", type: "read", part: PART4, title: "Plasmids: Making DNA Insertable",
       html: `
-        <p>Where transcription physically happens in the cell depends on what kind of cell it is:</p>
+        <p>In order to insert DNA, it must be made into a circular shape to form a <strong>plasmid</strong>. Plasmids are circular DNA loops that are easy to insert into cells, because circular DNA has no exposed ends — which protects it from degradation — and circular DNA is compact. Since DNA can only work in the nucleus, it can get destroyed if inserted linearly, as it travels through the cytoplasm.</p>
+        <p>RNA, on the other hand, can be inserted in a linear shape; it doesn't have to be a plasmid shape like DNA to be successfully inserted into cells. The key reason: RNA works in the cytoplasm, so it can be immediately translated once it enters the cell. It doesn't have to survive cell division the way DNA does.</p>
+      `
+    },
+    {
+      id: "i2c", type: "practice", part: PART4, title: "Check Your Understanding: Plasmids",
+      question: {
+        prompt: "Why must DNA be made circular (a plasmid) to be inserted into cells, while RNA doesn't need to be?",
+        options: [
+          { text: "DNA needs to survive in the nucleus without exposed ends to avoid degradation; RNA works directly in the cytoplasm and doesn't need that protection.", correct: true },
+          { text: "RNA cannot be inserted into cells at all.", correct: false },
+          { text: "Circular DNA is easier to sequence.", correct: false },
+          { text: "Plasmids are only used for RNA delivery.", correct: false }
+        ],
+        explanation: "Circular DNA (a plasmid) has no exposed ends, protecting it from degradation as it travels to the nucleus. RNA works in the cytoplasm and can be translated immediately, so it can be inserted linearly."
+      }
+    },
+    {
+      id: "i3r", type: "read", part: PART4, title: "Delivery Mechanisms",
+      html: `
+        <p>Different delivery mechanisms are used to deliver foreign genetic material into cells:</p>
         <ul>
-          <li>In <strong>plant and mammalian cells</strong>, transcription occurs in the <strong>nucleus</strong>, where the DNA is housed.</li>
-          <li>In <strong>bacterial cells</strong>, which have no nucleus, transcription occurs directly in the <strong>cytoplasm</strong>.</li>
+          <li><strong>Viral vectors</strong> are harmless viruses that insert genetic material by "infecting" cells.</li>
+          <li><strong>Lipid nanoparticles</strong> are microscopic fat bubbles that encapsulate and deliver genetic material to cells.</li>
+          <li><strong>Lipoplexation</strong> uses positively-charged lipids that bind to negatively-charged DNA to deliver genetic material.</li>
+          <li><strong>Electroporation</strong> uses electrical pulses that poke holes in cell membranes so genetic material can travel inside.</li>
         </ul>
-        <p>This distinction traces back to Module 1: eukaryotic cells enclose their DNA in a nuclear membrane, while bacterial DNA sits freely in the cytoplasm — so transcription simply happens wherever the DNA already is.</p>
-      `,
+      `
+    },
+    {
+      id: "i3c", type: "practice", part: PART4, title: "Check Your Understanding: Delivery Mechanisms",
       question: {
-        prompt: "Which of the following is FALSE about transcription?",
+        prompt: "Which delivery mechanism uses electrical pulses to create temporary holes in the cell membrane?",
         options: [
-          { text: "It synthesizes a new RNA based on a template DNA sequence.", correct: false },
-          { text: "The output RNA is single stranded.", correct: false },
-          { text: "The RNA bases are A, C, U, and G.", correct: false },
-          { text: "Occurs in the nucleus for all cell types.", correct: true }
+          { text: "Viral vectors", correct: false },
+          { text: "Lipid nanoparticles", correct: false },
+          { text: "Lipoplexation", correct: false },
+          { text: "Electroporation", correct: true }
         ],
-        explanation: "This statement is false: transcription occurs in the cytoplasm for bacterial cells, since bacteria have no nucleus. It only occurs in the nucleus for plant and mammalian cells."
+        explanation: "Electroporation uses electrical pulses to poke temporary holes in cell membranes so genetic material can travel inside."
       }
     },
     {
-      id: "2.9",
-      title: "Amino Acids and Proteins",
-      img: "../assets/img/module2/amino-acids-polypeptide.png",
-      imgAlt: "Diagram of amino acids linking into a polypeptide chain",
-      caption: "Amino acids link together into polypeptide chains, the building blocks of proteins. (Images from Khan Academy and Biorender)",
+      id: "i4r", type: "read", part: PART4, title: "Stable vs. Transient Expression",
       html: `
-        <p>Proteins are built from smaller building blocks called <strong>amino acids</strong>. There are 20 key amino acids used across all of life, each with a different chemical side chain that gives it unique properties.</p>
-        <p>When amino acids link together in a chain, they form a <strong>polypeptide</strong> — and one or more folded polypeptide chains make up a functional protein. The specific sequence of amino acids in that chain is determined entirely by the sequence of the mRNA that gets translated, which is the process we cover next.</p>
-      `,
-      question: {
-        prompt: "What is formed when a chain of amino acids link together?",
-        options: [
-          { text: "A nucleotide", correct: false },
-          { text: "A polypeptide", correct: true },
-          { text: "A codon", correct: false },
-          { text: "A phospholipid", correct: false }
-        ],
-        explanation: "Amino acids link together to form a polypeptide chain, which folds into a functional protein."
-      }
+        <p><strong>Stable expression</strong> means that the foreign genetic material successfully integrates into the host cell's genome. <strong>Transient expression</strong> indicates that foreign genetic material does not integrate into the host cell's genome.</p>
+      `
     },
     {
-      id: "2.10",
-      title: "Translation in the Ribosome",
-      img: "../assets/img/module2/ribosome-codon-anticodon.png",
-      imgAlt: "Diagram of a ribosome matching a codon to a tRNA anticodon",
-      caption: "Inside the ribosome, tRNA anticodons match RNA codons to deliver the correct amino acid. (Image from Biorender)",
-      html: `
-        <p>Translation happens inside the <strong>ribosome</strong>. As the ribosome reads along an mRNA strand three bases at a time (a <strong>codon</strong>), a matching molecule called <strong>transfer RNA (tRNA)</strong> brings in the correct amino acid.</p>
-        <p>Each tRNA has an <strong>anticodon</strong> — a three-base sequence complementary to the mRNA codon it matches — attached to a specific amino acid. When the anticodon pairs with the codon, the ribosome adds that tRNA's amino acid to the growing polypeptide chain.</p>
-      `,
+      id: "i4c", type: "practice", part: PART4, title: "Check Your Understanding: Stable vs. Transient Expression",
       question: {
-        prompt: "What is the role of a tRNA's anticodon during translation?",
+        prompt: "What is the difference between stable and transient expression?",
         options: [
-          { text: "It stores the cell's long-term genetic material.", correct: false },
-          { text: "It pairs with the mRNA codon to deliver the matching amino acid.", correct: true },
-          { text: "It forms the sugar-phosphate backbone of DNA.", correct: false },
-          { text: "It separates the two DNA strands before transcription.", correct: false }
+          { text: "Stable expression means the genetic material integrates into the host genome; transient expression means it does not.", correct: true },
+          { text: "Stable expression only applies to RNA; transient expression only applies to DNA.", correct: false },
+          { text: "There is no difference — the terms are interchangeable.", correct: false },
+          { text: "Transient expression lasts longer than stable expression.", correct: false }
         ],
-        explanation: "Each tRNA carries an anticodon that pairs with a complementary codon on the mRNA, delivering the correct amino acid to the growing polypeptide chain."
-      }
-    },
-    {
-      id: "2.11",
-      title: "Reading a Codon Table",
-      img: "../assets/img/module2/codon-table-example.png",
-      imgAlt: "A codon table showing AUG coding for Methionine",
-      caption: "A codon table maps each three-base RNA codon to the amino acid it encodes — for example, AUG codes for Methionine. (Image from Khan Academy)",
-      html: `
-        <p>Because each codon is three RNA bases long, and there are four possible bases, there are 64 possible codons — far more than the 20 amino acids they need to encode. A <strong>codon table</strong> is the reference chart that maps each three-base codon to the amino acid (or stop signal) it represents.</p>
-        <p>For example, the codon <strong>AUG</strong> codes for the amino acid <strong>Methionine (Met)</strong>. Handily, AUG doubles as the universal <strong>start codon</strong> — the signal that tells the ribosome where to begin translating.</p>
-      `,
-      question: {
-        prompt: "What does the codon AUG represent?",
-        options: [
-          { text: "A stop codon that ends translation", correct: false },
-          { text: "The start codon, which codes for Methionine", correct: true },
-          { text: "A nucleotide found only in DNA", correct: false },
-          { text: "An anticodon on a ribosome", correct: false }
-        ],
-        explanation: "AUG is the start codon, which also codes for the amino acid Methionine (Met) — it's where the ribosome begins reading the mRNA sequence."
-      }
-    },
-    {
-      id: "2.12",
-      title: "Summary of Translation",
-      img: "../assets/img/module2/translation-summary.png",
-      imgAlt: "Summary diagram of translation from start codon to stop codon",
-      caption: "Translation begins at a start codon (AUG) and ends at a stop codon, reading three bases at a time. (Image from Khan Academy)",
-      html: `
-        <p>Putting it all together, translation follows a consistent process:</p>
-        <ul>
-          <li>RNA synthesized in the nucleus travels to the cytoplasm.</li>
-          <li>Ribosomes attach to the RNA and begin reading its sequence.</li>
-          <li>The ribosome finds the <strong>start codon (AUG)</strong> and begins translating from there.</li>
-          <li>Every three RNA bases form a codon, each coding for one amino acid.</li>
-          <li>Translation continues until the ribosome reaches a <strong>stop codon</strong>: UAA, UAG, or UGA.</li>
-        </ul>
-      `,
-      question: {
-        prompt: "Which of the following is a stop codon that ends translation?",
-        options: [
-          { text: "AUG", correct: false },
-          { text: "UGA", correct: true },
-          { text: "CCU", correct: false },
-          { text: "GGA", correct: false }
-        ],
-        explanation: "UGA (along with UAA and UAG) is a stop codon. When the ribosome reaches one of these, translation ends and no additional amino acid is added."
-      }
-    },
-    {
-      id: "2.13",
-      title: "Translation Practice Example",
-      img: "../assets/img/module2/translation-example.png",
-      imgAlt: "Worked example translating an RNA sequence into amino acids",
-      caption: "Worked example: translating an RNA sequence into its amino acid chain using the start and stop codons. (Image from Khan Academy)",
-      html: `
-        <p>Let's apply what we've learned to an actual RNA sequence:</p>
-        <p style="font-family:monospace;background:#f1f4f9;padding:8px 10px;border-radius:6px;">AAU AUG CGU GGG GAU UAC UGA UUU</p>
-        <p>Scanning left to right, the first <strong>AUG</strong> marks the start codon. From there, each following triplet is read as a codon: CGU (Arg), GGG (Gly), GAU (Asp), UAC (Tyr) — until we hit <strong>UGA</strong>, the stop codon, which ends translation. Bases before the start codon and after the stop codon are not translated.</p>
-      `,
-      question: {
-        prompt: "What will the protein output of the RNA sequence AAUAUGCGUGGGGAUUACUGAUUU be?",
-        options: [
-          { text: "Met-Arg-Gly-Asp-Tyr", correct: true },
-          { text: "Asn-Met-Arg-Gly-Asp", correct: false },
-          { text: "Met-Arg-Gly-Asp-Tyr-Stop-Phe", correct: false },
-          { text: "The entire sequence is untranslatable", correct: false }
-        ],
-        explanation: "AUG is the start codon (codes for Met). Reading three bases at a time from there: CGU (Arg), GGG (Gly), GAU (Asp), UAC (Tyr), then UGA is the stop codon. So the protein is Met-Arg-Gly-Asp-Tyr."
+        explanation: "Stable expression means the foreign genetic material integrates into the host cell's genome; transient expression means it does not integrate."
       }
     }
   ]

@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>About — SynBase</title>
-<link rel="stylesheet" href="css/style.css?v=48">
+<link rel="stylesheet" href="css/style.css?v=51">
 </head>
 <body>
 
@@ -16,7 +16,7 @@
     <div>
       <span class="landing-hero-badge">Built on a real Stanford iGEM SiBRP session</span>
       <h1>Where curiosity meets molecular biology.</h1>
-      <p class="lede">A free, self-paced curriculum adapted from a real Stanford iGEM Bioengineering Research Program session — cells, DNA, and the engineering built on top of them, one lesson at a time.</p>
+      <p class="lede">A free, self-paced curriculum adapted from a real Stanford iGEM Bioengineering Research Program session — iGEM, bioengineering, cells, and DNA, with more modules on the way.</p>
       <div class="landing-hero-ctas">
         <a class="btn" href="signup.html">Start Learning</a>
         <a class="btn secondary" href="#how-it-works">See How It Works</a>
@@ -31,8 +31,8 @@
 <!-- Real stats pulled straight from the curriculum data, not placeholders -->
 <section class="stats-band">
   <div class="stats-row">
-    <div class="stat-big tint-green"><span class="num">5</span><span class="label">Modules</span></div>
-    <div class="stat-big tint-purple"><span class="num">34</span><span class="label">Lessons</span></div>
+    <div class="stat-big tint-green"><span class="num" id="stat-modules">&mdash;</span><span class="label">Modules (More Coming)</span></div>
+    <div class="stat-big tint-purple"><span class="num" id="stat-lessons">&mdash;</span><span class="label">Lessons</span></div>
     <div class="stat-big tint-blue"><span class="num">100%</span><span class="label">Free</span></div>
   </div>
 </section>
@@ -59,7 +59,7 @@
       </div>
       <div class="step-copy">
         <h3>1. Work through a module</h3>
-        <p>Five modules, unlocked in order, walking from the biology of cells through DNA, engineering applications, and gene delivery.</p>
+        <p>Modules unlock in order, one page at a time — each lesson is its own page, with more modules being added as the curriculum grows.</p>
       </div>
     </div>
     <div class="step-row">
@@ -76,8 +76,8 @@
         <svg viewBox="0 0 20 20" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3h4"/><path d="M9 3v5.5L4.8 15a1.5 1.5 0 0 0 1.3 2.3h7.8a1.5 1.5 0 0 0 1.3-2.3L11 8.5V3"/><path d="M6.5 12.5h7"/></svg>
       </div>
       <div class="step-copy">
-        <h3>3. Try hands-on activities</h3>
-        <p>Work through a real p53 gene sequence and visualize its protein structure, just like students did in the original session.</p>
+        <h3>3. Explore real examples</h3>
+        <p>See how the ideas in each module show up in real iGEM projects, from the same session students went through live.</p>
       </div>
     </div>
     <div class="step-row">
@@ -112,8 +112,8 @@
     <div class="trial-copy">
       <p class="about-eyebrow">Interactive Trial</p>
       <h2>Try a real lesson question right now</h2>
-      <p>This is an actual check-your-understanding question from Module 1. Every module ends with one just like it.</p>
-      <a class="btn" href="signup.html">Unlock All 34 Lessons</a>
+      <p>This is an actual check-your-understanding page from Module 1. Every lesson ends with one just like it.</p>
+      <a class="btn" href="signup.html">Unlock the Full Curriculum</a>
     </div>
     <div class="quiz-box" id="trial-quiz"></div>
   </div>
@@ -175,7 +175,7 @@
     </div>
     <div class="split-cta-card tint-purple">
       <h3>Ready to apply?</h3>
-      <p>Finish all five modules to unlock the SiBRP application — or check if you've been invited to apply as a TA.</p>
+      <p>Finish every module to unlock the SiBRP application — or check if you've been invited to apply as a TA.</p>
       <a class="btn small" href="signup.html">Get Started</a>
     </div>
   </div>
@@ -183,8 +183,8 @@
 
 <!-- Final CTA banner -->
 <section class="cta-banner">
-  <h2>Ready to see what cells, DNA, and bioengineering have in common?</h2>
-  <p>Module 1 starts with the basics — no background in biology required.</p>
+  <h2>Ready to see what iGEM, synthetic biology, and bioengineering have in common?</h2>
+  <p>Module 1 starts with the basics — no background in biology or engineering required.</p>
   <a class="btn" href="signup.html">Start the Curriculum</a>
 </section>
 
@@ -219,9 +219,10 @@
   </div>
 </footer>
 
-<script src="js/modules-meta.js?v=6"></script>
+<script src="js/modules-meta.js?v=10"></script>
+<script src="js/course-outline.js?v=9"></script>
 <script src="js/portfolio-data.js?v=2"></script>
-<script src="js/progress.js?v=19"></script>
+<script src="js/progress.js?v=21"></script>
 <script>
 function escapeHtml(str) {
   const div = document.createElement("div");
@@ -240,8 +241,11 @@ const EXPLORE_TINTS = ["green", "purple", "blue"];
 const ARROW_ICON = `<svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 15L15 5M7 5h8v8"/></svg>`;
 
 function renderExploreGrid(mountEl) {
-  // Module 5 (Review & Wrap-Up) omitted from this preview grid for now.
-  mountEl.innerHTML = MODULES_META.filter(m => m.id !== "module5").map((m, i) => `
+  if (!MODULES_META.length) {
+    mountEl.innerHTML = `<div class="explore-empty">New modules are on the way — check back soon.</div>`;
+    return;
+  }
+  mountEl.innerHTML = MODULES_META.map((m, i) => `
     <a class="explore-card tint-${EXPLORE_TINTS[i % EXPLORE_TINTS.length]}" href="signup.html">
       <span class="explore-card-arrow">${ARROW_ICON}</span>
       <div class="explore-card-icon">${MODULE_ICONS[i % MODULE_ICONS.length]}</div>
@@ -251,37 +255,22 @@ function renderExploreGrid(mountEl) {
   `).join("");
 }
 
-async function renderHighlightsGrid(mountEl) {
-  const res = await fetch("/api/portfolio-projects");
-  const data = await res.json();
-  const featured = (data.projects || []).slice(0, 3);
-  if (!featured.length) {
-    mountEl.innerHTML = `<div class="portfolio-empty">No projects added yet — check back soon.</div>`;
-    return;
-  }
-  mountEl.innerHTML = featured.map(p => `
-    <a class="portfolio-card" href="project.html?id=${encodeURIComponent(p.id)}">
-      <div class="portfolio-thumb chip-${p.accent}">${p.image ? `<img src="${escapeHtml(p.image)}" alt="${escapeHtml(p.title)}" loading="lazy">` : escapeHtml(initials(p.student))}</div>
-      <div class="portfolio-body">
-        <span class="portfolio-tag chip-${p.accent}">${escapeHtml(p.tag)}${p.year ? " &middot; " + escapeHtml(p.year) : ""}</span>
-        <h3>${escapeHtml(p.title)}</h3>
-        <div class="portfolio-student">${escapeHtml(p.student)}</div>
-        <p>${escapeHtml(p.shortDescription)}</p>
-      </div>
-    </a>
-  `).join("");
+function renderCurriculumStats() {
+  const lessonCount = MODULES_META.reduce((sum, m) => sum + (COURSE_OUTLINE[m.id] || []).length, 0);
+  document.getElementById("stat-modules").textContent = MODULES_META.length;
+  document.getElementById("stat-lessons").textContent = lessonCount;
 }
 
 // Real question from Module 1 — kept in sync by hand since this is just a preview copy.
 const TRIAL_QUESTION = {
-  prompt: "What best describes the relationship between cells and DNA?",
+  prompt: "According to Module 1, what have iGEM alumni founded more than 300 of?",
   options: [
-    { text: "DNA is found outside of cells, in the extracellular matrix.", correct: false },
-    { text: "Cells are the building blocks of life, and DNA inside them acts as an instructional manual.", correct: true },
-    { text: "Cells are made of DNA, but DNA does not control the cell's function.", correct: false },
-    { text: "Only bacterial cells contain DNA.", correct: false }
+    { text: "Registry parts", correct: false },
+    { text: "Ventures — including companies like Benchling and Ginkgo Bioworks", correct: true },
+    { text: "Villages", correct: false },
+    { text: "Countries", correct: false }
   ],
-  explanation: "Cells are the basic building blocks of biological life, and the DNA housed inside them stores the instructions that make each organism — and each of us — unique."
+  explanation: "iGEM alumni have founded more than 300 ventures, including companies like Benchling and Ginkgo Bioworks — one of several stats (100,000+ iGEMers, 5,000+ projects, 84,000+ registry parts) that show the scale of the iGEM community."
 };
 
 function renderTrialQuiz(mountEl) {
@@ -320,8 +309,30 @@ function renderTrialQuiz(mountEl) {
   });
 }
 
+async function renderHighlightsGrid(mountEl) {
+  const res = await fetch("/api/portfolio-projects");
+  const data = await res.json();
+  const featured = (data.projects || []).slice(0, 3);
+  if (!featured.length) {
+    mountEl.innerHTML = `<div class="portfolio-empty">No projects added yet — check back soon.</div>`;
+    return;
+  }
+  mountEl.innerHTML = featured.map(p => `
+    <a class="portfolio-card" href="project.html?id=${encodeURIComponent(p.id)}">
+      <div class="portfolio-thumb chip-${p.accent}">${p.image ? `<img src="${escapeHtml(p.image)}" alt="${escapeHtml(p.title)}" loading="lazy">` : escapeHtml(initials(p.student))}</div>
+      <div class="portfolio-body">
+        <span class="portfolio-tag chip-${p.accent}">${escapeHtml(p.tag)}${p.year ? " &middot; " + escapeHtml(p.year) : ""}</span>
+        <h3>${escapeHtml(p.title)}</h3>
+        <div class="portfolio-student">${escapeHtml(p.student)}</div>
+        <p>${escapeHtml(p.shortDescription)}</p>
+      </div>
+    </a>
+  `).join("");
+}
+
 (async () => {
   await renderPublicHeader(document.getElementById("site-header"), true);
+  renderCurriculumStats();
   renderExploreGrid(document.getElementById("explore-grid"));
   await renderHighlightsGrid(document.getElementById("highlights-grid"));
   renderTrialQuiz(document.getElementById("trial-quiz"));

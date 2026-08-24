@@ -1,50 +1,44 @@
 // Lightweight outline (titles only, no article/quiz bodies) so the homepage
 // can list every lesson Khan-Academy-style without loading each module's full
-// inline content script. Titles/ids must stay in sync with the section data
-// defined inline in modules/moduleN.html.
+// inline content script. Each topic now maps to two pages inside the module
+// (a "read" page and a "check"/practice page — see modules/moduleN.html),
+// so each entry carries both page ids. `part` groups topics under the same
+// "Part X" heading used inside the module itself; omit it for modules with
+// no part grouping. Titles/ids must stay in sync with modules/moduleN.html.
 const COURSE_OUTLINE = {
+  module0: [
+    { title: "Welcome to SynBase", readId: "0.1r", checkId: "0.1c" }
+  ],
   module1: [
-    { id: "1.1", title: "Cells: The Building Blocks of Life" },
-    { id: "1.2", title: "DNA Is Housed Within Cells" },
-    { id: "1.3", title: "The Three Domains of Life" },
-    { id: "1.4", title: "Model Organisms in Bioengineering" },
-    { id: "1.5", title: "Anatomy of a Bacterial Cell" },
-    { id: "1.6", title: "Anatomy of a Eukaryotic Cell" },
-    { id: "1.7", title: "The Extracellular Matrix" },
-    { id: "1.8", title: "The Cell Membrane and the Phospholipid Bilayer" }
+    { title: "What Is Stanford iGEM?", readId: "1.1r", checkId: "1.1c" },
+    { title: "From Biology to Engineering", readId: "1.2r", checkId: "1.2c" },
+    { title: "Where Synthetic Biology Fits In", readId: "1.3r", checkId: "1.3c" },
+    { title: "A Very Quick History of Synthetic Biology", readId: "1.4r", checkId: "1.4c" },
+    { title: "The Many Applications of Synthetic Biology", readId: "1.5r", checkId: "1.5c" },
+    { title: "Synthetic Biology Is Only One Part of Bioengineering", readId: "1.6r", checkId: "1.6c" }
   ],
   module2: [
-    { id: "2.1", title: "The Central Dogma Overview" },
-    { id: "2.2", title: "Nucleotides: Building Blocks of DNA" },
-    { id: "2.3", title: "Nucleotides: Building Blocks of RNA" },
-    { id: "2.4", title: "Complementary Base-Pairing" },
-    { id: "2.5", title: "The Double Helix & Antiparallel Strands" },
-    { id: "2.6", title: "Transcription: DNA to RNA" },
-    { id: "2.7", title: "mRNA Modifications" },
-    { id: "2.8", title: "Where Transcription Happens" },
-    { id: "2.9", title: "Amino Acids and Proteins" },
-    { id: "2.10", title: "Translation in the Ribosome" },
-    { id: "2.11", title: "Reading a Codon Table" },
-    { id: "2.12", title: "Summary of Translation" },
-    { id: "2.13", title: "Translation Practice Example" }
-  ],
-  module3: [
-    { id: "3.1", title: "Engineering the Central Dogma: An Overview" },
-    { id: "3.2", title: "Engineering DNA: From Crops to CRISPR Therapies" },
-    { id: "3.3", title: "Engineering RNA: Vaccines and RNA Interference" },
-    { id: "3.4", title: "Engineering Proteins: Enzymes, Cell Therapy, and AI" },
-    { id: "3.5", title: "Case Study: Visualizing the p53 Tumor-Suppressor Protein" },
-    { id: "3.6", title: "CRISPR-Cas9: Editing DNA with Precision" }
-  ],
-  module4: [
-    { id: "4.1", title: "Why Insert Foreign DNA Into Cells?" },
-    { id: "4.2", title: "Tools to Deliver Genetic Material Into Cells" },
-    { id: "4.3", title: "Stable vs. Transient Expression" },
-    { id: "4.4", title: "Plasmids: Easy-to-Insert Circular DNA" },
-    { id: "4.5", title: "Real-World Applications: Fluorescence and BioART" }
-  ],
-  module5: [
-    { id: "5.1", title: "Key Takeaways: Cells, DNA, and Synthetic Biology" },
-    { id: "5.2", title: "Guest Speaker and What's Next" }
+    { part: "Part 1: Biology of Cells", title: "Cells and DNA: An Overview", readId: "c1r", checkId: "c1c" },
+    { part: "Part 1: Biology of Cells", title: "The Three Domains of Life", readId: "c2r", checkId: "c2c" },
+    { part: "Part 1: Biology of Cells", title: "Model Cell Lines", readId: "c3r", checkId: "c3c" },
+    { part: "Part 1: Biology of Cells", title: "Anatomy of a Bacterial Cell", readId: "c4r", checkId: "c4c" },
+    { part: "Part 1: Biology of Cells", title: "Anatomy of a Eukaryotic Cell", readId: "c5r", checkId: "c5c" },
+    { part: "Part 1: Biology of Cells", title: "Outside the Cell: The ECM and Cell Membrane", readId: "c6r", checkId: "c6c" },
+
+    { part: "Part 2: Exploring DNA", title: "The Central Dogma", readId: "d1r", checkId: "d1c" },
+    { part: "Part 2: Exploring DNA", title: "DNA and RNA Bases", readId: "d2r", checkId: "d2c" },
+    { part: "Part 2: Exploring DNA", title: "The Double Helix and Antiparallel Strands", readId: "d3r", checkId: "d3c" },
+    { part: "Part 2: Exploring DNA", title: "From DNA to mRNA: Leaving the Nucleus", readId: "d4r", checkId: "d4c" },
+    { part: "Part 2: Exploring DNA", title: "Translation: Ribosomes, tRNA, and the Codon Table", readId: "d5r", checkId: "d5c" },
+
+    { part: "Part 3: Engineering Applications in Molecular Biology", title: "DNA Engineering Examples", readId: "e1r", checkId: "e1c" },
+    { part: "Part 3: Engineering Applications in Molecular Biology", title: "RNA Engineering Examples", readId: "e2r", checkId: "e2c" },
+    { part: "Part 3: Engineering Applications in Molecular Biology", title: "Protein Engineering Examples", readId: "e3r", checkId: "e3c" },
+    { part: "Part 3: Engineering Applications in Molecular Biology", title: "Discussion: Designing with p53", readId: "e4r", checkId: "e4f" },
+
+    { part: "Part 4: Inserting Foreign DNA Into Cells", title: "Why and How We Edit DNA", readId: "i1r", checkId: "i1c" },
+    { part: "Part 4: Inserting Foreign DNA Into Cells", title: "Plasmids: Making DNA Insertable", readId: "i2r", checkId: "i2c" },
+    { part: "Part 4: Inserting Foreign DNA Into Cells", title: "Delivery Mechanisms", readId: "i3r", checkId: "i3c" },
+    { part: "Part 4: Inserting Foreign DNA Into Cells", title: "Stable vs. Transient Expression", readId: "i4r", checkId: "i4c" }
   ]
 };

@@ -4,11 +4,14 @@
 // an application, and can reject bogus sectionIds — never trust the client
 // for either check. Keep this in sync with modules/moduleN.html.
 const MODULE_SECTION_IDS = {
-  module1: ["1.1", "1.2", "1.3", "1.4", "1.5", "1.6", "1.7", "1.8"],
-  module2: ["2.1", "2.2", "2.3", "2.4", "2.5", "2.6", "2.7", "2.8", "2.9", "2.10", "2.11", "2.12", "2.13"],
-  module3: ["3.1", "3.2", "3.3", "3.4", "3.5", "3.6"],
-  module4: ["4.1", "4.2", "4.3", "4.4", "4.5"],
-  module5: ["5.1", "5.2"]
+  module0: ["0.1r", "0.1c"],
+  module1: ["1.1r", "1.1c", "1.2r", "1.2c", "1.3r", "1.3c", "1.4r", "1.4c", "1.5r", "1.5c", "1.6r", "1.6c"],
+  module2: [
+    "c1r", "c1c", "c2r", "c2c", "c3r", "c3c", "c4r", "c4c", "c5r", "c5c", "c6r", "c6c",
+    "d1r", "d1c", "d2r", "d2c", "d3r", "d3c", "d4r", "d4c", "d5r", "d5c",
+    "e1r", "e1c", "e2r", "e2c", "e3r", "e3c", "e4r", "e4f",
+    "i1r", "i1c", "i2r", "i2c", "i3r", "i3c", "i4r", "i4c"
+  ]
 };
 
 function isValidSection(moduleId, sectionId) {
@@ -19,13 +22,14 @@ function isValidSection(moduleId, sectionId) {
 function isModuleComplete(progress, moduleId) {
   const sectionIds = MODULE_SECTION_IDS[moduleId];
   if (!sectionIds) return false;
-  const mod = (progress && progress[moduleId]) || { sections: {}, videoWatched: false };
-  const allSectionsDone = sectionIds.every(id => mod.sections && mod.sections[id]);
-  return allSectionsDone && !!mod.videoWatched;
+  const mod = (progress && progress[moduleId]) || { sections: {} };
+  return sectionIds.every(id => mod.sections && mod.sections[id]);
 }
 
 function isCourseComplete(progress) {
-  return Object.keys(MODULE_SECTION_IDS).every(moduleId => isModuleComplete(progress, moduleId));
+  const moduleIds = Object.keys(MODULE_SECTION_IDS);
+  if (!moduleIds.length) return false;
+  return moduleIds.every(moduleId => isModuleComplete(progress, moduleId));
 }
 
 module.exports = { MODULE_SECTION_IDS, isValidSection, isModuleComplete, isCourseComplete };

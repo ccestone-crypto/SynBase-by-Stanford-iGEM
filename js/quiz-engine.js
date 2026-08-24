@@ -1,25 +1,40 @@
-// Renders a full module page (video block, topic articles, quizzes, nav)
-// from a plain-data MODULE object defined inline in each modules/moduleN.html.
+// Renders a full module page as a Khan Academy-style, one-page-at-a-time
+// lesson flow, from a plain-data MODULE object defined inline in each
+// modules/moduleN.html.
 //
 // MODULE shape:
 // {
 //   id, number, title, lede,
-//   sections: [
+//   pages: [
 //     {
 //       id, title,
-//       img, imgAlt, caption,
-//       html: "<p>...</p>",              // article body, already-safe static HTML
+//       type: "read",                      // an article page
+//       html: "<p>...</p>"                  // already-safe static HTML
+//     },
+//     {
+//       id, title,
+//       type: "practice",                  // a check-your-understanding page
+//       part: "Part 2: Exploring DNA",      // optional — groups consecutive pages
 //       question: {
 //         prompt: "...",
 //         options: [{ text: "...", correct: true|false }, ...],
 //         explanation: "..."
-//       },
-//       freeResponse: {                    // optional, alongside or instead of `question`
-//         prompt: "..."                    // shown to the student; posting unlocks the discussion board
 //       }
+//     },
+//     {
+//       id, title,
+//       type: "freeresponse",              // a discussion-board reflection page
+//       freeResponse: { prompt: "..." }     // posting unlocks the discussion board
 //     }, ...
 //   ]
 // }
+//
+// `part` is optional per page — consecutive pages sharing the same `part`
+// string are grouped under one "Part X of Y" breadcrumb with their own dot
+// row, so a long module doesn't render one unreadable 30-dot bar. Pages with
+// no `part` are all treated as a single unlabeled group.
+
+let CURRENT_PAGE_INDEX = 0;
 
 function renderModulePage(MODULE) {
   const headerMount = document.getElementById("site-header");
@@ -34,11 +49,21 @@ function renderModulePage(MODULE) {
   }
 
   renderModuleHero(MODULE, meta);
-  renderVideoBlock(MODULE);
-  renderSections(MODULE);
-  renderFooterNav(MODULE);
+
+  CURRENT_PAGE_INDEX = resolveStartPageIndex(MODULE);
+  renderPageAt(MODULE, CURRENT_PAGE_INDEX);
 
   document.title = `${MODULE.title} — SynBase`;
+}
+
+function resolveStartPageIndex(MODULE) {
+  const hash = location.hash.replace(/^#page-/, "");
+  if (hash) {
+    const idx = MODULE.pages.findIndex(p => p.id === hash);
+    if (idx !== -1) return idx;
+  }
+  const firstIncomplete = MODULE.pages.findIndex(p => !isSectionComplete(MODULE.id, p.id));
+  return firstIncomplete === -1 ? 0 : firstIncomplete;
 }
 
 function renderLockedModule(MODULE) {
@@ -54,8 +79,8 @@ function renderLockedModule(MODULE) {
       </div>
     </div>
   `;
-  document.getElementById("video-block").innerHTML = "";
-  document.getElementById("topic-sections").innerHTML = `
+  document.getElementById("page-nav-mount").innerHTML = "";
+  document.getElementById("page-viewport").innerHTML = `
     <div class="locked-panel">
       <div class="locked-icon">${LOCK_ICON}</div>
       <h2>This module is locked</h2>
@@ -63,10 +88,7 @@ function renderLockedModule(MODULE) {
       <a class="btn" href="${prev.id}.html">Go to Module ${prev.number}</a>
     </div>
   `;
-  document.getElementById("module-footer-nav").innerHTML = `
-    <div><a class="btn secondary" href="${prev.id}.html">&larr; Module ${prev.number}: ${prev.title}</a></div>
-    <div><a class="btn secondary" href="../index.html">Back to Home &rarr;</a></div>
-  `;
+  document.getElementById("page-footer-nav").innerHTML = "";
 }
 
 function refreshModuleProgressBar(MODULE, meta) {
@@ -103,94 +125,135 @@ function renderModuleHero(MODULE, meta) {
   refreshModuleProgressBar(MODULE, meta);
 }
 
-function renderVideoBlock(MODULE) {
-  const el = document.getElementById("video-block");
-  const watched = isVideoWatched(MODULE.id);
-  el.innerHTML = `
-    <div class="container narrow">
-      <div class="video-block">
-        <h2>Preliminary Teaching Video</h2>
-        <p class="hint">Insert this module's teaching video here before class. Drop a file at
-          <code>assets/video/${MODULE.id}.mp4</code> and it will play automatically instead of this placeholder.</p>
-        <div class="video-placeholder">
-          <div class="icon">&#9654;</div>
-          <div><strong>No video uploaded yet</strong></div>
-          <div>Place a file named <code>${MODULE.id}.mp4</code> in <code>assets/video/</code></div>
-        </div>
-        <label class="watched-toggle">
-          <input type="checkbox" id="video-watched-checkbox" ${watched ? "checked" : ""}>
-          I watched the teaching video for this module
-        </label>
-      </div>
-    </div>
+// ---------- Page grouping (for the "Part X of Y" breadcrumb + dot rows) ----------
+function computePageGroups(MODULE) {
+  const groups = [];
+  MODULE.pages.forEach((page, i) => {
+    const label = page.part || null;
+    const last = groups[groups.length - 1];
+    if (last && last.label === label) last.end = i;
+    else groups.push({ label, start: i, end: i });
+  });
+  return groups;
+}
+
+function renderPageNavMount(MODULE, index) {
+  const groups = computePageGroups(MODULE);
+  const groupIdx = groups.findIndex(g => index >= g.start && index <= g.end);
+  const group = groups[groupIdx];
+  const mount = document.getElementById("page-nav-mount");
+
+  const breadcrumb = (groups.length > 1 && group.label)
+    ? `<div class="page-part-label">Part ${groupIdx + 1} of ${groups.length} &middot; ${group.label}</div>`
+    : "";
+
+  const dots = [];
+  for (let i = group.start; i <= group.end; i++) {
+    const p = MODULE.pages[i];
+    const state = i === index ? "current" : isSectionComplete(MODULE.id, p.id) ? "done" : "";
+    dots.push(`<button type="button" class="page-dot ${state}" data-page-index="${i}" title="${p.title}" aria-label="${p.title}"></button>`);
+  }
+
+  mount.innerHTML = `${breadcrumb}<div class="page-dot-row">${dots.join("")}</div>`;
+  mount.querySelectorAll(".page-dot").forEach(btn => {
+    btn.addEventListener("click", () => renderPageAt(MODULE, Number(btn.dataset.pageIndex)));
+  });
+}
+
+// ---------- Page body (one page visible at a time) ----------
+function renderPageAt(MODULE, index) {
+  CURRENT_PAGE_INDEX = index;
+  const page = MODULE.pages[index];
+  history.replaceState(null, "", `#page-${page.id}`);
+
+  renderPageNavMount(MODULE, index);
+
+  const el = document.getElementById("page-viewport");
+  if (page.type === "read") {
+    el.innerHTML = `
+      <article class="page-card page-read">
+        <h2>${page.title}</h2>
+        <div class="topic-text">${page.html}</div>
+      </article>
+    `;
+  } else if (page.type === "practice") {
+    el.innerHTML = `
+      <article class="page-card page-practice">
+        <div class="quiz-label">Check Your Understanding</div>
+        <h2>${page.title}</h2>
+        ${quizTemplate(page)}
+      </article>
+    `;
+    wireQuiz(MODULE, page, index);
+  } else if (page.type === "freeresponse") {
+    el.innerHTML = `
+      <article class="page-card page-practice">
+        <div class="quiz-label">Reflection</div>
+        <h2>${page.title}</h2>
+        ${freeResponseTemplate(page)}
+      </article>
+    `;
+    wireFreeResponse(MODULE, page, index);
+  }
+  window.scrollTo(0, 0);
+
+  renderPageFooterNav(MODULE, index);
+}
+
+function renderPageFooterNav(MODULE, index) {
+  const mount = document.getElementById("page-footer-nav");
+  const isFirst = index === 0;
+  const isLast = index === MODULE.pages.length - 1;
+  const metaIdx = MODULES_META.findIndex(m => m.id === MODULE.id);
+  const nextModule = MODULES_META[metaIdx + 1];
+
+  const continueLabel = !isLast
+    ? "Continue &rarr;"
+    : nextModule
+      ? `Finish Module &rarr; Module ${nextModule.number}`
+      : "Finish Module &rarr; Home";
+
+  mount.innerHTML = `
+    <button type="button" class="btn secondary" data-page-back ${isFirst ? "disabled" : ""}>&larr; Back</button>
+    <button type="button" class="btn" data-page-continue>${continueLabel}</button>
   `;
 
-  // If a real video file exists, swap the placeholder for a <video> element.
-  const probe = new Image();
-  const videoSrc = `../assets/video/${MODULE.id}.mp4`;
-  fetch(videoSrc, { method: "HEAD" }).then(res => {
-    if (res.ok) {
-      const placeholder = el.querySelector(".video-placeholder");
-      placeholder.outerHTML = `<video controls src="${videoSrc}"></video>`;
+  mount.querySelector("[data-page-back]").addEventListener("click", () => {
+    if (!isFirst) renderPageAt(MODULE, index - 1);
+  });
+  mount.querySelector("[data-page-continue]").addEventListener("click", () => {
+    const page = MODULE.pages[index];
+    if (page.type === "read" && !isSectionComplete(MODULE.id, page.id)) {
+      markSectionComplete(MODULE.id, page.id);
+      const meta = MODULES_META.find(m => m.id === MODULE.id);
+      refreshModuleProgressBar(MODULE, meta);
     }
-  }).catch(() => {});
-
-  const checkbox = document.getElementById("video-watched-checkbox");
-  checkbox.addEventListener("change", () => {
-    setVideoWatched(MODULE.id, checkbox.checked);
-    const meta = MODULES_META.find(m => m.id === MODULE.id);
-    refreshModuleProgressBar(MODULE, meta);
+    if (!isLast) {
+      renderPageAt(MODULE, index + 1);
+    } else if (nextModule) {
+      location.href = `${nextModule.id}.html`;
+    } else {
+      location.href = "../index.html";
+    }
   });
 }
 
-function renderSections(MODULE) {
-  const el = document.getElementById("topic-sections");
-  el.innerHTML = MODULE.sections.map((section, i) => sectionTemplate(MODULE, section, i)).join("");
-
-  MODULE.sections.forEach(section => {
-    wireQuiz(MODULE, section);
-    wireFreeResponse(MODULE, section);
-  });
-}
-
-function sectionTemplate(MODULE, section, index) {
-  const complete = isSectionComplete(MODULE.id, section.id);
-  const tint = moduleAccentClass(MODULE.number);
+// ---------- Practice (multiple-choice) pages ----------
+function quizTemplate(page) {
+  const q = page.question;
   return `
-    <article class="topic-article ${complete ? "is-complete" : ""}" id="section-${section.id}" data-section-id="${section.id}">
-      <div class="topic-article-header">
-        <span class="topic-index tint-${tint}">${complete ? "&#10003;" : index + 1}</span>
-        <h2>${section.title}</h2>
-      </div>
-      <div class="topic-body">
-        <figure class="topic-figure">
-          <img src="${section.img}" alt="${section.imgAlt}" loading="lazy">
-          <figcaption>${section.caption}</figcaption>
-        </figure>
-        <div class="topic-text">${section.html}</div>
-        ${section.question ? quizTemplate(section) : ""}
-        ${section.freeResponse ? freeResponseTemplate(section) : ""}
-      </div>
-    </article>
-  `;
-}
-
-function quizTemplate(section) {
-  const q = section.question;
-  return `
-    <div class="quiz-box" data-quiz-for="${section.id}">
-      <div class="quiz-label">Check Your Understanding</div>
+    <div class="quiz-box" data-quiz-for="${page.id}">
       <p class="quiz-question">${q.prompt}</p>
       <div class="quiz-options">
         ${q.options.map((opt, i) => `
           <label class="quiz-option" data-option-index="${i}">
-            <input type="radio" name="quiz-${section.id}" value="${i}">
+            <input type="radio" name="quiz-${page.id}" value="${i}">
             <span>${opt.text}</span>
           </label>
         `).join("")}
       </div>
       <div class="quiz-actions">
-        <button class="btn small" data-check-btn>Check Answer</button>
+        <button type="button" class="btn small" data-check-btn>Check Answer</button>
         <span class="quiz-feedback" data-feedback></span>
       </div>
       <div class="quiz-explanation" data-explanation>${q.explanation}</div>
@@ -198,9 +261,9 @@ function quizTemplate(section) {
   `;
 }
 
-function wireQuiz(MODULE, section) {
-  if (!section.question) return;
-  const box = document.querySelector(`.quiz-box[data-quiz-for="${section.id}"]`);
+function wireQuiz(MODULE, page, index) {
+  if (!page.question) return;
+  const box = document.querySelector(`.quiz-box[data-quiz-for="${page.id}"]`);
   if (!box) return;
   const checkBtn = box.querySelector("[data-check-btn]");
   const feedback = box.querySelector("[data-feedback]");
@@ -215,11 +278,11 @@ function wireQuiz(MODULE, section) {
       return;
     }
     const idx = Number(selected.value);
-    const isCorrect = !!section.question.options[idx].correct;
+    const isCorrect = !!page.question.options[idx].correct;
 
     options.forEach((opt, i) => {
       opt.classList.remove("correct", "incorrect");
-      if (section.question.options[i].correct) opt.classList.add("correct");
+      if (page.question.options[i].correct) opt.classList.add("correct");
       else if (i === idx) opt.classList.add("incorrect");
     });
 
@@ -227,26 +290,25 @@ function wireQuiz(MODULE, section) {
     feedback.className = "quiz-feedback " + (isCorrect ? "correct" : "incorrect");
     explanation.classList.add("show");
 
-    if (isCorrect) {
-      markSectionComplete(MODULE.id, section.id);
-      const articleEl = document.getElementById(`section-${section.id}`);
-      articleEl.classList.add("is-complete");
-      articleEl.querySelector(".topic-index").innerHTML = "&#10003;";
+    if (isCorrect && !isSectionComplete(MODULE.id, page.id)) {
+      markSectionComplete(MODULE.id, page.id);
       const meta = MODULES_META.find(m => m.id === MODULE.id);
       refreshModuleProgressBar(MODULE, meta);
+      renderPageNavMount(MODULE, index);
     }
   });
 }
 
-function freeResponseTemplate(section) {
-  const fr = section.freeResponse;
+// ---------- Free-response / discussion-board pages ----------
+function freeResponseTemplate(page) {
+  const fr = page.freeResponse;
   return `
-    <div class="free-response-box" data-fr-for="${section.id}">
-      <div class="free-response-label">Reflection <span class="fr-badge">Post to see what classmates wrote</span></div>
+    <div class="free-response-box" data-fr-for="${page.id}">
+      <div class="free-response-label"><span class="fr-badge">Post to see what classmates wrote</span></div>
       <p class="free-response-question">${fr.prompt}</p>
       <textarea class="free-response-input" data-fr-input rows="5" placeholder="Type your response here..." maxlength="4000"></textarea>
       <div class="free-response-actions">
-        <button class="btn small" data-fr-submit>Post Response</button>
+        <button type="button" class="btn small" data-fr-submit>Post Response</button>
         <span class="free-response-status" data-fr-status></span>
       </div>
       <div class="discussion-board" data-fr-board>
@@ -280,9 +342,9 @@ function renderBoardEntries(el, board) {
   });
 }
 
-function wireFreeResponse(MODULE, section) {
-  if (!section.freeResponse) return;
-  const box = document.querySelector(`.free-response-box[data-fr-for="${section.id}"]`);
+function wireFreeResponse(MODULE, page, index) {
+  if (!page.freeResponse) return;
+  const box = document.querySelector(`.free-response-box[data-fr-for="${page.id}"]`);
   if (!box) return;
   const input = box.querySelector("[data-fr-input]");
   const submitBtn = box.querySelector("[data-fr-submit]");
@@ -294,7 +356,7 @@ function wireFreeResponse(MODULE, section) {
   // discussion board only arrives in the response once they've already
   // answered — gated server-side, not something the client decides.
   renderBoardLocked(boardList);
-  fetch(`/api/free-response/${encodeURIComponent(MODULE.id)}/${encodeURIComponent(section.id)}`)
+  fetch(`/api/free-response/${encodeURIComponent(MODULE.id)}/${encodeURIComponent(page.id)}`)
     .then(res => res.ok ? res.json() : null)
     .then(data => {
       if (data && data.response) {
@@ -322,7 +384,7 @@ function wireFreeResponse(MODULE, section) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           moduleId: MODULE.id,
-          sectionId: section.id,
+          sectionId: page.id,
           answer
         })
       });
@@ -333,12 +395,12 @@ function wireFreeResponse(MODULE, section) {
       status.className = "free-response-status correct";
       renderBoardEntries(boardList, data.board);
 
-      markSectionComplete(MODULE.id, section.id);
-      const articleEl = document.getElementById(`section-${section.id}`);
-      articleEl.classList.add("is-complete");
-      articleEl.querySelector(".topic-index").innerHTML = "&#10003;";
-      const meta = MODULES_META.find(m => m.id === MODULE.id);
-      refreshModuleProgressBar(MODULE, meta);
+      if (!isSectionComplete(MODULE.id, page.id)) {
+        markSectionComplete(MODULE.id, page.id);
+        const meta = MODULES_META.find(m => m.id === MODULE.id);
+        refreshModuleProgressBar(MODULE, meta);
+        renderPageNavMount(MODULE, index);
+      }
     } catch (err) {
       status.textContent = err.message || "Couldn't post your response. Please try again.";
       status.className = "free-response-status incorrect";
@@ -346,15 +408,4 @@ function wireFreeResponse(MODULE, section) {
       submitBtn.disabled = false;
     }
   });
-}
-
-function renderFooterNav(MODULE) {
-  const el = document.getElementById("module-footer-nav");
-  const idx = MODULES_META.findIndex(m => m.id === MODULE.id);
-  const prev = MODULES_META[idx - 1];
-  const next = MODULES_META[idx + 1];
-  el.innerHTML = `
-    <div>${prev ? `<a class="btn secondary" href="${prev.id}.html">&larr; Module ${prev.number}: ${prev.title}</a>` : `<a class="btn secondary" href="../index.html">&larr; Home</a>`}</div>
-    <div>${next ? `<a class="btn" href="${next.id}.html">Module ${next.number}: ${next.title} &rarr;</a>` : `<a class="btn" href="../index.html">Back to Home &rarr;</a>`}</div>
-  `;
 }

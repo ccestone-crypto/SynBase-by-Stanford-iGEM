@@ -15,6 +15,20 @@ const ICONS = {
 function renderCourseHeader(mountEl) {
   const overall = overallProgress();
   const totalLessons = MODULES_META.reduce((sum, m) => sum + m.sectionCount, 0);
+
+  if (!MODULES_META.length) {
+    mountEl.innerHTML = `
+      <div class="container">
+        ${BRAND_MARK}
+        <div class="course-eyebrow">SynBase &rsaquo; Science</div>
+        <h1>Core Concepts in Molecular and Cellular Biology</h1>
+        <div class="course-meta">CURRICULUM COMING SOON</div>
+        <p class="course-intro">The curriculum is being rebuilt from scratch — new modules will appear here as they're added.</p>
+      </div>
+    `;
+    return;
+  }
+
   mountEl.innerHTML = `
     <div class="container">
       ${BRAND_MARK}
@@ -47,6 +61,15 @@ function renderLegend(mountEl) {
 }
 
 function renderUnitsAccordion(mountEl) {
+  if (!MODULES_META.length) {
+    mountEl.innerHTML = `
+      <div class="unit-empty-state">
+        <p>No modules are published yet — check back soon as the curriculum is rebuilt.</p>
+      </div>
+    `;
+    return;
+  }
+
   const firstIncompleteIdx = MODULES_META.findIndex(m => moduleProgress(m.id, m.sectionCount).pct < 100);
   const defaultOpenIdx = firstIncompleteIdx === -1 ? 0 : firstIncompleteIdx;
 
@@ -80,18 +103,23 @@ function renderUnitsAccordion(mountEl) {
       `;
     }
 
-    const rows = outline.map(section => {
-      const done = isSectionComplete(m.id, section.id);
-      const href = `${m.href}#section-${section.id}`;
+    const rows = outline.map((topic, i) => {
+      const done = isSectionComplete(m.id, topic.checkId);
+      const readHref = `${m.href}#page-${topic.readId}`;
+      const checkHref = `${m.href}#page-${topic.checkId}`;
+      const partHeading = (topic.part && topic.part !== (outline[i - 1] || {}).part)
+        ? `<div class="lesson-part-label">${topic.part}</div>`
+        : "";
       return `
+        ${partHeading}
         <div class="lesson-group">
-          <a class="lesson-row" href="${href}">
+          <a class="lesson-row" href="${readHref}">
             <span class="lesson-icon">${ICONS.reading}</span>
-            <span class="lesson-title">${section.title}</span>
+            <span class="lesson-title">${topic.title}</span>
           </a>
-          <a class="lesson-row" href="${href}">
+          <a class="lesson-row" href="${checkHref}">
             <span class="lesson-icon">${ICONS.practice}</span>
-            <span class="lesson-title">Check your understanding: ${section.title}</span>
+            <span class="lesson-title">Check your understanding: ${topic.title}</span>
             <span class="lesson-status ${done ? "is-done" : ""}">${done ? ICONS.statusDone : ICONS.statusOpen}</span>
           </a>
         </div>
@@ -125,6 +153,11 @@ function renderUnitsAccordion(mountEl) {
 }
 
 function renderUpNext(mountEl) {
+  if (!MODULES_META.length) {
+    mountEl.innerHTML = "";
+    return;
+  }
+
   const firstIncomplete = MODULES_META.find(m => moduleProgress(m.id, m.sectionCount).pct < 100);
   if (!firstIncomplete) {
     mountEl.innerHTML = `
@@ -139,13 +172,14 @@ function renderUpNext(mountEl) {
     return;
   }
   const outline = COURSE_OUTLINE[firstIncomplete.id] || [];
-  const nextSection = outline.find(s => !isSectionComplete(firstIncomplete.id, s.id)) || outline[0];
+  const nextTopic = outline.find(t => !isSectionComplete(firstIncomplete.id, t.readId) || !isSectionComplete(firstIncomplete.id, t.checkId));
+  const nextHref = nextTopic ? `${firstIncomplete.href}#page-${isSectionComplete(firstIncomplete.id, nextTopic.readId) ? nextTopic.checkId : nextTopic.readId}` : firstIncomplete.href;
   mountEl.innerHTML = `
     <div class="container">
       <div class="up-next-card">
         <div class="up-next-label">Up Next</div>
-        <div class="up-next-title">${firstIncomplete.title}${nextSection ? ": " + nextSection.title : ""}</div>
-        <a class="btn" href="${firstIncomplete.href}#section-${nextSection ? nextSection.id : ""}">Continue</a>
+        <div class="up-next-title">${firstIncomplete.title}${nextTopic ? ": " + nextTopic.title : ""}</div>
+        <a class="btn" href="${nextHref}">Continue</a>
       </div>
     </div>
   `;

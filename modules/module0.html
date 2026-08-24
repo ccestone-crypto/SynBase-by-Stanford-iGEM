@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 0: Introduction to SynBase — SynBase</title>
+<link rel="stylesheet" href="../css/style.css?v=51">
+</head>
+<body>
+
+<header class="site-header" id="site-header"></header>
+<section class="module-hero" id="module-hero"></section>
+
+<div class="container narrow">
+  <div class="page-nav-mount" id="page-nav-mount"></div>
+</div>
+<main class="container narrow" id="page-viewport"></main>
+<div class="container narrow">
+  <div class="page-footer-nav" id="page-footer-nav"></div>
+</div>
+
+<script src="../js/modules-meta.js?v=10"></script>
+<script src="../js/progress.js?v=21"></script>
+<script src="../js/quiz-engine.js?v=13"></script>
+<script>
+const MODULE = {
+  id: "module0",
+  number: 0,
+  title: "Introduction to SynBase",
+  lede: "Hello! We're so happy you made it here. Let's cover the basics before we dive in.",
+  pages: [
+    {
+      id: "0.1r", type: "read", title: "Welcome to SynBase",
+      html: `
+        <p><strong>SynBase</strong> was founded by the 2026 Stanford iGEM team to promote accessibility of synthetic biology education and share our love of the field along the way.</p>
+        <p>You're about to embark on a course carefully built by our team, piece by piece (or brick by brick, perchance), to equip you with a comprehensive introduction to principles of synthetic biology. This curriculum is separated into <strong>8 modules</strong>, with learning checks and interactive activities scattered throughout.</p>
+        <p>Learning is most effective when it's active! So we encourage you to find a quiet spot and complete this curriculum thoughtfully. Completion of SynBase also unlocks application to the <strong>Stanford iGEM Bioengineering Research Program (SiBRP)</strong>, a free online summer program for high school students and incoming college freshmen.</p>
+        <div class="topic-callout">
+          <div class="topic-callout-label">How Your Progress Works</div>
+          <p>Every quiz you answer and response you post is saved automatically to your account as you go — so you can pick up right where you left off, on any device, any time.</p>
+        </div>
+        <p>Without further ado, let's begin!</p>
+      `
+    },
+    {
+      id: "0.1c", type: "practice",
+      title: "Check Your Understanding: Welcome to SynBase",
+      question: {
+        prompt: "How many modules is the SynBase curriculum separated into?",
+        options: [
+          { text: "5", correct: false },
+          { text: "8", correct: true },
+          { text: "10", correct: false },
+          { text: "3", correct: false }
+        ],
+        explanation: "SynBase is separated into 8 modules, with learning checks and interactive activities scattered throughout."
+      }
+    }
+  ]
+};
+
+(async () => {
+  const user = await bootstrapAuthAndProgress(false);
+  if (!user) return;
+  renderModulePage(MODULE);
+})();
+</script>
+</body>
+</html>

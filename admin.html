@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin — SynBase</title>
-<link rel="stylesheet" href="css/style.css?v=48">
+<link rel="stylesheet" href="css/style.css?v=51">
 </head>
 <body>
 
@@ -22,14 +22,9 @@
   <div class="admin-table-wrap">
     <table class="admin-table" id="admin-table">
       <thead>
-        <tr>
+        <tr id="admin-table-head-row">
           <th>Student</th>
           <th>Joined</th>
-          <th>Module 1</th>
-          <th>Module 2</th>
-          <th>Module 3</th>
-          <th>Module 4</th>
-          <th>Module 5</th>
           <th>Overall</th>
           <th></th>
         </tr>
@@ -236,29 +231,22 @@
   </div>
 </main>
 
-<footer class="site-footer">
-  Adapted from Stanford iGEM Bioengineering Research Program (SiBRP), Session 2 — July 15th, 2026.
-</footer>
-
-<script src="js/modules-meta.js?v=6"></script>
+<script src="js/modules-meta.js?v=10"></script>
 <script src="js/portfolio-data.js?v=2"></script>
-<script src="js/progress.js?v=19"></script>
+<script src="js/progress.js?v=21"></script>
 <script>
 function calcModuleProgress(progress, moduleId, sectionCount) {
-  const mod = (progress && progress[moduleId]) || { sections: {}, videoWatched: false };
-  const completedSections = Object.keys(mod.sections || {}).filter(k => mod.sections[k]).length;
-  const total = sectionCount + 1;
-  const completed = completedSections + (mod.videoWatched ? 1 : 0);
-  return Math.round((completed / total) * 100);
+  const mod = (progress && progress[moduleId]) || { sections: {} };
+  const completed = Object.keys(mod.sections || {}).filter(k => mod.sections[k]).length;
+  return Math.round((completed / sectionCount) * 100);
 }
 
 function calcOverall(progress) {
   let completed = 0, total = 0;
   MODULES_META.forEach(m => {
-    const mod = (progress && progress[m.id]) || { sections: {}, videoWatched: false };
-    const completedSections = Object.keys(mod.sections || {}).filter(k => mod.sections[k]).length;
-    total += m.sectionCount + 1;
-    completed += completedSections + (mod.videoWatched ? 1 : 0);
+    const mod = (progress && progress[m.id]) || { sections: {} };
+    total += m.sectionCount;
+    completed += Object.keys(mod.sections || {}).filter(k => mod.sections[k]).length;
   });
   return total ? Math.round((completed / total) * 100) : 0;
 }
@@ -272,10 +260,19 @@ function pctCell(pct) {
   `;
 }
 
+const ADMIN_TABLE_COLSPAN = 4 + MODULES_META.length;
+
+function renderModuleColumnHeaders() {
+  const headRow = document.getElementById("admin-table-head-row");
+  const overallTh = headRow.querySelector("th:nth-last-child(2)");
+  const moduleThs = MODULES_META.map(m => `<th>Module ${m.number}</th>`).join("");
+  overallTh.insertAdjacentHTML("beforebegin", moduleThs);
+}
+
 async function loadUsers() {
   const res = await fetch("/api/admin/users");
   if (!res.ok) {
-    document.getElementById("admin-table-body").innerHTML = `<tr><td colspan="9">Could not load users.</td></tr>`;
+    document.getElementById("admin-table-body").innerHTML = `<tr><td colspan="${ADMIN_TABLE_COLSPAN}">Could not load users.</td></tr>`;
     return;
   }
   const data = await res.json();
@@ -285,7 +282,7 @@ async function loadUsers() {
 function renderUsers(users) {
   const body = document.getElementById("admin-table-body");
   if (!users.length) {
-    body.innerHTML = `<tr><td colspan="9">No accounts yet.</td></tr>`;
+    body.innerHTML = `<tr><td colspan="${ADMIN_TABLE_COLSPAN}">No accounts yet.</td></tr>`;
     return;
   }
   body.innerHTML = users.map(u => {
@@ -994,6 +991,7 @@ document.querySelectorAll(".app-subtabs").forEach(group => {
   }
   renderHeader(document.getElementById("site-header"), true);
   document.getElementById("brand-mark-mount").outerHTML = BRAND_MARK;
+  renderModuleColumnHeaders();
   loadUsers();
   sibrpApplicationSection.loadWindow();
   sibrpApplicationSection.loadQuestions();

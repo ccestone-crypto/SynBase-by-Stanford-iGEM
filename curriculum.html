@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Curriculum — SynBase</title>
-<link rel="stylesheet" href="css/style.css?v=48">
+<link rel="stylesheet" href="css/style.css?v=51">
 </head>
 <body>
 
@@ -28,18 +28,18 @@
 <!-- Stats band -->
 <section class="stats-band">
   <div class="stats-row">
-    <div class="stat-big tint-green"><span class="num">7</span><span class="label">Course Units</span></div>
-    <div class="stat-big tint-purple"><span class="num" id="completed-stat">—</span><span class="label">Learners Completed</span></div>
+    <div class="stat-big tint-green"><span class="num">6</span><span class="label">Course Units</span></div>
+    <div class="stat-big tint-purple"><span class="num" id="stat-live">&mdash;</span><span class="label">Live Now</span></div>
     <div class="stat-big tint-blue"><span class="num">100%</span><span class="label">Free</span></div>
   </div>
 </section>
 
-<!-- Purpose statement (placeholder — fill in) -->
+<!-- Purpose statement -->
 <section class="pillar-section">
   <div class="container">
     <div class="pillar-heading">
       <h2>About This Curriculum</h2>
-      <p>Add a description of this course's purpose and mission here — what it teaches, why it exists, and what completing it unlocks. <span class="placeholder-note">Placeholder — edit this section</span></p>
+      <p>SynBase was built by the Stanford iGEM team to make synthetic biology education accessible to anyone, anywhere. This curriculum walks from the basics of bioengineering and iGEM through the biology, engineering applications, and design process behind real synthetic biology projects — self-paced, free, and no background required. Completing it unlocks application to the Stanford iGEM Bioengineering Research Program (SiBRP), a free summer program for high schoolers and incoming college freshmen.</p>
     </div>
   </div>
 </section>
@@ -92,8 +92,8 @@
   </div>
 </footer>
 
-<script src="js/modules-meta.js?v=6"></script>
-<script src="js/progress.js?v=19"></script>
+<script src="js/modules-meta.js?v=10"></script>
+<script src="js/progress.js?v=21"></script>
 <script>
 function escapeHtml(str) {
   const div = document.createElement("div");
@@ -105,26 +105,32 @@ const CHEVRON_ICON = `<svg viewBox="0 0 20 20" width="14" height="14" fill="none
 const CHECK_ICON = `<svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5l3.5 3.5L16 6"/></svg>`;
 const CHIP_TINTS = ["green", "purple", "blue"];
 
-// Full course syllabus — provided directly by the program, not tied to the
-// interactive module system yet. Module 4-6 is one combined placeholder
-// entry until those units are split out and built.
+// Full course syllabus — the program's own curriculum outline. Module 4-6 is
+// one combined placeholder entry until those units are split out and built.
+// Modules 1 and 2 are live: they link straight into the real interactive
+// module instead of just listing objectives/topics.
 const SYLLABUS = [
   {
+    intro: true, chip: "0", title: "Introduction to SynBase",
+    live: true, moduleId: "module0",
+    single: "Hello! You're about to embark on a course built by the 2026 Stanford iGEM team, piece by piece, to give you a comprehensive introduction to synthetic biology — 8 modules, with learning checks and interactive activities scattered throughout. Completing it also unlocks application to the Stanford iGEM Bioengineering Research Program (SiBRP), a free summer program for high schoolers and incoming college freshmen."
+  },
+  {
     chip: "1", title: "Introduction to iGEM & Bioengineering", time: "Est. completion time: 30 min",
+    live: true, moduleId: "module1",
     objectives: [
-      "Define bioengineering as a field and describe its major subdisciplines (synthetic biology, genetic engineering, biomedical devices, etc.)",
-      "Explain this course's mission and structure, and what completing this course unlocks (a prerequisite for the mentored program)",
-      "Identify real-world examples of bioengineering's impact"
+      "Understand iGEM and its mission",
+      "Define bioengineering as a field and describe its major subdisciplines"
     ],
     topics: [
-      "What is bioengineering? Overview of subfields and how they relate",
       "What is iGEM, and Stanford iGEM specifically?",
-      "Landmark examples and why the field matters",
-      "Platform orientation: how to navigate the course, track progress, and get help"
+      "What is bioengineering? Overview of subfields and how they relate",
+      "Landmark examples and why the field matters"
     ]
   },
   {
-    chip: "2", title: "Core Concepts in Biology", time: "Est. completion time: 1 hr",
+    chip: "2", title: "Core Concepts in Molecular and Cellular Biology", time: "Est. completion time: 2 hours",
+    live: true, moduleId: "module2",
     objectives: [
       "Describe the central dogma of molecular biology (DNA → RNA → protein)",
       "Explain basic cell structure and function relevant to bioengineering",
@@ -210,17 +216,17 @@ const SYLLABUS = [
 
 function renderSyllabus(mountEl) {
   mountEl.innerHTML = SYLLABUS.map((m, i) => `
-    <details class="unit">
+    <details class="unit" ${m.live ? "open" : ""}>
       <summary class="unit-summary">
         <span class="unit-chevron">${CHEVRON_ICON}</span>
         <span class="unit-heading">
-          <span class="module-chip chip-${CHIP_TINTS[i % CHIP_TINTS.length]}">${m.closing ? CHECK_ICON : escapeHtml(m.chip)}</span>
+          <span class="module-chip chip-${CHIP_TINTS[i % CHIP_TINTS.length]}">${m.closing ? CHECK_ICON : m.intro ? "0" : escapeHtml(m.chip)}</span>
           <span class="unit-title-group">
-            <span class="unit-label">${m.closing ? "Closing Unit" : "Unit " + escapeHtml(m.chip)}</span>
+            <span class="unit-label">${m.closing ? "Closing Unit" : m.intro ? "Module 0" : "Unit " + escapeHtml(m.chip)}</span>
             <span class="unit-title">${escapeHtml(m.title)}${m.note ? " " + escapeHtml(m.note) : ""}</span>
           </span>
         </span>
-        ${m.time ? `<span class="unit-progress"><span class="unit-progress-pct">${escapeHtml(m.time.replace("Est. completion time: ", ""))}</span></span>` : ""}
+        ${m.live ? `<span class="live-badge">Live Now</span>` : m.time ? `<span class="unit-progress"><span class="unit-progress-pct">${escapeHtml(m.time.replace("Est. completion time: ", ""))}</span></span>` : ""}
       </summary>
       <div class="unit-body">
         ${m.single ? `<p class="unit-desc">${escapeHtml(m.single)}</p>` : `
@@ -229,25 +235,16 @@ function renderSyllabus(mountEl) {
           <h4 class="syllabus-subhead">Topics</h4>
           <ul class="syllabus-list">${m.topics.map(t => `<li>${escapeHtml(t)}</li>`).join("")}</ul>
         `}
+        ${m.live ? `<a class="btn small" href="signup.html">${m.intro ? "Start Module 0" : "Start Unit " + escapeHtml(m.chip)}</a>` : ""}
       </div>
     </details>
   `).join("");
 }
 
-async function renderCompletedStat(el) {
-  try {
-    const res = await fetch("/api/curriculum-stats");
-    const data = await res.json();
-    el.textContent = data.completedCount != null ? data.completedCount : "0";
-  } catch (e) {
-    el.textContent = "0";
-  }
-}
-
 (async () => {
   await renderPublicHeader(document.getElementById("site-header"), true);
   renderSyllabus(document.getElementById("syllabus-list"));
-  renderCompletedStat(document.getElementById("completed-stat"));
+  document.getElementById("stat-live").textContent = SYLLABUS.filter(m => m.live).length;
 })();
 </script>
 </body>
