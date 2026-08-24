@@ -1235,6 +1235,20 @@ a:hover { text-decoration: underline; }
 .cta-banner p { font-size: 1rem; color: rgba(255,255,255,0.85); max-width: 520px; margin: 0 auto 24px; }
 .cta-banner .btn { background: #fff; color: var(--syn-purple-dark); }
 .cta-banner .btn:hover { background: #f2f0fc; }
+.cta-banner .btn.secondary { background: transparent; color: #fff; border: 1.5px solid rgba(255,255,255,0.7); }
+.cta-banner .btn.secondary:hover { background: rgba(255,255,255,0.15); }
+
+/* ---------- Congratulations page ---------- */
+#confetti-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 500;
+}
+.congrats-mascot { height: 110px; width: auto; margin: 0 auto 12px; display: block; }
+.congrats-hero h1 { font-size: 2.2rem; margin: 0 0 12px; }
 
 /* ---------- Landing hero (split layout, about.html) ---------- */
 /* ---------- Centered hero variant (Stanford iGEM Team page) ---------- */

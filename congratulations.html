@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>You Finished! — SynBase</title>
+<link rel="stylesheet" href="css/style.css?v=52">
+</head>
+<body>
+
+<header class="site-header" id="site-header"></header>
+
+<canvas id="confetti-canvas" aria-hidden="true"></canvas>
+
+<section class="cta-banner congrats-hero">
+  <div class="container">
+    <img class="congrats-mascot" src="assets/img/site/Mascot Panels - transparent bg/203-success.png" alt="" width="140" height="140">
+    <h1>You did it!</h1>
+    <p id="congrats-copy">You've completed every module in SynBase so far — nice work.</p>
+    <div class="landing-hero-ctas" style="justify-content:center;">
+      <a class="btn" href="application.html">Apply to SiBRP</a>
+      <a class="btn secondary" href="index.html">Back to Home</a>
+    </div>
+  </div>
+</section>
+
+<main class="container narrow" style="padding:36px 24px;">
+  <div class="content-card" style="text-align:center;">
+    <h2>What's next?</h2>
+    <p>Completing SynBase unlocks application to the Stanford iGEM Bioengineering Research Program (SiBRP), a free summer program for high schoolers and incoming college freshmen. More modules are on the way, too — check back on your <a href="index.html">home page</a> any time.</p>
+  </div>
+</main>
+
+<script src="js/modules-meta.js?v=10"></script>
+<script src="js/course-outline.js?v=9"></script>
+<script src="js/progress.js?v=21"></script>
+<script>
+(async () => {
+  const user = await bootstrapAuthAndProgress(true);
+  if (!user) return;
+  renderHeader(document.getElementById("site-header"), true);
+
+  const overall = overallProgress();
+  if (overall.pct < 100) {
+    location.href = "index.html";
+    return;
+  }
+
+  const totalLessons = MODULES_META.reduce((sum, m) => sum + (COURSE_OUTLINE[m.id] || []).length, 0);
+  document.getElementById("congrats-copy").textContent =
+    `You've completed every module in SynBase so far — all ${MODULES_META.length} modules and ${totalLessons} lessons. Nice work.`;
+
+  runConfetti();
+})();
+
+function runConfetti() {
+  if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+  const canvas = document.getElementById("confetti-canvas");
+  const ctx = canvas.getContext("2d");
+  const colors = ["#0f5f38", "#7851b3", "#2f8fd6", "#e85fac", "#f2b93d"];
+  const COUNT = 160;
+  const GRAVITY = 0.12;
+  const DURATION = 4200;
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener("resize", resize);
+
+  const pieces = Array.from({ length: COUNT }, () => ({
+    x: Math.random() * canvas.width,
+    y: -20 - Math.random() * canvas.height * 0.5,
+    w: 6 + Math.random() * 5,
+    h: 8 + Math.random() * 7,
+    color: colors[Math.floor(Math.random() * colors.length)],
+    rotation: Math.random() * Math.PI * 2,
+    rotationSpeed: (Math.random() - 0.5) * 0.25,
+    vx: (Math.random() - 0.5) * 3,
+    vy: 2 + Math.random() * 3
+  }));
+
+  const start = performance.now();
+
+  function frame(now) {
+    const elapsed = now - start;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    pieces.forEach(p => {
+      p.vy += GRAVITY * 0.05;
+      p.x += p.vx;
+      p.y += p.vy;
+      p.rotation += p.rotationSpeed;
+
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rotation);
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+      ctx.restore();
+    });
+
+    if (elapsed < DURATION) {
+      requestAnimationFrame(frame);
+    } else {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      canvas.remove();
+      window.removeEventListener("resize", resize);
+    }
+  }
+  requestAnimationFrame(frame);
+}
+</script>
+</body>
+</html>

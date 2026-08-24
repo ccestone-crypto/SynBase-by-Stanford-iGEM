@@ -165,7 +165,7 @@ function renderUpNext(mountEl) {
         <div class="up-next-card">
           <div class="up-next-label">Up Next</div>
           <div class="up-next-title">You've completed every module — nice work!</div>
-          <a class="btn" href="${MODULES_META[MODULES_META.length - 1].href}">Review the Recap</a>
+          <a class="btn" href="congratulations.html">See Your Congratulations</a>
         </div>
       </div>
     `;

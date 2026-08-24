@@ -211,7 +211,7 @@ function renderPageFooterNav(MODULE, index) {
     ? "Continue &rarr;"
     : nextModule
       ? `Finish Module &rarr; Module ${nextModule.number}`
-      : "Finish Module &rarr; Home";
+      : "Finish the Curriculum &rarr;";
 
   mount.innerHTML = `
     <button type="button" class="btn secondary" data-page-back ${isFirst ? "disabled" : ""}>&larr; Back</button>
@@ -233,7 +233,7 @@ function renderPageFooterNav(MODULE, index) {
     } else if (nextModule) {
       location.href = `${nextModule.id}.html`;
     } else {
-      location.href = "../index.html";
+      location.href = "../congratulations.html";
     }
   });
 }
