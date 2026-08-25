@@ -123,19 +123,6 @@ const BRAND_MARK = `<div class="brand-mark"><span class="bar1"></span><span clas
 // ---------- Nav dropdown (groups the SiBRP course + TA applications) ----------
 const CHEVRON_DOWN = `<svg viewBox="0 0 20 20" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8l5 5 5-5"/></svg>`;
 
-function aboutNavDropdownHtml(prefix) {
-  return `
-    <div class="nav-dropdown">
-      <button type="button" class="nav-dropdown-toggle">About ${CHEVRON_DOWN}</button>
-      <div class="nav-dropdown-menu">
-        <a href="${prefix}about.html">About SynBase</a>
-        <a href="${prefix}stanford-igem-team.html">Stanford iGEM Team</a>
-        <a href="${prefix}igem.html">What Is iGEM?</a>
-      </div>
-    </div>
-  `;
-}
-
 function sibrpNavDropdownHtml(prefix, user) {
   return `
     <div class="nav-dropdown">
@@ -170,7 +157,7 @@ function wireNavDropdowns(mountEl) {
 // pages (renderPublicHeader).
 function headerNavHtml(prefix, user) {
   return `
-    ${aboutNavDropdownHtml(prefix)}
+    <a href="${prefix}about.html">About</a>
     <a href="${prefix}${user ? "index.html" : "curriculum.html"}">Curriculum</a>
     ${sibrpNavDropdownHtml(prefix, user)}
     <a href="${prefix}speaker-series.html">Speaker Series</a>

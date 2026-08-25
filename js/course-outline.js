@@ -13,7 +13,7 @@ const COURSE_OUTLINE = {
   ],
   module1: [
     { title: "What Is Stanford iGEM?", readId: "1.1r" },
-    { title: "From Biology to Engineering", readId: "1.2r" },
+    { title: "From Biology to Engineering", readId: "1.2r", checkId: "1.2m", checkTitle: "Matching Exercise: Biology vs. Engineering" },
     { title: "Where Synthetic Biology Fits In", readId: "1.3r" },
     { title: "A Very Quick History of Synthetic Biology", readId: "1.4r" },
     { title: "The Many Applications of Synthetic Biology", readId: "1.5r" },

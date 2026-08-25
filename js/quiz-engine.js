@@ -25,6 +25,14 @@
 //       id, title,
 //       type: "freeresponse",              // a discussion-board reflection page
 //       freeResponse: { prompt: "..." }     // posting unlocks the discussion board
+//     },
+//     {
+//       id, title,
+//       type: "matching",                  // a click-to-pair matching exercise
+//       matching: {
+//         instructions: "...",
+//         pairs: [{ left: "...", right: "..." }, ...]   // shuffled independently at render time
+//       }
 //     }, ...
 //   ]
 // }
@@ -194,6 +202,15 @@ function renderPageAt(MODULE, index) {
       </article>
     `;
     wireFreeResponse(MODULE, page, index);
+  } else if (page.type === "matching") {
+    el.innerHTML = `
+      <article class="page-card page-practice">
+        <div class="quiz-label">Matching Exercise</div>
+        <h2>${page.title}</h2>
+        ${matchingTemplate(page)}
+      </article>
+    `;
+    wireMatching(MODULE, page, index);
   }
   window.scrollTo(0, 0);
 
@@ -214,7 +231,7 @@ function renderPageFooterNav(MODULE, index) {
       : "Finish the Curriculum &rarr;";
 
   const page = MODULE.pages[index];
-  const needsAnswer = page.type === "practice" && !isSectionComplete(MODULE.id, page.id);
+  const needsAnswer = (page.type === "practice" || page.type === "matching") && !isSectionComplete(MODULE.id, page.id);
 
   mount.innerHTML = `
     <button type="button" class="btn secondary" data-page-back ${isFirst ? "disabled" : ""}>&larr; Back</button>
@@ -299,6 +316,89 @@ function wireQuiz(MODULE, page, index) {
       renderPageNavMount(MODULE, index);
       renderPageFooterNav(MODULE, index);
     }
+  });
+}
+
+// ---------- Matching-exercise pages ----------
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function matchingTemplate(page) {
+  const m = page.matching;
+  const left = shuffleArray(m.pairs.map((p, i) => ({ text: p.left, pairIndex: i })));
+  const right = shuffleArray(m.pairs.map((p, i) => ({ text: p.right, pairIndex: i })));
+  const col = items => items.map(item => `
+    <button type="button" class="matching-item" data-pair-index="${item.pairIndex}">${item.text}</button>
+  `).join("");
+  return `
+    <p class="quiz-question">${m.instructions}</p>
+    <div class="matching-box" data-matching-for="${page.id}">
+      <div class="matching-columns">
+        <div class="matching-col" data-side="left">${col(left)}</div>
+        <div class="matching-col" data-side="right">${col(right)}</div>
+      </div>
+      <p class="matching-status" data-matching-status></p>
+    </div>
+  `;
+}
+
+function wireMatching(MODULE, page, index) {
+  const box = document.querySelector(`.matching-box[data-matching-for="${page.id}"]`);
+  if (!box) return;
+  const total = page.matching.pairs.length;
+  const status = box.querySelector("[data-matching-status]");
+  let matchedCount = 0;
+  let selectedLeft = null;
+
+  function updateStatus() {
+    status.textContent = matchedCount === total ? "All matched — nice work!" : `${matchedCount}/${total} matched`;
+  }
+  updateStatus();
+
+  box.querySelectorAll('.matching-col[data-side="left"] .matching-item').forEach(btn => {
+    btn.addEventListener("click", () => {
+      if (btn.classList.contains("matched")) return;
+      box.querySelectorAll('.matching-col[data-side="left"] .matching-item').forEach(b => b.classList.remove("selected"));
+      btn.classList.add("selected");
+      selectedLeft = btn;
+    });
+  });
+
+  box.querySelectorAll('.matching-col[data-side="right"] .matching-item').forEach(btn => {
+    btn.addEventListener("click", () => {
+      if (btn.classList.contains("matched") || !selectedLeft) return;
+      const isCorrect = selectedLeft.dataset.pairIndex === btn.dataset.pairIndex;
+      if (isCorrect) {
+        selectedLeft.classList.remove("selected");
+        selectedLeft.classList.add("matched");
+        btn.classList.add("matched");
+        selectedLeft = null;
+        matchedCount++;
+        updateStatus();
+        if (matchedCount === total && !isSectionComplete(MODULE.id, page.id)) {
+          markSectionComplete(MODULE.id, page.id);
+          const meta = MODULES_META.find(m => m.id === MODULE.id);
+          refreshModuleProgressBar(MODULE, meta);
+          renderPageNavMount(MODULE, index);
+          renderPageFooterNav(MODULE, index);
+        }
+      } else {
+        const left = selectedLeft;
+        btn.classList.add("wrong");
+        left.classList.add("wrong");
+        setTimeout(() => {
+          btn.classList.remove("wrong");
+          left.classList.remove("wrong", "selected");
+        }, 450);
+        selectedLeft = null;
+      }
+    });
   });
 }
 

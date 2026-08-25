@@ -5,7 +5,7 @@
 // for either check. Keep this in sync with modules/moduleN.html.
 const MODULE_SECTION_IDS = {
   module0: ["0.1r"],
-  module1: ["1.1r", "1.2r", "1.3r", "1.4r", "1.5r", "1.6r"],
+  module1: ["1.1r", "1.2r", "1.2m", "1.3r", "1.4r", "1.5r", "1.6r"],
   module2: [
     "c1r", "c2r", "c3r", "c4r", "c5r", "c6r",
     "d1r", "d2r", "d3r", "d4r", "d5r",
