@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SynBase — Free Synthetic Biology Curriculum</title>
-<link rel="stylesheet" href="css/style.css?v=69">
+<link rel="stylesheet" href="css/style.css?v=70">
 </head>
 <body>
 
@@ -191,7 +191,9 @@ function renderExploreGrid(mountEl) {
 
 function renderCurriculumStats() {
   const lessonCount = MODULES_META.reduce((sum, m) => sum + (COURSE_OUTLINE[m.id] || []).length, 0);
-  document.getElementById("stat-modules").textContent = MODULES_META.length;
+  // Full planned curriculum size (see curriculum.html's syllabus), not just the
+  // modules built so far — the "More Coming" label makes that distinction clear.
+  document.getElementById("stat-modules").textContent = 8;
   document.getElementById("stat-lessons").textContent = lessonCount;
 }
 
