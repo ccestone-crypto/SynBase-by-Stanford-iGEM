@@ -749,15 +749,15 @@ app.post("/api/admin/reset-progress", requireAdmin, (req, res) => {
 });
 
 // ---------- Public landing ----------
-// The bare domain shows About (public) instead of the curriculum home, so
+// The bare domain shows Home (public) instead of the curriculum home, so
 // first-time visitors land on marketing content, not a login wall.
-app.get("/", (req, res) => res.redirect("/about.html"));
+app.get("/", (req, res) => res.redirect("/home.html"));
 
 // ---------- Protect the curriculum pages themselves ----------
 // Client-side JS already redirects unauthenticated visitors, but this stops
 // the HTML from being served at all without a valid session cookie.
 const PUBLIC_PATHS = new Set([
-  "/login.html", "/signup.html", "/about.html", "/curriculum.html", "/beyond-sibrp.html", "/project.html",
+  "/login.html", "/signup.html", "/home.html", "/about.html", "/curriculum.html", "/beyond-sibrp.html", "/project.html",
   "/forgot-password.html", "/reset-password.html"
 ]);
 const ADMIN_PATHS = new Set(["/admin.html"]);
