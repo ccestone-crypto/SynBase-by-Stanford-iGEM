@@ -97,7 +97,7 @@
   </div>
 </section>
 
-<!-- Beyond SiBRP highlights (real project data) -->
+<!-- Beyond SiBRP intro (project showcase removed, still linked from the CTA) -->
 <section class="highlights-section">
   <div class="container">
     <div class="highlights-head">
@@ -110,7 +110,6 @@
         </div>
       </div>
     </div>
-    <div class="highlights-grid" id="highlights-grid"></div>
   </div>
 </section>
 
@@ -207,27 +206,6 @@ function renderCurriculumStats() {
   document.getElementById("stat-lessons").textContent = lessonCount;
 }
 
-async function renderHighlightsGrid(mountEl) {
-  const res = await fetch("/api/portfolio-projects");
-  const data = await res.json();
-  const featured = (data.projects || []).slice(0, 3);
-  if (!featured.length) {
-    mountEl.innerHTML = `<div class="portfolio-empty">No projects added yet — check back soon.</div>`;
-    return;
-  }
-  mountEl.innerHTML = featured.map(p => `
-    <a class="portfolio-card" href="project.html?id=${encodeURIComponent(p.id)}">
-      <div class="portfolio-thumb chip-${p.accent}">${p.image ? `<img src="${escapeHtml(p.image)}" alt="${escapeHtml(p.title)}" loading="lazy">` : escapeHtml(initials(p.student))}</div>
-      <div class="portfolio-body">
-        <span class="portfolio-tag chip-${p.accent}">${escapeHtml(p.tag)}${p.year ? " &middot; " + escapeHtml(p.year) : ""}</span>
-        <h3>${escapeHtml(p.title)}</h3>
-        <div class="portfolio-student">${escapeHtml(p.student)}</div>
-        <p>${escapeHtml(p.shortDescription)}</p>
-      </div>
-    </a>
-  `).join("");
-}
-
 // Real question from Module 1 — kept in sync by hand since this is just a preview copy.
 const TRIAL_QUESTION = {
   prompt: "\"Prometheus: a large language model for synthetic biology\" (NJU, 2024) belongs to which iGEM village?",
@@ -280,7 +258,6 @@ function renderTrialQuiz(mountEl) {
   await renderPublicHeader(document.getElementById("site-header"), true);
   renderCurriculumStats();
   renderExploreGrid(document.getElementById("explore-grid"));
-  await renderHighlightsGrid(document.getElementById("highlights-grid"));
   renderTrialQuiz(document.getElementById("trial-quiz"));
 })();
 </script>
