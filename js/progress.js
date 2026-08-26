@@ -184,7 +184,7 @@ function renderHeaderCore(mountEl, fromRoot, user) {
   const prefix = fromRoot ? "" : "../";
   mountEl.innerHTML = `
     <div class="header-inner">
-      <a class="brand" href="${prefix}home.html"><img class="brand-logo" src="${prefix}assets/img/site/logo.png" alt="SynBase"><span class="brand-suffix">by Stanford iGEM</span></a>
+      <a class="brand" href="${prefix}home.html"><img class="brand-wordmark-img" src="${prefix}assets/img/site/synbase-wordmark.png" alt="SynBase"><span class="brand-suffix">by Stanford iGEM</span></a>
       <nav class="header-nav">${headerNavHtml(prefix, user)}</nav>
       <div class="header-actions">${headerActionsHtml(prefix, user)}</div>
     </div>
