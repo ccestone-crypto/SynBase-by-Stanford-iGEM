@@ -89,7 +89,7 @@ a:hover { text-decoration: underline; }
 .brand {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
   font-weight: 800;
   font-size: 1.1rem;
   color: var(--charcoal);
