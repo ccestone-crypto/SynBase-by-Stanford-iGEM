@@ -1546,6 +1546,7 @@ a:hover { text-decoration: underline; }
   border-bottom: 1px solid rgba(255,255,255,0.12);
 }
 .landing-footer-links { display: flex; gap: 40px; flex-wrap: wrap; }
+.landing-footer-logo { height: 100px; width: auto; flex: none; align-self: flex-start; }
 .landing-footer-col h4 { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; color: #8f8c82; margin: 0 0 12px; }
 .landing-footer-col a { display: block; color: #cfcdc5; font-size: 0.9rem; margin-bottom: 8px; }
 .landing-footer-col a:hover { color: #fff; text-decoration: none; }
