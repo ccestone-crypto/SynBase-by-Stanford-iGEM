@@ -1293,7 +1293,7 @@ a:hover { text-decoration: underline; }
 
 .quote-section { padding: 60px 24px; background: #fff; }
 .quote-card { max-width: 720px; margin: 0 auto; text-align: center; }
-.quote-mark { font-size: 3rem; line-height: 1; color: var(--syn-purple); font-weight: 800; margin-bottom: 8px; }
+.quote-mark { font-family: Georgia, 'Times New Roman', serif; font-size: 3rem; line-height: 1; color: var(--syn-purple); font-weight: 800; margin-bottom: 8px; }
 .quote-text { font-size: 1.3rem; font-style: italic; color: var(--ink-black); line-height: 1.5; margin: 0 0 16px; }
 .quote-attribution { font-size: 0.88rem; font-weight: 700; color: var(--ink-soft); }
 .quote-attribution .placeholder-note { display: block; margin: 10px auto 0; width: fit-content; }
