@@ -1194,59 +1194,68 @@ a:hover { text-decoration: underline; }
 .synbase-word-section .container { display: flex; align-items: center; justify-content: flex-start; gap: 48px; max-width: 1080px; }
 .synbase-word-image { width: 220px; height: auto; flex: none; margin-left: 32px; }
 .synbase-word-content { text-align: left; }
-.synbase-word { font-family: var(--font-display); font-size: 4.8rem; font-weight: 900; color: var(--charcoal); margin: 0 0 14px; letter-spacing: -1px; }
+.synbase-word { font-family: var(--font-display); font-size: 4.8rem; font-weight: 900; color: var(--charcoal); margin: 0; letter-spacing: -1px; cursor: default; }
 .synbase-word-hint { color: var(--ink-soft); font-size: 1.2rem; margin: 0 0 36px; }
-.synbase-defs { display: flex; flex-wrap: wrap; justify-content: flex-start; gap: 18px; margin: 0; }
+.synbase-defs {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 14px;
+  margin: 18px 0 0;
+}
 @media (max-width: 760px) {
   .synbase-word-section .container { flex-direction: column; text-align: center; gap: 24px; }
   .synbase-word-content { text-align: center; }
   .synbase-defs { justify-content: center; }
   .synbase-word-image { width: 170px; }
 }
-.synbase-def-chip {
+.synbase-def-brick {
   position: relative;
-  background: var(--syn-green-tint);
+  display: inline-block;
+  width: 130px;
+  height: 78px;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 8px 0 4px;
   color: var(--syn-green-dark);
   font-weight: 700;
   font-family: inherit;
-  padding: 15px 28px;
-  border-radius: 999px;
-  border: none;
   cursor: default;
-  font-size: 1.35rem;
+  font-size: 1.05rem;
 }
-.synbase-def-chip:nth-child(2) { background: var(--syn-purple-tint); color: var(--syn-purple-dark); }
-.synbase-def-chip:nth-child(3) { background: var(--syn-blue-tint); color: var(--syn-blue); }
-.synbase-def-chip:nth-child(4) { background: var(--syn-pink-tint); color: #a83c78; }
+.synbase-def-brick:nth-child(2) { color: var(--syn-purple-dark); }
+.synbase-def-brick:nth-child(3) { color: var(--syn-blue); }
+.synbase-def-brick:nth-child(4) { color: #a83c78; }
+.synbase-def-brick-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.synbase-def-label {
+  position: absolute;
+  top: 60%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  white-space: nowrap;
+}
 .synbase-def-tooltip {
   position: absolute;
   left: 50%;
   bottom: calc(100% + 14px);
   transform: translateX(-50%) translateY(6px);
-  width: 300px;
-  background: var(--charcoal);
-  color: #fff;
+  width: 280px;
+  background: #fff;
+  border: 2px solid currentColor;
+  border-radius: 3px;
+  box-shadow: 0 4px 0 0 currentColor;
   font-weight: 500;
-  font-size: 1rem;
+  font-size: 0.95rem;
   line-height: 1.5;
-  padding: 16px 18px;
-  border-radius: 12px;
+  padding: 14px 16px;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.15s ease, transform 0.15s ease;
   z-index: 20;
 }
-.synbase-def-tooltip::after {
-  content: "";
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  border: 6px solid transparent;
-  border-top-color: var(--charcoal);
-}
-.synbase-def-chip:hover .synbase-def-tooltip,
-.synbase-def-chip:focus-visible .synbase-def-tooltip { opacity: 1; transform: translateX(-50%) translateY(0); }
+.synbase-def-brick:hover .synbase-def-tooltip,
+.synbase-def-brick:focus-visible .synbase-def-tooltip { opacity: 1; transform: translateX(-50%) translateY(0); }
 @media (max-width: 640px) {
   .synbase-word { font-size: 3rem; }
   .synbase-def-tooltip { width: 220px; font-size: 0.9rem; }
