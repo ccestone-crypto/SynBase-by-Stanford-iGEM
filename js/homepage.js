@@ -21,7 +21,10 @@ function renderCourseHeader(mountEl) {
       <div class="container">
         ${BRAND_MARK}
         <div class="course-eyebrow">SynBase</div>
-        <h1>Curriculum</h1>
+        <div class="page-hero-title-row">
+          <h1>Curriculum</h1>
+          <img class="page-hero-mascot" src="assets/img/site/Mascot Panels - transparent bg/105-coding.png" alt="">
+        </div>
         <div class="course-meta">CURRICULUM COMING SOON</div>
         <p class="course-intro">The curriculum is being rebuilt from scratch — new modules will appear here as they're added.</p>
       </div>
@@ -33,7 +36,10 @@ function renderCourseHeader(mountEl) {
     <div class="container">
       ${BRAND_MARK}
       <div class="course-eyebrow">SynBase</div>
-      <h1>Curriculum</h1>
+      <div class="page-hero-title-row">
+        <h1>Curriculum</h1>
+        <img class="page-hero-mascot" src="assets/img/site/Mascot Panels - transparent bg/105-coding.png" alt="">
+      </div>
       <div class="course-meta">${MODULES_META.length} MODULES &middot; ${totalLessons} LESSONS &middot; ${overall.pct}% COMPLETE</div>
       <p class="course-intro">A self-paced curriculum adapted from Stanford iGEM's SiBRP program. Work through iGEM, bioengineering, cells, DNA, and engineering applications — one lesson at a time.</p>
       <div class="jump-row">
