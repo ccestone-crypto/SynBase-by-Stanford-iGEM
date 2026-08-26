@@ -1489,7 +1489,7 @@ a:hover { text-decoration: underline; }
 .highlights-section { padding: 56px 24px; background: #fff; }
 .highlights-section .container { max-width: 1100px; }
 .highlights-head { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 12px; margin-bottom: 28px; }
-.highlights-head h2 { margin: 0; font-size: 2.1rem; font-weight: 800; color: var(--ink-black); }
+.highlights-head h2 { margin: 0 0 18px; font-size: 2.1rem; font-weight: 800; color: var(--ink-black); }
 .highlights-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; }
 
 /* ---------- Interactive trial quiz ---------- */
