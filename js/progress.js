@@ -120,16 +120,18 @@ function moduleAccentClass(number) {
 // Small red-bar/gold-bar mark echoing the corner ornament repeated on every slide.
 const BRAND_MARK = `<div class="brand-mark"><span class="bar1"></span><span class="bar2"></span></div>`;
 
-// ---------- Nav dropdown (groups the SiBRP course + TA applications) ----------
+// ---------- SiBRP split nav item ----------
+// "SiBRP" itself links straight to the course application; the chevron
+// opens a small dropdown for the related-but-secondary SiBRP links.
 const CHEVRON_DOWN = `<svg viewBox="0 0 20 20" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8l5 5 5-5"/></svg>`;
 
-function sibrpNavDropdownHtml(prefix, user) {
+function sibrpNavHtml(prefix, user) {
   return `
     <div class="nav-dropdown">
-      <button type="button" class="nav-dropdown-toggle">SiBRP ${CHEVRON_DOWN}</button>
+      <a href="${prefix}application.html">SiBRP</a>
+      <button type="button" class="nav-dropdown-toggle" aria-label="More SiBRP links">${CHEVRON_DOWN}</button>
       <div class="nav-dropdown-menu">
         <a href="${prefix}beyond-sibrp.html">Beyond SiBRP</a>
-        ${user ? `<a href="${prefix}application.html">Course Application</a>` : ""}
         ${user && user.taEligible ? `<a href="${prefix}ta-application.html">TA Application</a>` : ""}
       </div>
     </div>
@@ -159,7 +161,7 @@ function headerNavHtml(prefix, user) {
   return `
     <a href="${prefix}about.html">About</a>
     <a href="${prefix}${user ? "index.html" : "curriculum.html"}">Curriculum</a>
-    ${sibrpNavDropdownHtml(prefix, user)}
+    ${sibrpNavHtml(prefix, user)}
     <a href="${prefix}speaker-series.html">Speaker Series</a>
     ${user && user.isAdmin ? `<a href="${prefix}admin.html">Admin</a>` : ""}
   `;

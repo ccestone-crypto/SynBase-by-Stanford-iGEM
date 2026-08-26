@@ -110,42 +110,24 @@ a:hover { text-decoration: underline; }
 .header-nav a { color: var(--ink); }
 .header-nav a:hover { color: var(--syn-green); text-decoration: none; }
 
-.header-actions { display: flex; align-items: center; gap: 12px; justify-self: end; }
-.header-actions .btn { border-radius: 999px; }
-.header-avatar {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  background: var(--syn-green);
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: 0.9rem;
-  flex-shrink: 0;
-}
-.header-avatar:hover { background: var(--syn-green-dark); text-decoration: none; }
-
-/* ---------- Nav dropdown (groups the SiBRP course + TA applications) ---------- */
-.nav-dropdown { position: relative; }
+/* ---------- SiBRP split nav item (direct link + dropdown for secondary links) ---------- */
+.nav-dropdown { position: relative; display: inline-flex; align-items: center; gap: 2px; }
 .nav-dropdown-toggle {
   background: none;
   border: none;
   font: inherit;
   color: var(--ink);
   cursor: pointer;
-  padding: 0;
+  padding: 4px;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
 }
 .nav-dropdown-toggle:hover { color: var(--syn-green); }
 .nav-dropdown-menu {
   display: none;
   position: absolute;
   top: 100%;
-  right: 0;
+  left: 0;
   margin-top: 12px;
   background: #fff;
   border: 1px solid var(--border);
@@ -165,6 +147,24 @@ a:hover { text-decoration: underline; }
   font-weight: 500;
 }
 .header-nav .nav-dropdown-menu a:hover { background: var(--bg); color: var(--syn-green); text-decoration: none; }
+
+.header-actions { display: flex; align-items: center; gap: 12px; justify-self: end; }
+.header-actions .btn { border-radius: 999px; }
+.header-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--syn-green);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+.header-avatar:hover { background: var(--syn-green-dark); text-decoration: none; }
+
 .header-progress-pill {
   background: var(--syn-green-tint);
   border-radius: 999px;
