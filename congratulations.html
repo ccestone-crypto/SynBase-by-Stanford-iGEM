@@ -16,7 +16,7 @@
   <div class="container">
     <img class="congrats-mascot" src="assets/img/site/Mascot Panels - transparent bg/203-success-white.png" alt="" width="140" height="140">
     <h1>You did it!</h1>
-    <p id="congrats-copy">You've completed every module in SynBase so far — nice work.</p>
+    <p id="congrats-copy">You've completed every module in SynBase so far. Nice work.</p>
     <div class="landing-hero-ctas" style="justify-content:center;">
       <a class="btn" href="application.html">Apply to SiBRP</a>
       <a class="btn secondary" href="index.html">Back to Home</a>
@@ -45,10 +45,6 @@
     location.href = "index.html";
     return;
   }
-
-  const totalLessons = MODULES_META.reduce((sum, m) => sum + (COURSE_OUTLINE[m.id] || []).length, 0);
-  document.getElementById("congrats-copy").textContent =
-    `You've completed every module in SynBase so far — all ${MODULES_META.length} modules and ${totalLessons} lessons. Nice work.`;
 
   runConfetti();
 })();
