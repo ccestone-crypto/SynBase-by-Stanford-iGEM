@@ -46,10 +46,6 @@ function renderCourseHeader(mountEl) {
         <div class="jump-pills">
           ${MODULES_META.map(m => `<a class="pill" href="#${m.id}">Module ${m.number}</a>`).join("")}
         </div>
-        <a class="challenge-card" href="${MODULES_META[MODULES_META.length - 1].href}">
-          <span class="challenge-label">Recap Challenge</span>
-          <span class="challenge-title">Test what you remember across every module</span>
-        </a>
       </div>
     </div>
   `;
