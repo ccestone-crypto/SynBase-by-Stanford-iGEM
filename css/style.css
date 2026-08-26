@@ -1196,6 +1196,23 @@ a:hover { text-decoration: underline; }
 .synbase-word-image { width: 220px; height: auto; flex: none; margin-left: 32px; }
 .synbase-word-content { text-align: left; }
 .synbase-word { font-family: var(--font-display); font-size: 4.8rem; font-weight: 900; color: var(--charcoal); margin: 0; letter-spacing: -1px; cursor: default; }
+.synbase-word .ltr { display: inline-block; border-bottom: 4px solid transparent; transition: border-color 0.15s ease; }
+.synbase-word-content:has(.synbase-def-brick[data-def="syn"]:hover) .ltr[data-range~="syn"],
+.synbase-word-content:has(.synbase-def-brick[data-def="syn"]:focus-visible) .ltr[data-range~="syn"] {
+  border-bottom-color: var(--syn-green-dark);
+}
+.synbase-word-content:has(.synbase-def-brick[data-def="synb"]:hover) .ltr[data-range~="synb"],
+.synbase-word-content:has(.synbase-def-brick[data-def="synb"]:focus-visible) .ltr[data-range~="synb"] {
+  border-bottom-color: var(--syn-purple-dark);
+}
+.synbase-word-content:has(.synbase-def-brick[data-def="base"]:hover) .ltr[data-range~="base"],
+.synbase-word-content:has(.synbase-def-brick[data-def="base"]:focus-visible) .ltr[data-range~="base"] {
+  border-bottom-color: var(--syn-blue);
+}
+.synbase-word-content:has(.synbase-def-brick[data-def="ase"]:hover) .ltr[data-range~="ase"],
+.synbase-word-content:has(.synbase-def-brick[data-def="ase"]:focus-visible) .ltr[data-range~="ase"] {
+  border-bottom-color: #a83c78;
+}
 .synbase-word-hint { color: var(--ink-soft); font-size: 1.2rem; margin: 0 0 36px; }
 .synbase-defs {
   display: flex;
