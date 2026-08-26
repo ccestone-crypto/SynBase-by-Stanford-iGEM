@@ -1265,7 +1265,7 @@ a:hover { text-decoration: underline; }
 .narrative-section.tint { background: var(--bg); }
 .narrative-section .container { max-width: 900px; text-align: center; }
 .narrative-section h2 { font-size: 2.4rem; font-weight: 800; margin: 0 0 22px; color: var(--charcoal); letter-spacing: -0.5px; }
-.narrative-section p { font-size: 1.25rem; color: var(--ink-soft); margin: 0 0 20px; line-height: 1.65; }
+.narrative-section p { font-size: 1.25rem; color: var(--ink-soft); margin: 0 0 20px; line-height: 1.65; text-align: left; }
 .narrative-section p:last-child { margin-bottom: 0; }
 .narrative-section .btn { margin-top: 8px; }
 
