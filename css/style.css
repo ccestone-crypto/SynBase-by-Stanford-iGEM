@@ -1549,13 +1549,22 @@ a:hover { text-decoration: underline; }
 .landing-footer-col a:hover { color: #fff; text-decoration: none; }
 .landing-footer-bottom {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
   gap: 14px;
   font-size: 0.82rem;
   color: #8f8c82;
-  text-align: right;
 }
+.footer-social { display: flex; gap: 10px; }
+.footer-social a {
+  display: flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; border-radius: 50%;
+  background: rgba(255,255,255,0.08); color: #cfcdc5;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.footer-social a:hover { background: rgba(255,255,255,0.18); color: #fff; }
+.footer-social svg { width: 15px; height: 15px; }
 
 /* ---------- Application form (student + admin question builder) ---------- */
 .form-field { margin-bottom: 18px; }
