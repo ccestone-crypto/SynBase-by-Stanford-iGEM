@@ -37,12 +37,17 @@ async function bootstrapAuthAndProgress(fromRoot) {
 }
 
 // Fire-and-forget persistence — the local cache is already updated by the
-// caller, so the UI never waits on this network round trip.
+// caller, so the UI never waits on this network round trip. keepalive is
+// required here: completing the last page of a module immediately navigates
+// to the next module (or congratulations.html) in the same click handler,
+// and without keepalive the browser cancels this request mid-flight on that
+// navigation — silently dropping the just-completed section server-side.
 function syncProgress(moduleId, patch) {
   fetch("/api/progress", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ moduleId, ...patch })
+    body: JSON.stringify({ moduleId, ...patch }),
+    keepalive: true
   }).catch(() => {});
 }
 
@@ -199,12 +204,24 @@ function renderHeader(mountEl, fromRoot) {
 }
 
 // ---------- Public header (About / Beyond SiBRP — no login required) ----------
+// Unlike bootstrapAuthAndProgress, this never redirects a logged-out visitor
+// to login — these pages must render for anyone. But when a user IS logged
+// in, it still needs their progress before rendering the header's "Overall"
+// pill: skipping this left CURRENT_USER/PROGRESS_CACHE at their empty
+// defaults, so the pill always read 0% here regardless of real progress —
+// visibly inconsistent with index.html/module pages, which do load it.
 async function renderPublicHeader(mountEl, fromRoot) {
   let user = null;
   try {
     const res = await fetch("/api/me");
     const data = await res.json();
     user = data.user;
+    if (user) {
+      CURRENT_USER = user;
+      const progRes = await fetch("/api/progress");
+      const progData = await progRes.json();
+      PROGRESS_CACHE = progData.progress || {};
+    }
   } catch (e) {}
   renderHeaderCore(mountEl, fromRoot, user);
 }
