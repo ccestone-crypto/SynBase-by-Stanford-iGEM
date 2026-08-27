@@ -132,6 +132,7 @@ function sibrpNavHtml(prefix, user) {
       <button type="button" class="nav-dropdown-toggle" aria-label="More SiBRP links">${CHEVRON_DOWN}</button>
       <div class="nav-dropdown-menu">
         <a href="${prefix}beyond-sibrp.html">Beyond SiBRP</a>
+        <a href="${prefix}speaker-series.html">Speaker Series</a>
         ${user && user.taEligible ? `<a href="${prefix}ta-application.html">TA Application</a>` : ""}
       </div>
     </div>
@@ -162,7 +163,6 @@ function headerNavHtml(prefix, user) {
     <a href="${prefix}about.html">About</a>
     <a href="${prefix}${user ? "index.html" : "curriculum.html"}">Curriculum</a>
     ${sibrpNavHtml(prefix, user)}
-    <a href="${prefix}speaker-series.html">Speaker Series</a>
     ${user && user.isAdmin ? `<a href="${prefix}admin.html">Admin</a>` : ""}
   `;
 }
