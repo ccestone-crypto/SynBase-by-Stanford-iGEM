@@ -27,7 +27,7 @@
 <!-- Stats band -->
 <section class="stats-band">
   <div class="stats-row">
-    <div class="stat-big tint-green"><span class="num">8</span><span class="label">Course Units</span></div>
+    <div class="stat-big tint-green"><span class="num">8</span><span class="label">Course Modules</span></div>
     <div class="stat-big tint-purple"><span class="num" id="stat-live">&mdash;</span><span class="label">Live Now</span></div>
     <div class="stat-big tint-blue"><span class="num">100%</span><span class="label">Free</span></div>
   </div>
@@ -47,8 +47,8 @@
 <section class="steps-section">
   <div class="container" style="max-width:900px;">
     <p class="about-eyebrow">Full Syllabus</p>
-    <h2 style="font-size:2rem;font-weight:800;color:var(--ink-black);margin:0 0 8px;">What you'll cover, unit by unit.</h2>
-    <p style="color:var(--ink-soft);margin:0 0 8px;">Click a unit to see its learning objectives and topics.</p>
+    <h2 style="font-size:2rem;font-weight:800;color:var(--ink-black);margin:0 0 8px;">What you'll cover, module by module.</h2>
+    <p style="color:var(--ink-soft);margin:0 0 8px;">Click a module to see its learning objectives and topics.</p>
     <div class="unit-accordion" id="syllabus-list" style="margin-top:24px;"></div>
   </div>
 </section>
@@ -104,7 +104,6 @@ function escapeHtml(str) {
 }
 
 const CHEVRON_ICON = `<svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8l4 4 4-4"/></svg>`;
-const CHECK_ICON = `<svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5l3.5 3.5L16 6"/></svg>`;
 const CHIP_TINTS = ["green", "purple", "blue"];
 
 // Full course syllabus — the program's own curriculum outline. All 8 units
@@ -237,10 +236,6 @@ const SYLLABUS = [
       "Case studies beyond the individual: germline editing, gain-of-function research, CAR-T access and risk",
       "Who decides what research happens: IRBs, IACUCs, IBCs, and FDA oversight"
     ]
-  },
-  {
-    closing: true, title: "Closing Module: Next Steps",
-    single: "Information about applying to SiBRP"
   }
 ];
 
@@ -250,9 +245,9 @@ function renderSyllabus(mountEl) {
       <summary class="unit-summary">
         <span class="unit-chevron">${CHEVRON_ICON}</span>
         <span class="unit-heading">
-          <span class="module-chip chip-${CHIP_TINTS[i % CHIP_TINTS.length]}">${m.closing ? CHECK_ICON : m.intro ? "0" : escapeHtml(m.chip)}</span>
+          <span class="module-chip chip-${CHIP_TINTS[i % CHIP_TINTS.length]}">${m.intro ? "0" : escapeHtml(m.chip)}</span>
           <span class="unit-title-group">
-            <span class="unit-label">${m.closing ? "Closing Unit" : m.intro ? "Module 0" : "Unit " + escapeHtml(m.chip)}</span>
+            <span class="unit-label">${"Module " + (m.intro ? "0" : escapeHtml(m.chip))}</span>
             <span class="unit-title">${escapeHtml(m.title)}${m.note ? " " + escapeHtml(m.note) : ""}</span>
           </span>
         </span>
