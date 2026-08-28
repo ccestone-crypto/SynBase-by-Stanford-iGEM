@@ -166,9 +166,9 @@ function wireNavDropdowns(mountEl) {
 // pages (renderPublicHeader).
 function headerNavHtml(prefix, user) {
   return `
-    <a href="${prefix}about.html">About</a>
     <a href="${prefix}${user ? "index.html" : "curriculum.html"}">Curriculum</a>
     ${sibrpNavHtml(prefix, user)}
+    <a href="${prefix}about.html">About</a>
     ${user && user.isAdmin ? `<a href="${prefix}admin.html">Admin</a>` : ""}
   `;
 }
