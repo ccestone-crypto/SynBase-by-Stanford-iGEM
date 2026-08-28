@@ -19,9 +19,9 @@
   <div class="page-footer-nav" id="page-footer-nav"></div>
 </div>
 
-<script src="../js/modules-meta.js?v=13"></script>
-<script src="../js/progress.js?v=24"></script>
-<script src="../js/quiz-engine.js?v=17"></script>
+<script src="../js/modules-meta.js?v=14"></script>
+<script src="../js/progress.js?v=25"></script>
+<script src="../js/quiz-engine.js?v=18"></script>
 <script>
 const MODULE = {
   id: "module1",
@@ -32,26 +32,28 @@ const MODULE = {
     {
       id: "1.1r", type: "read", title: "What Is Stanford iGEM?",
       html: `
-        <p><a href="https://igem.stanford.edu" target="_blank" rel="noopener">Stanford iGEM</a> is an interdisciplinary team of Stanford undergraduates competing in <strong>iGEM</strong> (International Genetically Engineered Machine — not the most straightforward acronym, we know), an organization centered around an annual synthetic biology competition.</p>
-        <p>iGEM describes itself as the "beating heart of synthetic biology." Since the founding of iGEM in 2003, <strong>100,000+ iGEMers</strong> have worked on <strong>5,000+ synthetic biology projects</strong>. Biological parts from these projects are deposited in the <a href="https://registry.igem.org/" target="_blank" rel="noopener">iGEM Registry</a>, which now contains more than <strong>84,000 documented parts</strong>, to promote collaboration between bioengineers. iGEM alumni have also founded <strong>300+ ventures</strong>, including major companies like <a href="https://www.benchling.com/" target="_blank" rel="noopener">Benchling</a> and <a href="https://www.ginkgo.bio/" target="_blank" rel="noopener">Ginkgo Bioworks</a>.</p>
-        <p>iGEM's work broadly spans four foundational areas — <strong>Community, Technology, Responsibility, and Innovation</strong> — all with the hope of ultimately using synthetic biology to benefit humanity and our planet.</p>
-        <p>These are the same four principles that guide our work at Stanford iGEM. Our educational initiatives range from the site you're on right now to the Stanford iGEM Bioengineering Research Program (SiBRP) and <a href="https://knockdev.itch.io/phils-laberia" target="_blank" rel="noopener">Phil's Laberia</a> (check it out!), a video game teaching foundational lab skills and their underlying principles in a fun, accessible way. Our team members come together to dream up a new project each year, building new, innovative technologies while integrating bigger-picture implications and ethics throughout the entire design process.</p>
-        <p>As a team, we're all deeply interested in bioengineering, but we study everything from data science to English and electrical engineering. We believe diversity in thought and experience is necessary to achieve comprehensive understanding and resolution of the problems we face — another reason why we believe in equipping you with the tools to join the hopeful world of synthetic biology.</p>
-        <div class="topic-callout">
-          <div class="topic-callout-label">From the Source Material</div>
-          <p>Dr. Drew Endy, Stanford professor of bioengineering and co-founder of iGEM, spoke about iGEM during the first session of Stanford iGEM's 2026 summer program: <a href="https://www.youtube.com/watch?v=3Gg5VWrSFUQ" target="_blank" rel="noopener"><em>"SiBRP '26: Introduction to SynBio/iGEM by Guest Speaker Dr. Drew Endy."</em></a></p>
-        </div>
+        <p><a href="https://igem.stanford.edu" target="_blank" rel="noopener">Stanford iGEM</a> is an interdisciplinary team of Stanford undergraduates competing in <strong>iGEM</strong> (International Genetically Engineered Machine), an organization centered around an annual synthetic biology competition. iGEM describes itself as the "beating heart of synthetic biology" — since it was founded in 2003, more than 100,000 students have worked on over 5,000 synthetic biology projects.</p>
+        <p>iGEM's work centers on four principles: <strong>Community, Technology, Responsibility, and Innovation</strong>. Those same four principles guide Stanford iGEM's own work, from the SynBase curriculum you're using right now to the Stanford iGEM Bioengineering Research Program (SiBRP) and <a href="https://knockdev.itch.io/phils-laberia" target="_blank" rel="noopener">Phil's Laberia</a>, a video game that teaches foundational lab skills.</p>
+        <p>If you want to hear more about iGEM's origins, Stanford professor and iGEM co-founder Drew Endy spoke about them during Stanford iGEM's 2026 summer program — <a href="https://www.youtube.com/watch?v=3Gg5VWrSFUQ" target="_blank" rel="noopener">watch it here</a>.</p>
       `
     },
     {
-      id: "1.2r", type: "read", title: "From Biology to Engineering",
+      id: "1.2s", type: "shortanswer", title: "Quick Recall: When Was iGEM Founded?",
+      shortAnswer: {
+        prompt: "In what year was iGEM founded?",
+        acceptedAnswers: ["2003"],
+        explanation: "As you just read, iGEM was founded in 2003 — since then, more than 100,000 students have worked on over 5,000 synthetic biology projects."
+      }
+    },
+    {
+      id: "1.3r", type: "read", title: "From Biology to Engineering",
       html: `
-        <p>Bioengineering is a very, very broad field. At its core, it applies engineering principles of design and analysis to biological systems and biomedical technologies. <a href="https://bioengineering.stanford.edu/" target="_blank" rel="noopener">Stanford Bioengineering</a> similarly describes the field as bringing together life sciences and engineering to advance areas ranging from healthcare and medicine to manufacturing, agriculture, and the environment.</p>
+        <p>Bioengineering is a very, very broad field. At its core, it applies engineering principles of design and analysis to biological systems and biomedical technologies.</p>
         <p>That means two people can both call themselves bioengineers while doing work that looks quite different. But regardless of what you're engineering, the shift in mindset is similar. While biology asks, <em>"What does the system naturally do?"</em>, engineering focuses on <em>"How can we redesign the system?"</em></p>
       `
     },
     {
-      id: "1.2m", type: "matching", title: "Matching Exercise: Biology vs. Engineering",
+      id: "1.4m", type: "matching", title: "Matching Exercise: Biology vs. Engineering",
       matching: {
         instructions: "Match each example to whether it's biology or engineering.",
         pairs: [
@@ -61,12 +63,11 @@ const MODULE = {
       }
     },
     {
-      id: "1.3r", type: "read", title: "Where Synthetic Biology Fits In",
+      id: "1.5r", type: "read", title: "Where Synthetic Biology Fits In",
       html: `
-        <p>Synthetic biology is one area within the much larger world of bioengineering.</p>
-        <p>The <a href="https://www.genome.gov/about-genomics/policy-issues/Synthetic-Biology" target="_blank" rel="noopener">National Human Genome Research Institute</a> defines <strong>synthetic biology</strong> as redesigning organisms for useful purposes by engineering them to have new abilities. Researchers have applied this idea to problems in medicine, manufacturing, agriculture, environmental sensing, and more.</p>
-        <p>You may also hear the term <a href="https://www.genome.gov/genetics-glossary/Genetic-Engineering" target="_blank" rel="noopener"><strong>genetic engineering</strong></a>, which refers to laboratory techniques that alter the DNA makeup of an organism — for example, changing a DNA sequence, removing a region, or adding new DNA.</p>
-        <p>Synthetic biology often uses genetic engineering, but tends to zoom out and ask a larger engineering question: <strong>How can we design or redesign a biological system to perform a useful function?</strong> Examples include:</p>
+        <p>Synthetic biology is one area within the much larger world of bioengineering. It's often defined as redesigning organisms for useful purposes by engineering them to have new abilities — applying that idea to problems in medicine, manufacturing, agriculture, environmental sensing, and more.</p>
+        <p>You may also hear the term <strong>genetic engineering</strong>, which refers to laboratory techniques that alter the DNA makeup of an organism — for example, changing a DNA sequence, removing a region, or adding new DNA.</p>
+        <p>Synthetic biology often uses genetic engineering, but zooms out to ask a bigger question: <strong>how can we design or redesign a biological system to perform a useful function?</strong> Examples include:</p>
         <ul>
           <li>Microorganisms that produce useful medicines or materials</li>
           <li>Biological systems that detect something in the environment</li>
@@ -75,101 +76,108 @@ const MODULE = {
       `
     },
     {
-      id: "1.4r", type: "read", title: "A Very Quick History of Synthetic Biology",
+      id: "1.6r", type: "read", title: "A Very Quick History of Synthetic Biology: Early Foundations",
       html: `
         <h4>1961 — Learning how cells regulate genes</h4>
         <p>François Jacob and Jacques Monod published a landmark model describing genetic regulation in bacteria. Their work helped establish the idea that cells contain regulatory systems that can turn genes on and off in response to changing conditions.</p>
         <h4>1995 — Reading an entire microbial genome</h4>
         <p>Researchers reported the complete genome sequence of <em>Haemophilus influenzae</em>, the first complete genome sequence from a free-living organism. Being able to read increasingly large amounts of DNA gave researchers a much larger foundation for understanding — and eventually redesigning — biological systems.</p>
+      `
+    },
+    {
+      id: "1.7r", type: "read", title: "A Very Quick History of Synthetic Biology: Toward iGEM",
+      html: `
         <h4>2000 — Building synthetic genetic circuits</h4>
         <p>Two landmark papers demonstrated that researchers could deliberately construct simple genetic circuits inside <em>E. coli</em>: a genetic toggle switch that could switch between stable states, and the repressilator, a synthetic network that produced oscillating gene expression.</p>
         <h4>2003–2004 — iGEM begins</h4>
         <p>iGEM began in 2003 as a month-long course at MIT in which students tried to design biological systems that made cells blink. In 2004, that course grew into a summer competition involving five teams.</p>
-        <h4>Today</h4>
-        <p>Synthetic biology now spans thousands of projects and applications — from medicine and agriculture to environmental engineering, manufacturing, computation, and space.</p>
+        <p>Synthetic biology has grown a lot since then — today it spans thousands of projects and applications, from medicine and agriculture to environmental engineering, manufacturing, computation, and space.</p>
       `
     },
     {
-      id: "1.5r", type: "read", title: "The Many Applications of Synthetic Biology",
+      id: "1.8o", type: "ordering", title: "Put the History of Synthetic Biology in Order",
+      ordering: {
+        prompt: "Arrange these landmark moments in the history of synthetic biology in chronological order, earliest to most recent.",
+        items: [
+          "Jacob and Monod publish a landmark model of genetic regulation in bacteria",
+          "The complete genome of Haemophilus influenzae is sequenced",
+          "The genetic toggle switch and the repressilator are built in E. coli",
+          "iGEM begins as a course at MIT, then grows into a competition"
+        ],
+        explanation: "That's the order: first came the basic understanding of how cells regulate genes (1961), then the ability to read a whole microbial genome (1995), then the ability to actually build simple synthetic circuits (2000), and finally iGEM itself, turning that foundation into a hands-on student competition (2003–2004)."
+      }
+    },
+    {
+      id: "1.9r", type: "read", title: "The Many Applications of Synthetic Biology: Environment", part: "The Many Applications of Synthetic Biology",
       html: `
-        <p>iGEM organizes the many areas of focus within synthetic biology by "village." As of 2026, iGEM has 15 villages across the three broader areas of <strong>Environment, Healthcare, and Advancements</strong> — see the full list at <a href="https://villages.igem.org/" target="_blank" rel="noopener">iGEM Villages</a>.</p>
-        <p>Here's one real past iGEM project for each village. Each links to its team's official iGEM wiki, so feel free to click around if one catches your attention:</p>
-        <div class="topic-match-grid" style="grid-template-columns:1fr;">
-          <div>
-            <h5>Environment</h5>
-            <ul>
-              <li><strong>Agriculture</strong> — <a href="https://2023.igem.wiki/szu-china/index.html" target="_blank" rel="noopener">PolycoBead: RNA-biopesticides for tomato gray mold disease</a> (SZU China, 2023)</li>
-              <li><strong>Bioremediation</strong> — <a href="https://2025.igem.wiki/lyon/index.html" target="_blank" rel="noopener">Engineered bacteria for PFAS degradation and detection</a> (Lyon, 2025)</li>
-              <li><strong>Climate Crisis</strong> — <a href="https://2024.igem.wiki/xmu-china/" target="_blank" rel="noopener">REPARO: eco-friendly paper-purification and recovery</a> (XMU China, 2024)</li>
-              <li><strong>Conservation</strong> — <a href="https://2023.igem.wiki/estonia-tuit/" target="_blank" rel="noopener">BeeYeast: yeast engineering to fight bee viral infections</a> (Estonia, 2023)</li>
-              <li><strong>Fashion &amp; Cosmetics</strong> — <a href="https://2025.igem.wiki/dtu-denmark/" target="_blank" rel="noopener">NomNomNylon: a sustainable future for nylon waste</a> (DTU Denmark, 2025)</li>
-              <li><strong>Food &amp; Nutrition</strong> — <a href="https://2025.igem.wiki/unicamp-brazil/" target="_blank" rel="noopener">PepCitrus: combating citrus greening with antimicrobial peptides</a> (UNICAMP-Brazil, 2025)</li>
-            </ul>
-          </div>
-          <div>
-            <h5>Healthcare</h5>
-            <ul>
-              <li><strong>Diagnostics</strong> — <a href="https://2025.igem.wiki/munich/" target="_blank" rel="noopener">InkSight: living diagnostic tattoos using engineered mammalian cells</a> (Munich, 2025)</li>
-              <li><strong>Infectious Diseases</strong> — <a href="https://2024.igem.wiki/uchicago/" target="_blank" rel="noopener">VIPR: a virus-inspired particle vaccine for schistosomiasis</a> (UChicago, 2024)</li>
-              <li><strong>Oncology</strong> — <a href="https://2024.igem.wiki/aachen/" target="_blank" rel="noopener">OncoBiotica: microbiota-directed cancer therapy</a> (Aachen Germany, 2024)</li>
-              <li><strong>Therapeutics</strong> — <a href="https://2023.igem.wiki/uni-padua-it/" target="_blank" rel="noopener">PASTA: a phage-assisted silencing tool against antimicrobial resistance</a> (Uni-Padua-IT, 2023)</li>
-            </ul>
-          </div>
-          <div>
-            <h5>Advancements</h5>
-            <ul>
-              <li><strong>Art &amp; Design</strong> — <a href="https://2004.igem.org/austin.html" target="_blank" rel="noopener">World's first biological photographic film</a> (UT Austin, 2004)</li>
-              <li><strong>Biomanufacturing</strong> — <a href="https://2024.igem.wiki/vilnius-lithuania/" target="_blank" rel="noopener">SYNHESION: natural bacterial adhesives</a> (Vilnius-Lithuania, 2024)</li>
-              <li><strong>Foundational Advance</strong> — <a href="https://2024.igem.wiki/heidelberg/" target="_blank" rel="noopener">PICasSO: CRISPR/Cas-mediated 3D genome engineering</a> (Heidelberg, 2024)</li>
-              <li><strong>Software &amp; AI</strong> — <a href="https://2024.igem.wiki/nju-china/home" target="_blank" rel="noopener">Prometheus: a large language model for synthetic biology</a> (NJU, 2024)</li>
-              <li><strong>Space</strong> — <a href="https://2025.igem.wiki/cornell/index.html" target="_blank" rel="noopener">Scalable perchlorate removal in Martian regolith</a> (Cornell, 2025)</li>
-            </ul>
-          </div>
-        </div>
+        <p>iGEM organizes the many areas of focus within synthetic biology by "village." As of 2026, iGEM has 15 villages across three broader areas: Environment, Healthcare, and Advancements.</p>
+        <p>Here's one real past iGEM project for each village, starting with Environment. Each links to its team's official iGEM wiki, so feel free to click around if one catches your attention:</p>
+        <ul>
+          <li><strong>Agriculture</strong> — <a href="https://2023.igem.wiki/szu-china/index.html" target="_blank" rel="noopener">PolycoBead: RNA-biopesticides for tomato gray mold disease</a> (SZU China, 2023)</li>
+          <li><strong>Bioremediation</strong> — <a href="https://2025.igem.wiki/lyon/index.html" target="_blank" rel="noopener">Engineered bacteria for PFAS degradation and detection</a> (Lyon, 2025)</li>
+          <li><strong>Climate Crisis</strong> — <a href="https://2024.igem.wiki/xmu-china/" target="_blank" rel="noopener">REPARO: eco-friendly paper-purification and recovery</a> (XMU China, 2024)</li>
+          <li><strong>Conservation</strong> — <a href="https://2023.igem.wiki/estonia-tuit/" target="_blank" rel="noopener">BeeYeast: yeast engineering to fight bee viral infections</a> (Estonia, 2023)</li>
+          <li><strong>Fashion &amp; Cosmetics</strong> — <a href="https://2025.igem.wiki/dtu-denmark/" target="_blank" rel="noopener">NomNomNylon: a sustainable future for nylon waste</a> (DTU Denmark, 2025)</li>
+          <li><strong>Food &amp; Nutrition</strong> — <a href="https://2025.igem.wiki/unicamp-brazil/" target="_blank" rel="noopener">PepCitrus: combating citrus greening with antimicrobial peptides</a> (UNICAMP-Brazil, 2025)</li>
+        </ul>
       `
     },
     {
-      id: "1.6r", type: "read", title: "Synthetic Biology Is Only One Part of Bioengineering",
+      id: "1.10r", type: "read", title: "The Many Applications of Synthetic Biology: Healthcare", part: "The Many Applications of Synthetic Biology",
       html: `
-        <p>Bioengineers also work on things like:</p>
+        <ul>
+          <li><strong>Diagnostics</strong> — <a href="https://2025.igem.wiki/munich/" target="_blank" rel="noopener">InkSight: living diagnostic tattoos using engineered mammalian cells</a> (Munich, 2025)</li>
+          <li><strong>Infectious Diseases</strong> — <a href="https://2024.igem.wiki/uchicago/" target="_blank" rel="noopener">VIPR: a virus-inspired particle vaccine for schistosomiasis</a> (UChicago, 2024)</li>
+          <li><strong>Oncology</strong> — <a href="https://2024.igem.wiki/aachen/" target="_blank" rel="noopener">OncoBiotica: microbiota-directed cancer therapy</a> (Aachen Germany, 2024)</li>
+          <li><strong>Therapeutics</strong> — <a href="https://2023.igem.wiki/uni-padua-it/" target="_blank" rel="noopener">PASTA: a phage-assisted silencing tool against antimicrobial resistance</a> (Uni-Padua-IT, 2023)</li>
+        </ul>
+      `
+    },
+    {
+      id: "1.11r", type: "read", title: "The Many Applications of Synthetic Biology: Advancements", part: "The Many Applications of Synthetic Biology",
+      html: `
+        <ul>
+          <li><strong>Art &amp; Design</strong> — <a href="https://2004.igem.org/austin.html" target="_blank" rel="noopener">World's first biological photographic film</a> (UT Austin, 2004)</li>
+          <li><strong>Biomanufacturing</strong> — <a href="https://2024.igem.wiki/vilnius-lithuania/" target="_blank" rel="noopener">SYNHESION: natural bacterial adhesives</a> (Vilnius-Lithuania, 2024)</li>
+          <li><strong>Foundational Advance</strong> — <a href="https://2024.igem.wiki/heidelberg/" target="_blank" rel="noopener">PICasSO: CRISPR/Cas-mediated 3D genome engineering</a> (Heidelberg, 2024)</li>
+          <li><strong>Software &amp; AI</strong> — <a href="https://2024.igem.wiki/nju-china/home" target="_blank" rel="noopener">Prometheus: a large language model for synthetic biology</a> (NJU, 2024)</li>
+          <li><strong>Space</strong> — <a href="https://2025.igem.wiki/cornell/index.html" target="_blank" rel="noopener">Scalable perchlorate removal in Martian regolith</a> (Cornell, 2025)</li>
+        </ul>
+      `
+    },
+    {
+      id: "1.12m", type: "matching", title: "Matching Exercise: Village to Broader Area", part: "The Many Applications of Synthetic Biology",
+      matching: {
+        instructions: "Match each iGEM village to the broader area it belongs to.",
+        pairs: [
+          { left: "Agriculture", right: "Environment" },
+          { left: "Bioremediation", right: "Environment" },
+          { left: "Diagnostics", right: "Healthcare" },
+          { left: "Oncology", right: "Healthcare" },
+          { left: "Biomanufacturing", right: "Advancements" },
+          { left: "Space", right: "Advancements" }
+        ]
+      }
+    },
+    {
+      id: "1.13r", type: "read", title: "Bioengineering Beyond Synthetic Biology: Devices & Tissue",
+      html: `
+        <p>Bioengineers also work in areas well beyond synthetic biology. Two examples:</p>
         <h4>Biomedical devices</h4>
         <p>Engineering physical or electronic technologies for biological research, diagnosis, monitoring, or treatment. Examples include medical imaging systems, portable diagnostic devices, biosensors, and wearable technologies.</p>
         <h4>Tissue engineering &amp; regenerative medicine</h4>
         <p>Using engineering principles to understand and control how cells and tissues behave — with goals that can include repairing damaged tissue or creating engineered tissues with useful functions.</p>
+      `
+    },
+    {
+      id: "1.14r", type: "read", title: "Bioengineering Beyond Synthetic Biology: Computation & Circuits",
+      html: `
         <h4>Biomedical computation</h4>
         <p>Building computational models and tools to analyze biological and medical information. That can include everything from large-scale genomic data analysis to computational models of biological systems.</p>
         <h4>Synthetic &amp; cellular engineering</h4>
         <p>Designing or modifying biological systems themselves — including the engineered organisms, genetic circuits, biosensors, and biological factories we just spent much of this module exploring.</p>
         <p>These areas can merge, too! A single project could involve a genetically engineered cell, a computational model that predicts its behavior, a physical device that delivers it, and a clinical study evaluating whether it works — that's part of what makes all of this so exciting.</p>
         <p>Over the rest of this course, we're going to start building the biological and engineering toolkit needed to understand how projects like these actually work. Up first: <strong>the biology itself.</strong></p>
-        <div class="topic-callout">
-          <div class="topic-callout-label">Sources</div>
-          <ol class="topic-source-list">
-            <li><a href="https://igem.org/" target="_blank" rel="noopener">iGEM — Main Website</a></li>
-            <li><a href="https://innovation.igem.org/ecosystem/venture-portfolio" target="_blank" rel="noopener">iGEM Innovation — Venture Portfolio</a></li>
-            <li><a href="https://registry.igem.org/" target="_blank" rel="noopener">iGEM Registry of Standard Biological Parts</a></li>
-            <li><a href="https://igem.org/vision" target="_blank" rel="noopener">iGEM — Vision</a></li>
-            <li><a href="https://igem.stanford.edu/" target="_blank" rel="noopener">Stanford iGEM</a></li>
-            <li><a href="https://bioengineering.stanford.edu/news/phils-laberia-game-changer-bioengineering-education" target="_blank" rel="noopener">Stanford Bioengineering — Phil's Laberia</a></li>
-            <li><a href="https://competition.igem.org/" target="_blank" rel="noopener">iGEM Competition — Grand Jamboree</a></li>
-            <li><a href="https://www.youtube.com/watch?v=3Gg5VWrSFUQ" target="_blank" rel="noopener">Stanford iGEM — SiBRP '26: Dr. Drew Endy (YouTube)</a></li>
-            <li><a href="https://bioeng.berkeley.edu/about-us/what-is-bioengineering" target="_blank" rel="noopener">UC Berkeley Bioengineering — What is Bioengineering?</a></li>
-            <li><a href="https://bioengineering.stanford.edu/research-impact" target="_blank" rel="noopener">Stanford Bioengineering — Research &amp; Impact</a></li>
-            <li><a href="https://bioengineering.stanford.edu/academics-admission/graduate-programs/masters-program" target="_blank" rel="noopener">Stanford Bioengineering — Focus Areas</a></li>
-            <li><a href="https://bioeng.berkeley.edu/undergrad/program/devices" target="_blank" rel="noopener">UC Berkeley Bioengineering — Biomedical Devices</a></li>
-            <li><a href="https://bioengineering.stanford.edu/academics-admission/undergraduate/bs-biomedical-computation" target="_blank" rel="noopener">Stanford Bioengineering — Biomedical Computation</a></li>
-            <li><a href="https://www.genome.gov/about-genomics/policy-issues/Synthetic-Biology" target="_blank" rel="noopener">NHGRI — Synthetic Biology</a></li>
-            <li><a href="https://www.genome.gov/genetics-glossary/Genetic-Engineering" target="_blank" rel="noopener">NHGRI — Genetic Engineering</a></li>
-            <li><a href="https://pubmed.ncbi.nlm.nih.gov/13718526/" target="_blank" rel="noopener">Jacob &amp; Monod (1961) — PubMed</a></li>
-            <li><a href="https://pubmed.ncbi.nlm.nih.gov/7542800/" target="_blank" rel="noopener">Fleischmann et al. (1995) — PubMed</a></li>
-            <li><a href="https://www.nature.com/articles/35002131" target="_blank" rel="noopener">Gardner, Cantor &amp; Collins (2000) — Nature</a></li>
-            <li><a href="https://www.nature.com/articles/35002125" target="_blank" rel="noopener">Elowitz &amp; Leibler (2000) — Nature</a></li>
-            <li><a href="https://competition.igem.org/about/previous-years" target="_blank" rel="noopener">iGEM Competition — History</a></li>
-            <li><a href="https://villages.igem.org/" target="_blank" rel="noopener">iGEM — Villages</a></li>
-            <li><a href="https://2024.igem.wiki/nju-china/engineering" target="_blank" rel="noopener">NJU-China 2024 — Prometheus Engineering</a></li>
-            <li><a href="https://bioeng.berkeley.edu/research/cell-tissue" target="_blank" rel="noopener">UC Berkeley Bioengineering — Cell &amp; Tissue Engineering</a></li>
-          </ol>
-        </div>
       `
     }
   ]

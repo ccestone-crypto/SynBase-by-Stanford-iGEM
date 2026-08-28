@@ -18,7 +18,7 @@ const MODULES_META = [
     title: "Introduction to iGEM & Bioengineering",
     description: "What Stanford iGEM is, how bioengineering and synthetic biology relate, a brief history of the field, and real examples of synthetic biology's impact.",
     href: "modules/module1.html",
-    sectionCount: 7
+    sectionCount: 14
   },
   {
     id: "module2",

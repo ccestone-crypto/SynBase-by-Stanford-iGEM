@@ -36,14 +36,15 @@ async function bootstrapAuthAndProgress(fromRoot) {
   return CURRENT_USER;
 }
 
-// Fire-and-forget persistence — the local cache is already updated by the
-// caller, so the UI never waits on this network round trip. keepalive is
-// required here: completing the last page of a module immediately navigates
-// to the next module (or congratulations.html) in the same click handler,
-// and without keepalive the browser cancels this request mid-flight on that
-// navigation — silently dropping the just-completed section server-side.
+// The local cache is already updated by the caller, so most callers don't
+// wait on this network round trip. It returns its promise, though, because
+// completing the very last page of a module immediately navigates to the
+// next module (or congratulations.html) in the same click handler — that
+// specific caller awaits this so the section is actually persisted server-
+// side before the browser tears down the page's fetch. keepalive is kept as
+// a second line of defense for that same case.
 function syncProgress(moduleId, patch) {
-  fetch("/api/progress", {
+  return fetch("/api/progress", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ moduleId, ...patch }),
@@ -60,7 +61,7 @@ function markSectionComplete(moduleId, sectionId) {
   if (!PROGRESS_CACHE[moduleId]) PROGRESS_CACHE[moduleId] = { sections: {} };
   if (!PROGRESS_CACHE[moduleId].sections) PROGRESS_CACHE[moduleId].sections = {};
   PROGRESS_CACHE[moduleId].sections[sectionId] = true;
-  syncProgress(moduleId, { sectionId });
+  return syncProgress(moduleId, { sectionId });
 }
 
 function moduleProgress(moduleId, sectionCount) {

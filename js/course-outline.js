@@ -13,12 +13,16 @@ const COURSE_OUTLINE = {
     { title: "Welcome to SynBase", readId: "0.1r" }
   ],
   module1: [
-    { title: "What Is Stanford iGEM?", readId: "1.1r" },
-    { title: "From Biology to Engineering", readId: "1.2r", checkId: "1.2m", checkTitle: "Matching Exercise: Biology vs. Engineering" },
-    { title: "Where Synthetic Biology Fits In", readId: "1.3r" },
-    { title: "A Very Quick History of Synthetic Biology", readId: "1.4r" },
-    { title: "The Many Applications of Synthetic Biology", readId: "1.5r" },
-    { title: "Synthetic Biology Is Only One Part of Bioengineering", readId: "1.6r" }
+    { title: "What Is Stanford iGEM?", readId: "1.1r", checkId: "1.2s", checkTitle: "Quick Recall: When Was iGEM Founded?" },
+    { title: "From Biology to Engineering", readId: "1.3r", checkId: "1.4m", checkTitle: "Matching Exercise: Biology vs. Engineering" },
+    { title: "Where Synthetic Biology Fits In", readId: "1.5r" },
+    { title: "A Very Quick History of Synthetic Biology: Early Foundations", readId: "1.6r" },
+    { title: "A Very Quick History of Synthetic Biology: Toward iGEM", readId: "1.7r", checkId: "1.8o", checkTitle: "Put the History of Synthetic Biology in Order" },
+    { part: "The Many Applications of Synthetic Biology", title: "The Many Applications of Synthetic Biology: Environment", readId: "1.9r" },
+    { title: "The Many Applications of Synthetic Biology: Healthcare", readId: "1.10r" },
+    { title: "The Many Applications of Synthetic Biology: Advancements", readId: "1.11r", checkId: "1.12m", checkTitle: "Matching Exercise: Village to Broader Area" },
+    { title: "Bioengineering Beyond Synthetic Biology: Devices & Tissue", readId: "1.13r" },
+    { title: "Bioengineering Beyond Synthetic Biology: Computation & Circuits", readId: "1.14r" }
   ],
   module2: [
     { title: "Welcome to Module 2", readId: "2.1r" },

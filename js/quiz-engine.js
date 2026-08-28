@@ -283,15 +283,23 @@ function renderPageFooterNav(MODULE, index) {
   mount.querySelector("[data-page-back]").addEventListener("click", () => {
     if (!isFirst) renderPageAt(MODULE, index - 1);
   });
-  mount.querySelector("[data-page-continue]").addEventListener("click", () => {
+  mount.querySelector("[data-page-continue]").addEventListener("click", async () => {
+    let syncPromise = null;
     if (page.type === "read" && !isSectionComplete(MODULE.id, page.id)) {
-      markSectionComplete(MODULE.id, page.id);
+      syncPromise = markSectionComplete(MODULE.id, page.id);
       const meta = MODULES_META.find(m => m.id === MODULE.id);
       refreshModuleProgressBar(MODULE, meta);
     }
     if (!isLast) {
       renderPageAt(MODULE, index + 1);
-    } else if (nextModule) {
+      return;
+    }
+    // Completing the module's last page marks its final section complete and
+    // navigates away in the same click — awaiting here (instead of relying on
+    // fire-and-forget + keepalive alone) makes sure that completion is actually
+    // persisted server-side before the next page's own unlock check reads it.
+    if (syncPromise) await syncPromise;
+    if (nextModule) {
       location.href = `${nextModule.id}.html`;
     } else {
       location.href = "../congratulations.html";
