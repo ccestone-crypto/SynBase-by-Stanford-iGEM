@@ -28,7 +28,7 @@
 <!-- Stats band -->
 <section class="stats-band">
   <div class="stats-row">
-    <div class="stat-big tint-green"><span class="num">6</span><span class="label">Course Units</span></div>
+    <div class="stat-big tint-green"><span class="num">8</span><span class="label">Course Units</span></div>
     <div class="stat-big tint-purple"><span class="num" id="stat-live">&mdash;</span><span class="label">Live Now</span></div>
     <div class="stat-big tint-blue"><span class="num">100%</span><span class="label">Free</span></div>
   </div>
@@ -108,10 +108,8 @@ const CHEVRON_ICON = `<svg viewBox="0 0 20 20" width="14" height="14" fill="none
 const CHECK_ICON = `<svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5l3.5 3.5L16 6"/></svg>`;
 const CHIP_TINTS = ["green", "purple", "blue"];
 
-// Full course syllabus — the program's own curriculum outline. Module 4-6 is
-// one combined placeholder entry until those units are split out and built.
-// Modules 1 and 2 are live: they link straight into the real interactive
-// module instead of just listing objectives/topics.
+// Full course syllabus — the program's own curriculum outline. All 8 units
+// are live and link straight into the real interactive module.
 const SYLLABUS = [
   {
     intro: true, chip: "0", title: "Introduction to SynBase",
@@ -119,96 +117,126 @@ const SYLLABUS = [
     single: "Hello! You're about to embark on a course built by the 2026 Stanford iGEM team, piece by piece, to give you a comprehensive introduction to synthetic biology — 8 modules, with learning checks and interactive activities scattered throughout. Completing it also unlocks application to the Stanford iGEM Bioengineering Research Program (SiBRP), a free summer program for high schoolers and incoming college freshmen."
   },
   {
-    chip: "1", title: "Introduction to iGEM & Bioengineering", time: "Est. completion time: 30 min",
+    chip: "1", title: "Introduction to iGEM & Bioengineering", time: "Est. completion time: 30–40 min",
     live: true, moduleId: "module1",
     objectives: [
-      "Understand iGEM and its mission",
-      "Define bioengineering as a field and describe its major subdisciplines"
+      "Understand what Stanford iGEM is and how it connects to the wider iGEM community",
+      "Distinguish a biology mindset from an engineering mindset",
+      "Define synthetic biology and see where it fits within the broader field of bioengineering"
     ],
     topics: [
-      "What is iGEM, and Stanford iGEM specifically?",
-      "What is bioengineering? Overview of subfields and how they relate",
-      "Landmark examples and why the field matters"
+      "What Stanford iGEM and iGEM are, and a quick history of synthetic biology",
+      "Biology vs. engineering: two different ways of asking questions about living systems",
+      "Where synthetic biology sits within bioengineering, plus real iGEM projects across Environment, Healthcare, and Advancements"
     ]
   },
   {
-    chip: "2", title: "Core Concepts in Molecular and Cellular Biology", time: "Est. completion time: 2 hours",
+    chip: "2", title: "Core Concepts in Molecular and Cellular Biology", time: "Est. completion time: 2–2.5 hrs",
     live: true, moduleId: "module2",
     objectives: [
-      "Describe the central dogma of molecular biology (DNA → RNA → protein)",
-      "Explain basic cell structure and function relevant to bioengineering",
-      "Identify key biomolecules (DNA, RNA, proteins, enzymes) and their roles"
+      "Describe basic cell structure across bacterial, mammalian, and plant cells",
+      "Explain the central dogma of molecular biology — DNA to RNA to protein",
+      "Connect DNA, RNA, and protein engineering to real synthetic biology applications",
+      "Describe how foreign DNA is inserted into a cell"
     ],
     topics: [
-      "Cell biology basics",
-      "Central dogma: transcription and translation",
-      "Core biochemistry needed for genetic engineering work later in the course"
+      "Cell biology: domains of life, bacterial vs. eukaryotic cell structure, the cell membrane",
+      "DNA and RNA structure, transcription, and translation",
+      "Real-world engineering examples across DNA, RNA, and protein — from drought-resistant wheat to CAR-T therapy",
+      "CRISPR-Cas9 and how new genetic material gets delivered into a cell"
     ]
   },
   {
-    chip: "3", title: "Biodesign & Literature Review", time: "Est. completion time: 1 hr",
+    chip: "3", title: "Biodesign & Literature Review", time: "Est. completion time: 1.5 hrs",
+    live: true, moduleId: "module3",
     objectives: [
-      "Understand the biodesign process as a framework for approaching a research problem",
-      "Find and evaluate scientific literature",
-      "Formulate a research question"
+      "Apply the biodesign framework to identify and narrow down a real-world need",
+      "Turn a need into a concrete research direction and question",
+      "Find relevant scientific literature efficiently",
+      "Evaluate a source's credibility and read a paper efficiently"
     ],
     topics: [
-      "Biodesign thinking framework",
-      "Searching PubMed/Google Scholar effectively",
-      "Evaluating primary sources and identifying gaps in the literature"
+      "The biodesign process, from an open-ended problem to a validated need statement",
+      "Brainstorming and evaluating research directions against real criteria",
+      "Strategies for searching the literature, plus responsible use of AI tools",
+      "How to evaluate a source and read a scientific paper efficiently"
     ]
   },
   {
-    chip: "4–6", title: "Genetic Circuit Design, Plasmid DNA Design, Experimental Workflows", note: "(to be expanded)", time: "Est. completion time: 3-4 hrs",
+    chip: "4", title: "Genetic Circuit Design", time: "Est. completion time: 1.5 hrs",
+    live: true, moduleId: "module4",
     objectives: [
-      "Explain what a genetic circuit is",
-      "Describe basic components: promoters, ribosome binding sites, coding sequences, terminators",
-      "Interpret simple circuit diagrams",
-      "Describe plasmid structure and function",
-      "Explain basic cloning methods (restriction enzyme cloning, Gibson assembly)",
-      "Read and annotate a simple plasmid map",
-      "Outline a typical wet-lab experimental workflow, from hypothesis to result",
-      "Describe common bioengineering lab techniques (PCR, gel electrophoresis, transformation) at a conceptual level",
-      "Apply basic experimental design principles: controls, replicates, variables"
+      "Identify the components that control transcription: promoters and terminators",
+      "Identify the components that control translation: start/stop codons and ribosome binding",
+      "Interpret simple genetic logic gates (AND, OR)",
+      "Explain how activators, repressors, and feedback loops shape circuit behavior"
     ],
     topics: [
-      "Intro to standardized biological parts (e.g., registry of standard parts)",
-      "Logic gates in biology",
-      "Examples of engineered genetic circuits",
-      "Brief intro to circuit-design tools used in the field",
-      "Plasmid components: origin of replication, selection marker, multiple cloning site",
-      "Common cloning methods, at a conceptual level",
-      "Intro to free plasmid-design/visualization tools",
-      "From hypothesis to experiment",
-      "Overview of common lab techniques (conceptual, not hands-on)",
-      "Experimental design principles and basic lab safety"
+      "Promoters and terminators, and how they differ across bacterial, plant, and mammalian cells",
+      "Translation initiation: Kozak vs. Shine-Dalgarno sequences",
+      "Genetic logic gates, using real AND/OR-gate examples",
+      "Activators, repressors, and positive/negative feedback loops"
     ]
   },
   {
-    chip: "7", title: "Entrepreneurship in Bioengineering", time: "Est. completion time: 45 min",
+    chip: "5", title: "Plasmid DNA Design", time: "Est. completion time: 1.5–2 hrs",
+    live: true, moduleId: "module5",
     objectives: [
-      "Describe paths from bioengineering research to real-world application",
-      "Explain basic concepts in biotech entrepreneurship: IP, funding, translation from lab to market",
-      "Identify possible career pathways in the field"
+      "Describe the two parts of a plasmid: backbone and insert",
+      "Compare restriction enzyme cloning and Gibson Assembly",
+      "Read a real plasmid map and identify its components",
+      "Navigate Benchling to design a plasmid"
     ],
     topics: [
-      "Research commercialization and technology transfer",
-      "Case studies of biotech startups",
-      "Intro to intellectual property in biotech",
-      "Career pathways overview"
+      "Backbone and insert components, and how they change by target cell type",
+      "Restriction enzyme cloning vs. Gibson Assembly",
+      "Worked examples reading real AddGene plasmid maps",
+      "Getting started in Benchling"
     ]
   },
   {
-    chip: "8", title: "Ethics & Broader Applications", time: "Est. completion time: 1 hr",
+    chip: "6", title: "Experimental Workflows", time: "Est. completion time: 1 hr",
+    live: true, moduleId: "module6",
     objectives: [
-      "Identify major ethical considerations in bioengineering: biosafety, biosecurity, dual-use research, equitable access",
-      "Discuss the societal impact of genetic technologies"
+      "Outline the full wet-lab workflow from ordering plasmids to visualizing results",
+      "Explain transformation, colony picking, and miniprep at a conceptual level",
+      "Describe transfection and how to measure its efficiency"
     ],
     topics: [
-      "Bioethics frameworks",
-      "Case studies (e.g., CRISPR ethics, gene drives, biosecurity)",
-      "Equitable access to biotechnology",
-      "Discussion prompts for further reflection"
+      "Ordering plasmids, Gibson Assembly, and transformation into competent cells",
+      "Colony picking, miniprep, and sequencing",
+      "Transfection into mammalian cells, fluorescence microscopy, and calculating transfection efficiency"
+    ]
+  },
+  {
+    chip: "7", title: "Entrepreneurship in Bioengineering", time: "Est. completion time: 1 hr",
+    live: true, moduleId: "module7",
+    objectives: [
+      "Assess the competitive landscape and articulate a unique value proposition",
+      "Describe the major types of intellectual property relevant to synthetic biology",
+      "Outline the therapeutic development pipeline, from IND to approval",
+      "Explain how synthetic biology solutions get funded, including sizing a market"
+    ],
+    topics: [
+      "From biodesign to a pitch: competitive landscape and unique value proposition",
+      "Intellectual property basics",
+      "The development pipeline for a new therapeutic",
+      "Funding a synthetic biology solution and sizing your market (TAM/SAM/SOM)"
+    ]
+  },
+  {
+    chip: "8", title: "Ethics & Broader Applications", time: "Est. completion time: 1.5 hrs",
+    live: true, moduleId: "module8",
+    objectives: [
+      "Apply the Belmont Report's three ethical principles to real case studies",
+      "Identify the ethical gray areas in emerging technologies like germline editing and gain-of-function research",
+      "Describe which oversight bodies (IRBs, IACUCs, IBCs) review which kinds of research"
+    ],
+    topics: [
+      "A framework for research ethics: the Belmont Report",
+      "Case studies in human subjects research: HeLa cells, the Havasupai Tribe, Jesse Gelsinger",
+      "Case studies beyond the individual: germline editing, gain-of-function research, CAR-T access and risk",
+      "Who decides what research happens: IRBs, IACUCs, IBCs, and FDA oversight"
     ]
   },
   {
