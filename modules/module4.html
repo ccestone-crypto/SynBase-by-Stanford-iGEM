@@ -41,6 +41,7 @@ const MODULE = {
         <p>Back in Module 2, you learned that plasmids are small, circular pieces of DNA that are easy to insert into cells. But a plasmid on its own is just a container. What actually determines what a cell does with the DNA inside it?</p>
         <p>That's where genetic circuits come in. A genetic circuit is a set of DNA parts arranged so a cell reads them in a specific way — sensing a signal, "computing" a response, and producing an output. Over this module and the next two, you'll learn how to read, and eventually design, circuits like these — the same technical skill that turns a Module 3-style need statement into something you could actually build.</p>
         <p>Think of an electronic circuit: an input, some internal computation, and an output — like a flash of light. Genetic circuits work the same way, just built from genes instead of wires. Most follow a sense–compute–output pattern: the cell senses a biological signal, computes a response to it, and produces an output.</p>
+        <img class="topic-image" src="../assets/img/curriculum/module4_sense_compute_output.png" alt="Most genetic circuits follow a sense-compute-output mechanism: a DNA sequence is sensed, computed, and output as a folded green fluorescent protein">
         <p>This module has four parts: the DNA parts that control transcription, the parts that control translation, logic gates, and more advanced genetic systems like feedback loops. Let's start with transcription.</p>
       `
     },
@@ -48,6 +49,7 @@ const MODULE = {
       id: "4.2r", type: "read", part: PART1, title: "Promoters and Terminators",
       html: `
         <p>Every genetic circuit needs a way to say "start here" and "stop here." A promoter is the DNA sequence that does the former — it's where RNA polymerase (the enzyme that builds RNA) and other transcription factors bind to begin transcription. Promoters come in two flavors: constitutive promoters are always on, while inducible promoters only turn on in response to a specific stimulus.</p>
+        <img class="topic-image" src="../assets/img/curriculum/module4_promoter_terminator_switches.png" alt="Parts that determine transcription: a promoter is a 'start-switch', a specific DNA sequence that initiates transcription; a terminator is a 'stop-switch', a specific DNA sequence that terminates transcription">
         <p>A terminator does the opposite — it's the sequence that tells RNA polymerase to stop. Terminators work differently depending on the cell type: in eukaryotic cells, protein complexes bind the terminator region and cut the RNA at a cleavage site; in bacterial cells, either an RNA hairpin structure or a protein called Rho causes RNA polymerase to fall off.</p>
       `
     },
@@ -60,7 +62,9 @@ const MODULE = {
           <li><strong>Pribnow box</strong> (bacterial): usually about 10 bases upstream; this is where the sigma subunit of RNA polymerase binds directly.</li>
           <li><strong>High GC content</strong> (eukaryotic): promoter regions rich in CpG sites (a C followed by a G) tend to be easier for transcription factors to bind, since they're less likely to be tightly packaged with histones. Bacterial promoters tend to run the opposite way — higher AT content, lower GC content.</li>
         </ul>
+        <img class="topic-image" src="../assets/img/curriculum/module4_promoter_motifs.png" alt="Motifs of promoters: the TATA box (eukaryotic, usually 35 bases upstream), the Pribnow box (bacterial, usually 10 bases upstream), and high GC content (eukaryotic) shown with diagrams of RNA polymerase binding and CpG site frequency">
         <p>A real, commonly used mammalian promoter is the CMV promoter — you'll work with it again in Module 5, and you'll get to examine a real promoter sequence yourself in the activity below.</p>
+        <img class="topic-image" src="../assets/img/curriculum/module4_cmv_promoter_sequence.png" alt="A real CMV promoter DNA sequence from Addgene, with the TATA box highlighted in red near the end of the sequence">
       `
     },
     {
@@ -106,6 +110,7 @@ const MODULE = {
           <li><strong>Polyadenylation signal</strong> (eukaryotic): AATAAA in DNA (AAUAAA in RNA); a protein complex called CPSF binds here and cleaves the RNA.</li>
           <li><strong>Hairpin</strong> (bacterial): the newly made RNA folds back on itself, physically blocking RNA polymerase and stopping transcription.</li>
         </ul>
+        <img class="topic-image" src="../assets/img/curriculum/module4_terminator_motifs.png" alt="Motifs of terminators: the polyadenylation signal (eukaryotic), showing RNA polymerase cleavage and poly-A tail addition, and the hairpin (bacterial), showing RNA folding back on itself">
         <p>A common real mammalian terminator is the SV40 poly(A) signal — you'll see it again when we design plasmids in Module 5.</p>
       `
     },
@@ -130,6 +135,7 @@ const MODULE = {
           <li><strong>Promoters</strong> — Bacterial: lac, tac, BAD. Plant: CaMV, Ubi, NOS. Mammalian: CMV, EF-1alpha, TRE.</li>
           <li><strong>Terminators</strong> — Bacterial: T7, tonB. Plant: NOS, CaMV 35S. Mammalian: poly-A signals like bGH (Bovine Growth Hormone) and SV40.</li>
         </ul>
+        <img class="topic-image" src="../assets/img/curriculum/module4_promoters_terminators_by_celltype.png" alt="Examples of promoters and terminators by cell type: bacterial (lac, tac, BAD promoters; T7, tonB terminators), plant (CaMV, Ubi, NOS promoters; NOS, CaMV 35S terminators), and mammalian (CMV, EF-1alpha, TRE promoters; bGH, SV40 poly-A terminators)">
       `
     },
     {
@@ -157,6 +163,7 @@ const MODULE = {
       html: `
         <p>Promoters and terminators control transcription — turning a DNA sequence into RNA. But how does the cell know which part of that RNA to actually turn into protein?</p>
         <p>Codons — the three-base sequences you learned about in Module 2 — are the answer. The start codon, AUG (or ATG in DNA), always codes for methionine and marks where translation begins. Three codons — UAA, UAG, and UGA (TAA, TAG, TGA in DNA) — don't code for any amino acid at all; they're stop codons that signal translation to end. The coding sequence is everything in between — the actual protein-coding instructions.</p>
+        <img class="topic-image" src="../assets/img/curriculum/module4_start_stop_codons.png" alt="Parts that determine translation: a codon table showing the start codon AUG and stop codons UAA/UAG/UGA, translation start sites (Kozak and Shine-Dalgarno sequences), and the coding sequence">
       `
     },
     {
@@ -216,6 +223,7 @@ const MODULE = {
       id: "4.18r", type: "read", part: PART3, title: "AND-Gates",
       html: `
         <p>An AND-gate requires two inputs to both be true before it produces an output. Stanford iGEM's own 2026 team built one: an AND-gate that only expresses a YAP/TAZ inhibitor when both ADAM12 and POSTN mRNA — two genes upregulated in keloid (overgrown scar) fibroblasts — are detected. Jiang et al. built a similar AND-gate that only activates a sensor when both IL6 and EGFP are detected.</p>
+        <img class="topic-image" src="../assets/img/curriculum/module4_and_gate.png" alt="Two AND-gate examples: an AND-gate with POSTN and ADAM12 mRNA that inhibits the YAP/TAZ pathway to restore healthy wound healing, and an AND-gate with IL6 and EGFP from Jiang et al. (2023) showing RADARS fold activation">
       `
     },
     {
@@ -244,6 +252,7 @@ const MODULE = {
         <p>Not every circuit is either fully on or fully off — some genes get turned up or down by regulatory proteins that bind to their promoters.</p>
         <p>Activators increase gene expression. Cyclic AMP (cAMP) is a classic example: when it binds its promoter, a protein called CAP also binds, boosting RNA polymerase activity.</p>
         <p>Repressors decrease gene expression. Tryptophan is a classic example: when tryptophan is present, a tryptophan repressor protein binds the operator and blocks transcription. When tryptophan runs out, the repressor lets go, and transcription can resume.</p>
+        <img class="topic-image" src="../assets/img/curriculum/module4_activators_repressors.png" alt="Activators increase promoter activity, shown with the CAP/cAMP example on the lac operon; repressors decrease promoter activity, shown with the tryptophan repressor example on the trp operon">
       `
     },
     {
@@ -263,6 +272,7 @@ const MODULE = {
       id: "4.23r", type: "read", part: PART4, title: "Feedback Loops",
       html: `
         <p>Feedback loops happen when a circuit's own output changes its future input. A positive feedback loop increases input — Becskei et al. showed this with a circuit where more GFP expression drove even more expression of a gene called tetR. A negative feedback loop decreases input — Becskei and Serrano showed the opposite pattern, where more TetR-EGFP expression suppressed a target called tetO-1.</p>
+        <img class="topic-image" src="../assets/img/curriculum/module4_feedback_loops.png" alt="Positive feedback loop (increases input), shown with the Becskei et al. (2001) rtTA-GFP fusion protein reporter plasmids; negative feedback loop (decreases input), shown with the Becskei and Serrano (2000) TetR-EGFP construct">
       `
     },
     {

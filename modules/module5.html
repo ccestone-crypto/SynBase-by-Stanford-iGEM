@@ -34,6 +34,8 @@ const MODULE = {
       html: `
         <p>Welcome to Module 5! So far, you've learned about the individual parts that make up a genetic circuit. Now we're going to see how those parts get packaged into something a cell can actually take up and use: a plasmid.</p>
         <p>Quick recap from Module 2: plasmids are small, circular pieces of DNA. Their circular shape is exactly what makes them so easy to insert into a cell — with no exposed ends, they're much harder for a cell's exonucleases (enzymes that chew away at loose DNA ends) to degrade.</p>
+        <img class="topic-image" src="../assets/img/curriculum/module5_plasmid_circular_dna_recap.png" alt="Review diagram: circular plasmid DNA has no exposed ends, protecting it from degradation, and is compact, both of which make it easier to insert into bacterial and other cells">
+
         <p>Back in Module 3, you took a real-world need and scoped it into a research question. A plasmid like the one you'll design in this module is often the literal physical thing you'd build to answer that question.</p>
         <p>Today, we'll open one up and look at exactly what's inside.</p>
       `
@@ -43,7 +45,9 @@ const MODULE = {
       html: `
         <p>Plasmids are built from genetic circuits, so today leans heavily on Module 4. As a quick reminder before we dive in:</p>
         <p>Promoters and terminators determine what gets transcribed — a promoter marks where transcription starts, a terminator marks where it stops.</p>
+        <img class="topic-image" src="../assets/img/curriculum/module5_promoter_terminator_examples.png" alt="Diagram of promoter and terminator symbols with examples: common bacterial promoters (lac, tac, BAD), plant promoters (CaMV, Ubi, NOS), and mammalian promoters (CMV, EF-1Alpha, TRE); common bacterial terminators (T7, tonB), plant terminators (NOS, CaMV 35S), and mammalian terminators (poly-A signals like bGH and SV40)">
         <p>And translation initiation sites determine what gets translated — the Kozak sequence for plant and mammalian cells, the Shine-Dalgarno sequence for bacterial cells — followed by the coding sequence itself.</p>
+        <img class="topic-image" src="../assets/img/curriculum/module5_translation_parts_overview.png" alt="Diagram of parts that determine translation: the codon table with start codon AUG and stop codons UAA/UAG/UGA, translation start sites (Kozak sequence GCCGCCACCATG for plant and mammalian, Shine-Dalgarno AGGAGG for bacteria), and the coding sequence">
         <p>If you want the full reference tables, they're still back in Module 4. Today, we'll put these same parts to work inside a real plasmid.</p>
       `
     },
@@ -51,12 +55,14 @@ const MODULE = {
       id: "5.3r", type: "read", title: "What You'll Learn Today",
       html: `
         <p>This module has four parts. First, you'll learn the components of a plasmid. Second, you'll learn two different ways to physically join those components together — restriction enzyme cloning and Gibson Assembly. Third, you'll create a free Benchling account, a tool researchers use to design and store DNA sequences. Fourth, you'll design a plasmid of your own.</p>
+        <img class="topic-image" src="../assets/img/curriculum/module5_roadmap_four_parts.png" alt="Four-part roadmap card: 01 Learn about components of a plasmid, 02 Learn about Gibson Assembly and how that affects plasmid design, 03 Creating an account at Benchling, a software used for plasmid design, 04 Complete a plasmid design activity">
       `
     },
     {
       id: "5.4r", type: "read", title: "The Two Parts of a Plasmid: Backbone and Insert", part: "Part 1: Components of a Plasmid",
       html: `
         <p>Every plasmid is made of two parts. The insert is the piece of foreign DNA you actually want a cell to express — the gene of interest. The backbone is everything else: the machinery that lets the plasmid survive inside a cell, multiply, and express whatever's encoded in the insert.</p>
+        <img class="topic-image" src="../assets/img/curriculum/module5_backbone_insert_intro.png" alt="Diagram of a circular plasmid with the insert shown in green and the backbone shown in black: the insert is the piece of foreign DNA to be inserted into the cell, and the backbone provides the tools for the plasmid to survive, multiply, and express the gene in the insert">
       `
     },
     {
@@ -69,6 +75,7 @@ const MODULE = {
           <li><strong>Selectable marker</strong> — usually a gene for antibiotic resistance. Add that antibiotic to the growth medium, and only cells carrying the plasmid survive.</li>
           <li><strong>Multiple cloning site (MCS)</strong> — a region containing restriction sites where the insert gets pasted in. We won't focus much on this in this course, but it matters for the next page.</li>
         </ul>
+        <img class="topic-image" src="../assets/img/curriculum/module5_backbone_insert_components.png" alt="Diagram listing backbone components (backbone promoter, origin of replication, selectable marker, multiple cloning site) and insert components (coding sequence, including sensors, fluorescent reporters, linkers, and 2A sequences), arranged around a circular plasmid map">
       `
     },
     {
@@ -94,6 +101,7 @@ const MODULE = {
           <li><strong>Linkers</strong> — short sequences that connect two distinct protein parts together.</li>
           <li><strong>2A sequences</strong> — sequences that separate two naturally-linked proteins into two independent parts.</li>
         </ul>
+        <img class="topic-image" src="../assets/img/curriculum/module5_backbone_insert_components.png" alt="Diagram listing backbone components (backbone promoter, origin of replication, selectable marker, multiple cloning site) and insert components (coding sequence, including sensors, fluorescent reporters, linkers, and 2A sequences), arranged around a circular plasmid map">
       `
     },
     {
@@ -105,6 +113,7 @@ const MODULE = {
           <li>Mammalian cells are trickier: plasmid DNA has to be built up in bacteria first, since bacteria replicate fast enough to amplify it into many copies. So a mammalian-cell backbone needs promoters from both bacteria and mammalian cells.</li>
           <li>Plant cells follow the same logic — bacterial amplification first — so their backbones need both bacterial and plant promoters.</li>
         </ul>
+        <img class="topic-image" src="../assets/img/curriculum/module5_backbone_by_cell_type.png" alt="Table of plasmid backbone design by cell type: how DNA is inserted into bacterial, mammalian, and plant cells, which backbone components (bacterial only, bacterial and mammalian, or bacterial and plant) are required, and common promoters, origins of replication, and selectable markers for each cell type">
       `
     },
     {
@@ -125,6 +134,7 @@ const MODULE = {
       html: `
         <p>The insert follows the same cell-type logic. It begins with a translation initiation sequence — the Shine-Dalgarno sequence for bacteria, or a Kozak sequence (commonly GCCGCCACCATG) for mammalian and plant cells, the same two sequences you just reviewed from Module 4.</p>
         <p>From there, the insert can include any combination of sensors, linkers, 2A sequences, and fluorescent reporters (like GFP, mCherry, and mTagBFP), and it always ends with a stop codon: TAA, TAG, or TGA.</p>
+        <img class="topic-image" src="../assets/img/curriculum/module5_insert_by_cell_type.png" alt="Table of plasmid insert design by cell type: translation initiation sequences (Shine-Dalgarno for bacteria, Kozak for mammalian and plant), with example sensors, linkers, 2A sequences, fluorescent reporters (GFP, mCherry, mTagBFP), and stop codons (UAA, UAG, UGA)">
       `
     },
     {
@@ -246,6 +256,7 @@ const MODULE = {
       id: "5.21r", type: "read", title: "What Is Gibson Assembly?", part: "Part 2: Cloning Methods",
       html: `
         <p>Gibson Assembly is another cloning method that joins DNA fragments together — but instead of cutting them, it fuses matching overhangs directly. One common use is joining a plasmid's backbone and insert into one complete piece of DNA.</p>
+        <img class="topic-image" src="../assets/img/curriculum/module5_gibson_two_fragments.png" alt="Diagram of two DNA fragments used in Gibson Assembly: a PCR-amplified insert with overlapping ends and a linearized backbone vector with overlapping ends, joined into one assembled circular plasmid product">
       `
     },
     {
@@ -258,6 +269,7 @@ const MODULE = {
           <li>DNA polymerase extends the 3' ends to fill in the newly exposed gaps.</li>
           <li>DNA ligase seals any remaining nicks, leaving one continuous piece of DNA.</li>
         </ol>
+        <img class="topic-image" src="../assets/img/curriculum/module5_gibson_assembly_mechanism.png" alt="Diagram of the Gibson Assembly single-tube reaction mechanism: two dsDNA fragments with overlapping ends, a 5' exonuclease chews back the 5' ends, the fragments anneal at their overlap, DNA polymerase extends the 3' ends, and DNA ligase seals the remaining nicks to form fully-assembled DNA">
       `
     },
     {

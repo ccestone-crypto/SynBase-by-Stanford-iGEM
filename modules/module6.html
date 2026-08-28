@@ -36,12 +36,14 @@ const MODULE = {
         <p>One quick reminder from earlier modules: we insert plasmids into cells rather than linear DNA, because a plasmid's circular shape means it has no exposed ends. That makes it much harder for the cell's own enzymes to chew it up, and easier for it to survive intact until it's expressed.</p>
         <p>Getting from a finished plasmid design to a visible result takes eight steps: (1) ordering the plasmid, (2) combining DNA fragments with Gibson assembly, (3) transforming the DNA into bacteria, (4) isolating an individual bacterial colony, (5) miniprepping the DNA back out of the bacteria, (6) sequencing it to confirm it's correct, (7) transfecting it into mammalian cells, and (8) visualizing the result under a fluorescence microscope.</p>
         <p>Notice that even though the final destination is a mammalian cell, the plasmid makes a stop in bacteria first. Bacteria divide quickly, so routing the plasmid through them first lets you cheaply amplify a tiny amount of DNA into a large, usable quantity before it ever reaches a mammalian cell. Let's walk through each step.</p>
+        <img class="topic-image" src="../assets/img/curriculum/module6_workflow_roadmap.png" alt="Diagram titled 'The Synthetic Biology Wet Lab Workflow with Mammalian Cells' showing all eight steps in order, from Ordering plasmids on Twist Biosciences through Visualizing Outputs (Fluorescence Microscopy)">
       `
     },
     {
       id: "6.2r", type: "read", title: "Step 1: Ordering Plasmids on Twist Bioscience", part: "Part 1: From Plasmid Design to Bacteria",
       html: `
         <p>Once a plasmid is designed in Benchling, the next step is turning that digital sequence into physical DNA. The sequence is entered into Twist Bioscience's ordering platform, the plasmid is ordered, and Twist synthesizes and ships it. What arrives in the mail is the same plasmid you designed — just as real DNA instead of a sequence file.</p>
+        <img class="topic-image" src="../assets/img/curriculum/module6_twist_order_steps.png" alt="Diagram titled 'Steps To Order from Twist Biosciences': Design Plasmid on Benchling, then Input Sequence on Twist, then Twist Manufactures and Ships Plasmids, showing a Benchling plasmid map, the Twist sequence-upload interface, and a tube rack of plasmids arriving at the lab">
       `
     },
     {
@@ -54,6 +56,7 @@ const MODULE = {
           <li>DNA polymerase extends the 3' ends of both fragments to fill in the space that was chewed back.</li>
           <li>DNA ligase seals whatever nicks remain, leaving one continuous, joined piece of DNA.</li>
         </ul>
+        <img class="topic-image" src="../assets/img/curriculum/module6_gibson_assembly_mechanism.png" alt="Diagram of Gibson Assembly showing two dsDNA fragments A and B: 5' exonuclease chews back the 5' ends, the fragments anneal at their overlap, DNA polymerase extends the 3' ends, and DNA ligase seals the nicks to produce one fully-assembled piece of DNA">
       `
     },
     {
@@ -76,6 +79,7 @@ const MODULE = {
         <p>The DNA mix is first added to the competent E. coli, then briefly incubated on ice, which helps the DNA bind to the cell surfaces. The mixture is then heat-shocked, creating temporary tears in the cell wall along with a temperature gradient that drives DNA into the cells. Immediately afterward, the cells go back on ice, which seals those tears and traps the DNA inside.</p>
         <p>That sudden temperature swing stresses the cells, so they're given time to recover in SOC media, which supplies the nutrients they need to survive. The cell-media mixture is shaken at 37°C for about an hour.</p>
         <p>Finally, a small amount of the mixture is spread onto an agar plate with a cell-spreading stick, so individual bacterial colonies can form. The plate is incubated overnight.</p>
+        <img class="topic-image" src="../assets/img/curriculum/module6_transformation_overview.png" alt="Overview-of-steps diagram for DNA transformation: add DNA to competent E. coli cells and incubate on ice, heat shock, incubate on ice, recover in SOC media at 37°C while shaking, plate on selective agar LB+antibiotic media, and incubate at 37°C overnight">
       `
     },
     {
@@ -109,6 +113,7 @@ const MODULE = {
       id: "6.8r", type: "read", title: "Step 4: Amplifying an Individual Bacterial Colony (Colony Picking)", part: "Part 1: From Plasmid Design to Bacteria",
       html: `
         <p>After overnight incubation, bacterial colonies form on the plate — visible as individual dots. To isolate one, an inoculating stick is used to pick up a single colony and transfer it into a 5 mL mix of LB broth, where the cells within that one colony can multiply. That mixture is then incubated overnight.</p>
+        <img class="topic-image" src="../assets/img/curriculum/module6_colony_picking.png" alt="Diagram of colony picking: an inoculating stick touches a single bacterial colony on an agar plate, then is inserted into a tube of cell media to transfer that colony into liquid culture">
       `
     },
     {
@@ -129,6 +134,7 @@ const MODULE = {
         <p>With the three buffers added, the spin column is centrifuged. This is where plasmid DNA gets separated from larger, linear non-plasmid DNA: the sample binds to a silica membrane inside the column, the larger DNA passes through into the collection tube below, and the smaller plasmid DNA stays attached to the membrane. That flow-through liquid is discarded.</p>
         <p>Next, a wash buffer — <strong>Buffer PE</strong> — is added, and the column is centrifuged again to rinse away salts and other impurities, which collect in the tube below and are discarded.</p>
         <p>Finally, an elution buffer — <strong>Buffer EB</strong> — is added to detach the purified DNA from the membrane. The column is centrifuged one last time (sometimes more than once, to maximize yield), and the miniprepped DNA collects in the tube below — ready for the next step.</p>
+        <img class="topic-image" src="../assets/img/curriculum/module6_miniprep_steps.png" alt="Five-step diagram of DNA miniprep spin-column processing: DNA attaches to the silica membrane, the column is spun, washed, eluted, and spun a final time to collect purified plasmid DNA in solution">
       `
     },
     {
@@ -162,6 +168,7 @@ const MODULE = {
       html: `
         <p>DNA transfection (the next step) is time-consuming and relatively costly, so before committing to it, bioengineers confirm the miniprepped DNA is actually the sequence they intended.</p>
         <p>Sequencing is done by mailing a small sample of the miniprepped DNA to a sequencing company — commonly Plasmidsaurus. Within about a day, Plasmidsaurus emails back the full sequence, which is then aligned against the original intended sequence from Benchling to confirm the lab DNA matches the design.</p>
+        <img class="topic-image" src="../assets/img/curriculum/module6_sequencing_overview.png" alt="Overview-of-steps diagram for sequencing through Plasmidsaurus: mail samples to Plasmidsaurus, receive a linearized plasmid map back, and verify the plasmid map against the intended sequence after miniprep">
       `
     },
     {
@@ -182,6 +189,7 @@ const MODULE = {
         <p>Mammalian DNA transfection introduces the plasmid into mammalian cells. It works by mixing a lipofectamine reagent (Lipofectamine 3000 is one common example) with the DNA to form a lipoplex.</p>
         <p>Lipofectamine reagents are positively charged, which lets them bind readily to negatively charged DNA and helps that complex cross the negatively charged inner portion of the cell's phospholipid bilayer. Along the way, the lipofectamine layer also shields the DNA from being destroyed by enzymes.</p>
         <p>Experimentally, the DNA-lipofectamine mix is added to a well plate of cells that were pre-plated 24 hours before transfection.</p>
+        <img class="topic-image" src="../assets/img/curriculum/module6_transfection_steps.png" alt="Diagram of transfection: a tube of Lipofectamine reagent plus a tube of plasmid DNA are combined into a single tube, which is then added to the wells of a 24-well cell culture plate">
       `
     },
     {
@@ -223,6 +231,7 @@ const MODULE = {
         <p>Transfection efficiency measures what percentage of cells actually took up the plasmid DNA. For a plasmid expressing green fluorescent protein, that's calculated as the number of green fluorescent spots (on the green fluorescence setting) divided by the total number of cells visible on the brightfield image — the overlay image makes it easier to compare the two side by side.</p>
         <p>For example, if a sample shows 20 cells on brightfield but only 17 green dots, the transfection efficiency is 17/20, or 85%.</p>
         <p>One way to count total live cells is with a fluorescent dye like DAPI, which stains all nuclei blue — though that only works if the plasmid isn't also expressing a blue fluorescent reporter, since the two would be indistinguishable.</p>
+        <img class="topic-image" src="../assets/img/curriculum/module6_dapi_gfp_microscopy.png" alt="Two fluorescence microscopy images side by side: DAPI staining showing all cell nuclei lit up blue, and GFP fluorescent reporters showing successfully transfected cells lit up green">
       `
     },
     {
