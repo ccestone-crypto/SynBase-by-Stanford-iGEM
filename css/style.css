@@ -1522,6 +1522,7 @@ a:hover { text-decoration: underline; }
 .landing-hero h1 { font-size: 2.6rem; font-weight: 900; line-height: 1.12; letter-spacing: -1px; color: var(--ink-black); margin: 0 0 16px; }
 .landing-hero .lede { font-size: 1.08rem; color: var(--ink-soft); max-width: 480px; margin: 0 0 26px; }
 .landing-hero-ctas { display: flex; gap: 12px; flex-wrap: wrap; }
+.landing-hero-ctas .btn:only-child { padding: 13px 28px; font-size: 1rem; }
 .landing-hero-art { display: flex; align-items: center; justify-content: center; }
 .landing-hero-art img { width: 100%; height: auto; }
 .hero-stats-mini { display: flex; gap: 22px; flex-wrap: wrap; }
