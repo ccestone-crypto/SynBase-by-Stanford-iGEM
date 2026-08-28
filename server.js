@@ -844,6 +844,14 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: "Something went wrong." });
 });
 
-app.listen(PORT, () => {
-  console.log(`SynBase running at http://localhost:${PORT}`);
-});
+// Only start a real listener when this file is run directly (`node server.js`
+// locally, or on Render) — when required as a module (by index.js, for the
+// Firebase Cloud Functions wrapper), Cloud Functions manages the HTTP
+// lifecycle itself and just needs the bare Express app.
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`SynBase running at http://localhost:${PORT}`);
+  });
+}
+
+module.exports = app;

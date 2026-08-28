@@ -1,0 +1,12 @@
+{
+  "hosting": {
+    "public": "firebase-hosting-empty",
+    "rewrites": [
+      { "source": "**", "function": "app" }
+    ]
+  },
+  "functions": {
+    "source": ".",
+    "runtime": "nodejs20"
+  }
+}
