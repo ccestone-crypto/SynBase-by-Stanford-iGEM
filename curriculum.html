@@ -257,7 +257,7 @@ function renderSyllabus(mountEl) {
             <span class="unit-title">${escapeHtml(m.title)}${m.note ? " " + escapeHtml(m.note) : ""}</span>
           </span>
         </span>
-        ${m.live ? `<span class="live-badge">Live Now</span>` : m.time ? `<span class="unit-progress"><span class="unit-progress-pct">${escapeHtml(m.time.replace("Est. completion time: ", ""))}</span></span>` : ""}
+        ${m.time ? `<span class="unit-progress"><span class="unit-progress-pct">${escapeHtml(m.time.replace("Est. completion time: ", ""))}</span></span>` : ""}
       </summary>
       <div class="unit-body">
         ${m.single ? `<p class="unit-desc">${escapeHtml(m.single)}</p>` : `
