@@ -3,32 +3,44 @@
 // and derive both the thumbnail image URL and the outbound watch link from it.
 const db = require("./db");
 
-const insertTalkStmt = db.prepare(`
-  INSERT INTO speaker_talks (id, title, speakerName, description, youtubeId, uploadedAt)
-  VALUES (?, ?, ?, ?, ?, ?)
-`);
-const listTalksStmt = db.prepare(`SELECT * FROM speaker_talks ORDER BY uploadedAt DESC`);
-const findTalkByIdStmt = db.prepare(`SELECT * FROM speaker_talks WHERE id = ?`);
-const deleteTalkStmt = db.prepare(`DELETE FROM speaker_talks WHERE id = ?`);
-
-function listTalks() {
-  return listTalksStmt.all();
+function unwrap({ data, error }) {
+  if (error) throw new Error(error.message);
+  return data;
 }
 
-function findTalkById(id) {
-  return findTalkByIdStmt.get(id) || null;
+function rowToTalk(row) {
+  if (!row) return null;
+  return {
+    id: row.id,
+    title: row.title,
+    speakerName: row.speaker_name,
+    description: row.description,
+    youtubeId: row.youtube_id,
+    uploadedAt: row.uploaded_at
+  };
 }
 
-function addTalk({ id, title, speakerName, description, youtubeId }) {
-  const uploadedAt = new Date().toISOString();
-  insertTalkStmt.run(id, title, speakerName, description || "", youtubeId, uploadedAt);
+async function listTalks() {
+  const rows = unwrap(await db.from("speaker_talks").select("*").order("uploaded_at", { ascending: false }));
+  return rows.map(rowToTalk);
+}
+
+async function findTalkById(id) {
+  const row = unwrap(await db.from("speaker_talks").select("*").eq("id", id).maybeSingle());
+  return rowToTalk(row);
+}
+
+async function addTalk({ id, title, speakerName, description, youtubeId }) {
+  unwrap(await db.from("speaker_talks").insert({
+    id, title, speaker_name: speakerName, description: description || "", youtube_id: youtubeId
+  }));
   return findTalkById(id);
 }
 
-function deleteTalk(id) {
-  const talk = findTalkById(id);
+async function deleteTalk(id) {
+  const talk = await findTalkById(id);
   if (!talk) return false;
-  deleteTalkStmt.run(id);
+  await db.from("speaker_talks").delete().eq("id", id);
   return true;
 }
 

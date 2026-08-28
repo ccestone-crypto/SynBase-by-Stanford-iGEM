@@ -3,37 +3,35 @@
 // (user, module, section) — resubmitting overwrites the previous attempt.
 const db = require("./db");
 
-const getStmt = db.prepare(`
-  SELECT answer, updatedAt FROM free_responses
-  WHERE userId = ? AND moduleId = ? AND sectionId = ?
-`);
+function unwrap({ data, error }) {
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+async function getResponse(userId, moduleId, sectionId) {
+  const row = unwrap(await db.from("free_responses")
+    .select("answer,updated_at")
+    .eq("user_id", userId).eq("module_id", moduleId).eq("section_id", sectionId)
+    .maybeSingle());
+  return row ? { answer: row.answer, updatedAt: row.updated_at } : null;
+}
+
 // Anonymous by design — no userId/name in the result. Ordered chronologically
 // like a discussion thread; capped defensively since this is unpaginated.
-const listForSectionStmt = db.prepare(`
-  SELECT answer, updatedAt FROM free_responses
-  WHERE moduleId = ? AND sectionId = ?
-  ORDER BY updatedAt ASC
-  LIMIT 200
-`);
-const upsertStmt = db.prepare(`
-  INSERT INTO free_responses (userId, moduleId, sectionId, answer, updatedAt)
-  VALUES (@userId, @moduleId, @sectionId, @answer, @updatedAt)
-  ON CONFLICT(userId, moduleId, sectionId) DO UPDATE SET
-    answer = excluded.answer,
-    updatedAt = excluded.updatedAt
-`);
-
-function getResponse(userId, moduleId, sectionId) {
-  return getStmt.get(userId, moduleId, sectionId) || null;
+async function listAnswersForSection(moduleId, sectionId) {
+  const rows = unwrap(await db.from("free_responses")
+    .select("answer,updated_at")
+    .eq("module_id", moduleId).eq("section_id", sectionId)
+    .order("updated_at", { ascending: true })
+    .limit(200));
+  return rows.map(r => ({ answer: r.answer, updatedAt: r.updated_at }));
 }
 
-function listAnswersForSection(moduleId, sectionId) {
-  return listForSectionStmt.all(moduleId, sectionId);
-}
-
-function saveResponse({ userId, moduleId, sectionId, answer }) {
-  const updatedAt = new Date().toISOString();
-  upsertStmt.run({ userId, moduleId, sectionId, answer, updatedAt });
+async function saveResponse({ userId, moduleId, sectionId, answer }) {
+  unwrap(await db.from("free_responses").upsert(
+    { user_id: userId, module_id: moduleId, section_id: sectionId, answer, updated_at: new Date().toISOString() },
+    { onConflict: "user_id,module_id,section_id" }
+  ));
   return getResponse(userId, moduleId, sectionId);
 }
 

@@ -5,20 +5,17 @@ const path = require("path");
 const crypto = require("crypto");
 const express = require("express");
 const cookieParser = require("cookie-parser");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
 const rateLimit = require("express-rate-limit");
 const multer = require("multer");
 
+const supabase = require("./server/db");
+const { freshAuthClient } = require("./server/auth-client");
 const store = require("./server/store");
-const mailer = require("./server/mailer");
 const speakerStore = require("./server/speaker-store");
 const portfolioStore = require("./server/portfolio-store");
 const freeResponseStore = require("./server/free-response-store");
-const { getSessionSecret } = require("./server/secret");
 const { isCourseComplete, isValidSection } = require("./server/course-config");
 
-const SESSION_SECRET = getSessionSecret();
 const COOKIE_NAME = "sibrp_session";
 const PORT = process.env.PORT || 8420;
 
@@ -33,6 +30,22 @@ function getAdminEmails() {
 }
 
 const app = express();
+
+// Express 4 doesn't catch a rejected promise from an async route handler —
+// left alone, one thrown error (a network blip talking to Supabase, say)
+// crashes the whole Node process instead of just failing that one request.
+// Wrapping every handler registered via app.get/post/put/delete here, once,
+// means every route added below is automatically protected without having
+// to remember a try/catch in each one individually.
+function wrapAsync(fn) {
+  if (typeof fn !== "function" || fn.constructor.name !== "AsyncFunction") return fn;
+  return (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
+}
+["get", "post", "put", "delete"].forEach(method => {
+  const original = app[method].bind(app);
+  app[method] = (path, ...handlers) => original(path, ...handlers.map(wrapAsync));
+});
+
 app.use(express.json());
 app.use(cookieParser());
 
@@ -53,39 +66,69 @@ const portfolioImageUpload = multer({
 });
 
 // ---------- Auth helpers ----------
-function issueSession(res, user) {
-  const token = jwt.sign({ sub: user.id }, SESSION_SECRET, { expiresIn: "30d" });
-  res.cookie(COOKIE_NAME, token, {
+// Session = a Supabase access token + refresh token, stored together as one
+// JSON cookie. Access tokens are short-lived (~1hr); getUserFromRequest
+// transparently refreshes using the refresh token so the 30-day "stay logged
+// in" behavior users had before still holds, without a separate signed JWT
+// of our own — Supabase Auth is the one issuing and verifying tokens now.
+function issueSession(res, session) {
+  res.cookie(COOKIE_NAME, JSON.stringify({ at: session.access_token, rt: session.refresh_token }), {
     httpOnly: true,
     sameSite: "lax",
     maxAge: 30 * 24 * 60 * 60 * 1000
   });
 }
 
-function getUserFromRequest(req) {
-  const token = req.cookies && req.cookies[COOKIE_NAME];
-  if (!token) return null;
+async function getUserFromRequest(req, res) {
+  const raw = req.cookies && req.cookies[COOKIE_NAME];
+  if (!raw) return null;
+
+  let tokens;
   try {
-    const payload = jwt.verify(token, SESSION_SECRET);
-    return store.findUserById(payload.sub);
+    tokens = JSON.parse(raw);
   } catch (e) {
     return null;
   }
+  if (!tokens || !tokens.at) return null;
+
+  let authUser = null;
+  const { data, error } = await freshAuthClient().auth.getUser(tokens.at);
+  if (!error && data.user) {
+    authUser = data.user;
+  } else if (tokens.rt) {
+    // Access token expired/invalid — try the refresh token before giving up.
+    const { data: refreshed, error: refreshError } = await freshAuthClient().auth.refreshSession({ refresh_token: tokens.rt });
+    if (!refreshError && refreshed.session) {
+      authUser = refreshed.user;
+      if (res) issueSession(res, refreshed.session); // silently rotate the cookie forward
+    }
+  }
+  if (!authUser) return null;
+
+  return store.findUserById(authUser.id);
 }
 
-function requireAuth(req, res, next) {
-  const user = getUserFromRequest(req);
-  if (!user) return res.status(401).json({ error: "Not signed in." });
-  req.user = user;
-  next();
+async function requireAuth(req, res, next) {
+  try {
+    const user = await getUserFromRequest(req, res);
+    if (!user) return res.status(401).json({ error: "Not signed in." });
+    req.user = user;
+    next();
+  } catch (e) {
+    next(e);
+  }
 }
 
-function requireAdmin(req, res, next) {
-  const user = getUserFromRequest(req);
-  if (!user) return res.status(401).json({ error: "Not signed in." });
-  if (!user.isAdmin) return res.status(403).json({ error: "Admin access required." });
-  req.user = user;
-  next();
+async function requireAdmin(req, res, next) {
+  try {
+    const user = await getUserFromRequest(req, res);
+    if (!user) return res.status(401).json({ error: "Not signed in." });
+    if (!user.isAdmin) return res.status(403).json({ error: "Admin access required." });
+    req.user = user;
+    next();
+  } catch (e) {
+    next(e);
+  }
 }
 
 function isValidEmail(email) {
@@ -137,7 +180,7 @@ function pruneResetCooldowns() {
 }
 
 // ---------- Auth API ----------
-app.post("/api/signup", authLimiter, (req, res) => {
+app.post("/api/signup", authLimiter, async (req, res) => {
   const { name, email, password } = req.body || {};
 
   if (!name || !String(name).trim()) {
@@ -149,41 +192,74 @@ app.post("/api/signup", authLimiter, (req, res) => {
   if (!password || String(password).length < 8) {
     return res.status(400).json({ error: "Password must be at least 8 characters." });
   }
-  if (store.findUserByEmail(email)) {
-    return res.status(409).json({ error: "An account with that email already exists." });
-  }
 
-  const isListedAdmin = getAdminEmails().includes(String(email).trim().toLowerCase());
+  const normalizedEmail = String(email).trim().toLowerCase();
+  const isListedAdmin = getAdminEmails().includes(normalizedEmail);
+  const baseUrl = process.env.APP_BASE_URL || `${req.protocol}://${req.get("host")}`;
 
-  const passwordHash = bcrypt.hashSync(String(password), 10);
-  let user;
-  try {
-    user = store.createUser({
-      id: crypto.randomUUID(),
-      name: String(name).trim(),
-      email,
-      passwordHash,
-      isAdmin: isListedAdmin
-    });
-  } catch (e) {
-    if (/UNIQUE constraint failed/.test(e.message)) {
+  const { data, error } = await freshAuthClient().auth.signUp({
+    email: normalizedEmail,
+    password: String(password),
+    options: {
+      data: { name: String(name).trim(), is_admin: isListedAdmin },
+      emailRedirectTo: `${baseUrl}/confirm-email.html`
+    }
+  });
+
+  if (error) {
+    if (/already registered|already exists|already been registered/i.test(error.message)) {
       return res.status(409).json({ error: "An account with that email already exists." });
     }
-    throw e;
+    return res.status(400).json({ error: error.message });
   }
 
-  issueSession(res, user);
-  res.json({ user: { id: user.id, name: user.name, email: user.email, isAdmin: user.isAdmin, taEligible: !!user.taEligible } });
+  // "Confirm email" is on for this project — signUp() creates the account but
+  // doesn't log them in yet. confirm-email.html finishes the job once they
+  // click the link Supabase just emailed them.
+  if (!data.session) {
+    return res.json({ needsConfirmation: true, message: "Check your email to confirm your account, then log in." });
+  }
+
+  issueSession(res, data.session);
+  const user = await store.findUserById(data.user.id);
+  res.json({ user: { id: user.id, name: user.name, email: user.email, isAdmin: user.isAdmin, taEligible: user.taEligible } });
 });
 
-app.post("/api/login", authLimiter, (req, res) => {
+app.post("/api/login", authLimiter, async (req, res) => {
   const { email, password } = req.body || {};
-  const user = store.findUserByEmail(email);
-  if (!user || !bcrypt.compareSync(String(password || ""), user.passwordHash)) {
+  const { data, error } = await freshAuthClient().auth.signInWithPassword({
+    email: String(email || "").trim().toLowerCase(),
+    password: String(password || "")
+  });
+  if (error) {
+    if (/email not confirmed/i.test(error.message)) {
+      return res.status(401).json({ error: "Please confirm your email first — check your inbox for the confirmation link." });
+    }
     return res.status(401).json({ error: "Incorrect email or password." });
   }
-  issueSession(res, user);
-  res.json({ user: { id: user.id, name: user.name, email: user.email, isAdmin: !!user.isAdmin, taEligible: !!user.taEligible } });
+  if (!data.session) {
+    return res.status(401).json({ error: "Incorrect email or password." });
+  }
+  issueSession(res, data.session);
+  const user = await store.findUserById(data.user.id);
+  res.json({ user: { id: user.id, name: user.name, email: user.email, isAdmin: user.isAdmin, taEligible: user.taEligible } });
+});
+
+// Finishes the email-confirmation flow: confirm-email.html establishes a
+// Supabase session client-side from the link Supabase emailed, then hands us
+// those tokens here so we can set our own httpOnly session cookie exactly
+// like /api/login does — same server-side session mechanism regardless of
+// how the client obtained a valid Supabase session.
+app.post("/api/session-from-tokens", authLimiter, async (req, res) => {
+  const { access_token, refresh_token } = req.body || {};
+  if (!access_token) return res.status(400).json({ error: "Missing session token." });
+
+  const { data, error } = await freshAuthClient().auth.getUser(access_token);
+  if (error || !data.user) return res.status(401).json({ error: "That confirmation link is invalid or has expired." });
+
+  issueSession(res, { access_token, refresh_token });
+  const user = await store.findUserById(data.user.id);
+  res.json({ user: { id: user.id, name: user.name, email: user.email, isAdmin: user.isAdmin, taEligible: user.taEligible } });
 });
 
 app.post("/api/logout", (req, res) => {
@@ -191,18 +267,17 @@ app.post("/api/logout", (req, res) => {
   res.json({ ok: true });
 });
 
-app.get("/api/me", (req, res) => {
-  const user = getUserFromRequest(req);
-  res.json({ user: user ? { id: user.id, name: user.name, email: user.email, isAdmin: !!user.isAdmin, taEligible: !!user.taEligible } : null });
+app.get("/api/me", async (req, res) => {
+  const user = await getUserFromRequest(req, res);
+  res.json({ user: user ? { id: user.id, name: user.name, email: user.email, isAdmin: user.isAdmin, taEligible: user.taEligible } : null });
 });
 
 // ---------- Forgot / reset password ----------
-const RESET_TOKEN_TTL_MS = 60 * 60 * 1000; // 1 hour
-
-function hashToken(rawToken) {
-  return crypto.createHash("sha256").update(rawToken).digest("hex");
-}
-
+// Supabase Auth owns this flow end-to-end: it sends its own reset email (via
+// its built-in mailer, or custom SMTP if configured in the Supabase
+// dashboard under Authentication > SMTP Settings) with a link that lands the
+// browser in a recovery session directly — reset-password.html talks to
+// Supabase client-side to finish the job, not through an API route here.
 app.post("/api/forgot-password", forgotPasswordLimiter, async (req, res) => {
   const { email } = req.body || {};
   const genericResponse = { ok: true, message: "If an account exists for that email, a reset link has been sent." };
@@ -218,48 +293,22 @@ app.post("/api/forgot-password", forgotPasswordLimiter, async (req, res) => {
   resetCooldowns.set(normalizedEmail, Date.now());
   if (resetCooldowns.size > 1000) pruneResetCooldowns();
 
-  const user = store.findUserByEmail(email);
-  if (!user) return res.json(genericResponse); // don't reveal whether the account exists
-
-  const rawToken = crypto.randomBytes(32).toString("hex");
-  store.setResetToken(user.id, hashToken(rawToken), Date.now() + RESET_TOKEN_TTL_MS);
-
   const baseUrl = process.env.APP_BASE_URL || `${req.protocol}://${req.get("host")}`;
-  const resetUrl = `${baseUrl}/reset-password.html?token=${rawToken}`;
+  await freshAuthClient().auth.resetPasswordForEmail(normalizedEmail, {
+    redirectTo: `${baseUrl}/reset-password.html`
+  }).catch(() => {}); // Supabase itself never reveals whether the email exists either
 
-  const sent = await mailer.sendMail({
-    to: user.email,
-    subject: "Reset your SynBase password",
-    text: `We received a request to reset your SynBase password.\n\nReset it here (this link expires in 1 hour):\n${resetUrl}\n\nIf you didn't request this, you can ignore this email.`
-  }).catch(() => false);
-
-  // Only surfaced when SMTP isn't configured, so local/dev testing works without a real mail server.
-  res.json(sent ? genericResponse : { ...genericResponse, devResetUrl: resetUrl });
-});
-
-app.post("/api/reset-password", async (req, res) => {
-  const { token, password } = req.body || {};
-  if (!token) return res.status(400).json({ error: "Missing reset token." });
-  if (!password || String(password).length < 8) {
-    return res.status(400).json({ error: "Password must be at least 8 characters." });
-  }
-
-  const user = store.findUserByResetTokenHash(hashToken(String(token)));
-  if (!user) return res.status(400).json({ error: "This reset link is invalid or has expired." });
-
-  store.updatePassword(user.id, bcrypt.hashSync(String(password), 10));
-  store.clearResetToken(user.id);
-  res.json({ ok: true });
+  res.json(genericResponse);
 });
 
 // ---------- Progress API ----------
-app.get("/api/progress", requireAuth, (req, res) => {
-  res.json({ progress: store.readProgress(req.user.id) });
+app.get("/api/progress", requireAuth, async (req, res) => {
+  res.json({ progress: await store.readProgress(req.user.id) });
 });
 
 // Body: { moduleId, sectionId } to mark a section complete,
 // or { moduleId, videoWatched } to set the video-watched flag.
-app.post("/api/progress", requireAuth, (req, res) => {
+app.post("/api/progress", requireAuth, async (req, res) => {
   const { moduleId, sectionId, videoWatched } = req.body || {};
   if (!moduleId) return res.status(400).json({ error: "moduleId is required." });
 
@@ -267,17 +316,19 @@ app.post("/api/progress", requireAuth, (req, res) => {
     if (!isValidSection(moduleId, sectionId)) {
       return res.status(400).json({ error: "Unknown section." });
     }
-    store.markSectionComplete(req.user.id, moduleId, sectionId);
+    await store.markSectionComplete(req.user.id, moduleId, sectionId);
   }
-  if (typeof videoWatched === "boolean") store.setVideoWatched(req.user.id, moduleId, videoWatched);
+  if (typeof videoWatched === "boolean") await store.setVideoWatched(req.user.id, moduleId, videoWatched);
 
-  res.json({ progress: store.readProgress(req.user.id) });
+  res.json({ progress: await store.readProgress(req.user.id) });
 });
 
 // Public — powers the "X learners have completed this curriculum" stat on
 // the logged-out curriculum.html page. Only a count is exposed, never who.
-app.get("/api/curriculum-stats", (req, res) => {
-  const completedCount = store.listUsers().filter(u => isCourseComplete(store.readProgress(u.id))).length;
+app.get("/api/curriculum-stats", async (req, res) => {
+  const users = await store.listUsers();
+  const progresses = await Promise.all(users.map(u => store.readProgress(u.id)));
+  const completedCount = progresses.filter(isCourseComplete).length;
   res.json({ completedCount });
 });
 
@@ -288,15 +339,15 @@ const FREE_RESPONSE_MAX_LEN = 4000;
 // the requesting user has submitted their own answer for this section —
 // enforced here, not on the client, since the client can't be trusted to
 // hide data it was never supposed to receive.
-app.get("/api/free-response/:moduleId/:sectionId", requireAuth, (req, res) => {
+app.get("/api/free-response/:moduleId/:sectionId", requireAuth, async (req, res) => {
   const { moduleId, sectionId } = req.params;
   if (!isValidSection(moduleId, sectionId)) return res.status(400).json({ error: "Unknown section." });
-  const response = freeResponseStore.getResponse(req.user.id, moduleId, sectionId);
-  const board = response ? freeResponseStore.listAnswersForSection(moduleId, sectionId) : [];
+  const response = await freeResponseStore.getResponse(req.user.id, moduleId, sectionId);
+  const board = response ? await freeResponseStore.listAnswersForSection(moduleId, sectionId) : [];
   res.json({ response, board });
 });
 
-app.post("/api/free-response", requireAuth, freeResponsePostLimiter, (req, res) => {
+app.post("/api/free-response", requireAuth, freeResponsePostLimiter, async (req, res) => {
   const { moduleId, sectionId, answer } = req.body || {};
   if (!isValidSection(moduleId, sectionId)) return res.status(400).json({ error: "Unknown section." });
 
@@ -306,8 +357,8 @@ app.post("/api/free-response", requireAuth, freeResponsePostLimiter, (req, res) 
     return res.status(400).json({ error: `Keep your response under ${FREE_RESPONSE_MAX_LEN} characters.` });
   }
 
-  freeResponseStore.saveResponse({ userId: req.user.id, moduleId, sectionId, answer: trimmedAnswer });
-  const board = freeResponseStore.listAnswersForSection(moduleId, sectionId);
+  await freeResponseStore.saveResponse({ userId: req.user.id, moduleId, sectionId, answer: trimmedAnswer });
+  const board = await freeResponseStore.listAnswersForSection(moduleId, sectionId);
   res.json({ board });
 });
 
@@ -332,39 +383,39 @@ function windowClosedError(kind, status, window) {
 // ---------- Application API (students) ----------
 // Questions are visible to any signed-in user (not sensitive); only admins
 // can create/edit/delete them (see Admin API below).
-app.get("/api/application/questions", requireAuth, (req, res) => {
-  res.json({ questions: store.readApplicationQuestions() });
+app.get("/api/application/questions", requireAuth, async (req, res) => {
+  res.json({ questions: await store.readApplicationQuestions() });
 });
 
-app.get("/api/application/me", requireAuth, (req, res) => {
-  const progress = store.readProgress(req.user.id);
+app.get("/api/application/me", requireAuth, async (req, res) => {
+  const progress = await store.readProgress(req.user.id);
   const courseComplete = isCourseComplete(progress);
-  const window = store.getApplicationWindow("sibrp");
+  const window = await store.getApplicationWindow("sibrp");
   const status = windowStatus(window);
   res.json({
     courseComplete,
     window,
     windowStatus: status,
     eligible: courseComplete && status === "open",
-    application: store.findApplicationByUserId(req.user.id)
+    application: await store.findApplicationByUserId(req.user.id)
   });
 });
 
-app.post("/api/application", requireAuth, (req, res) => {
-  const progress = store.readProgress(req.user.id);
+app.post("/api/application", requireAuth, async (req, res) => {
+  const progress = await store.readProgress(req.user.id);
   if (!isCourseComplete(progress)) {
     return res.status(403).json({ error: "Finish every module before applying." });
   }
-  const window = store.getApplicationWindow("sibrp");
+  const window = await store.getApplicationWindow("sibrp");
   const status = windowStatus(window);
   if (status !== "open") {
     return res.status(403).json({ error: windowClosedError("sibrp", status, window) });
   }
-  if (store.findApplicationByUserId(req.user.id)) {
+  if (await store.findApplicationByUserId(req.user.id)) {
     return res.status(409).json({ error: "You've already submitted an application." });
   }
 
-  const questions = store.readApplicationQuestions();
+  const questions = await store.readApplicationQuestions();
   if (!questions.length) {
     return res.status(400).json({ error: "There's no application open right now." });
   }
@@ -377,7 +428,7 @@ app.post("/api/application", requireAuth, (req, res) => {
     answers[q.id] = answer;
   }
 
-  const application = store.saveApplication({
+  const application = await store.saveApplication({
     userId: req.user.id,
     name: req.user.name,
     email: req.user.email,
@@ -389,37 +440,37 @@ app.post("/api/application", requireAuth, (req, res) => {
 // ---------- TA Application (students) ----------
 // Eligibility here is granted per-user by an admin (see /api/admin/set-ta-eligible),
 // not tied to course completion — a separate track from the SiBRP application above.
-app.get("/api/ta-application/questions", requireAuth, (req, res) => {
-  res.json({ questions: store.readApplicationQuestions("ta") });
+app.get("/api/ta-application/questions", requireAuth, async (req, res) => {
+  res.json({ questions: await store.readApplicationQuestions("ta") });
 });
 
-app.get("/api/ta-application/me", requireAuth, (req, res) => {
+app.get("/api/ta-application/me", requireAuth, async (req, res) => {
   const invited = !!req.user.taEligible;
-  const window = store.getApplicationWindow("ta");
+  const window = await store.getApplicationWindow("ta");
   const status = windowStatus(window);
   res.json({
     invited,
     window,
     windowStatus: status,
     eligible: invited && status === "open",
-    application: store.findApplicationByUserId(req.user.id, "ta")
+    application: await store.findApplicationByUserId(req.user.id, "ta")
   });
 });
 
-app.post("/api/ta-application", requireAuth, (req, res) => {
+app.post("/api/ta-application", requireAuth, async (req, res) => {
   if (!req.user.taEligible) {
     return res.status(403).json({ error: "You haven't been invited to apply for a TA position." });
   }
-  const window = store.getApplicationWindow("ta");
+  const window = await store.getApplicationWindow("ta");
   const status = windowStatus(window);
   if (status !== "open") {
     return res.status(403).json({ error: windowClosedError("ta", status, window) });
   }
-  if (store.findApplicationByUserId(req.user.id, "ta")) {
+  if (await store.findApplicationByUserId(req.user.id, "ta")) {
     return res.status(409).json({ error: "You've already submitted a TA application." });
   }
 
-  const questions = store.readApplicationQuestions("ta");
+  const questions = await store.readApplicationQuestions("ta");
   if (!questions.length) {
     return res.status(400).json({ error: "There's no TA application open right now." });
   }
@@ -432,7 +483,7 @@ app.post("/api/ta-application", requireAuth, (req, res) => {
     answers[q.id] = answer;
   }
 
-  const application = store.saveApplication({
+  const application = await store.saveApplication({
     userId: req.user.id,
     name: req.user.name,
     email: req.user.email,
@@ -460,11 +511,11 @@ function talkWithUrls(talk) {
   };
 }
 
-app.get("/api/speaker-talks", requireAuth, (req, res) => {
-  res.json({ talks: speakerStore.listTalks().map(talkWithUrls) });
+app.get("/api/speaker-talks", requireAuth, async (req, res) => {
+  res.json({ talks: (await speakerStore.listTalks()).map(talkWithUrls) });
 });
 
-app.post("/api/admin/speaker-talks", requireAdmin, (req, res) => {
+app.post("/api/admin/speaker-talks", requireAdmin, async (req, res) => {
   const { title, speakerName, description, youtubeUrl } = req.body || {};
   if (!title || !String(title).trim()) {
     return res.status(400).json({ error: "Title is required." });
@@ -477,7 +528,7 @@ app.post("/api/admin/speaker-talks", requireAdmin, (req, res) => {
     return res.status(400).json({ error: "Please enter a valid YouTube link." });
   }
 
-  const talk = speakerStore.addTalk({
+  const talk = await speakerStore.addTalk({
     id: crypto.randomUUID(),
     title: String(title).trim(),
     speakerName: String(speakerName).trim(),
@@ -487,8 +538,8 @@ app.post("/api/admin/speaker-talks", requireAdmin, (req, res) => {
   res.json({ talk: talkWithUrls(talk) });
 });
 
-app.delete("/api/admin/speaker-talks/:id", requireAdmin, (req, res) => {
-  const deleted = speakerStore.deleteTalk(req.params.id);
+app.delete("/api/admin/speaker-talks/:id", requireAdmin, async (req, res) => {
+  const deleted = await speakerStore.deleteTalk(req.params.id);
   if (!deleted) return res.status(404).json({ error: "Talk not found." });
   res.json({ ok: true });
 });
@@ -523,45 +574,45 @@ function parsePortfolioFields(body) {
   };
 }
 
-app.get("/api/portfolio-projects", (req, res) => {
-  res.json({ projects: portfolioStore.listProjects() });
+app.get("/api/portfolio-projects", async (req, res) => {
+  res.json({ projects: await portfolioStore.listProjects() });
 });
 
-app.post("/api/admin/portfolio-projects", requireAdmin, portfolioImageUpload.single("image"), (req, res) => {
+app.post("/api/admin/portfolio-projects", requireAdmin, portfolioImageUpload.single("image"), async (req, res) => {
   const { error, fields } = parsePortfolioFields(req.body);
   if (error) return res.status(400).json({ error });
   if (req.file) fields.image = `assets/img/portfolio/uploads/${req.file.filename}`;
-  const project = portfolioStore.addProject(fields);
+  const project = await portfolioStore.addProject(fields);
   res.json({ project });
 });
 
-app.put("/api/admin/portfolio-projects/:id", requireAdmin, portfolioImageUpload.single("image"), (req, res) => {
-  const existing = portfolioStore.findProjectById(req.params.id);
+app.put("/api/admin/portfolio-projects/:id", requireAdmin, portfolioImageUpload.single("image"), async (req, res) => {
+  const existing = await portfolioStore.findProjectById(req.params.id);
   if (!existing) return res.status(404).json({ error: "Project not found." });
   const { error, fields } = parsePortfolioFields(req.body);
   if (error) return res.status(400).json({ error });
   if (req.file) fields.image = `assets/img/portfolio/uploads/${req.file.filename}`;
-  const project = portfolioStore.updateProject(req.params.id, fields);
+  const project = await portfolioStore.updateProject(req.params.id, fields);
   res.json({ project });
 });
 
-app.delete("/api/admin/portfolio-projects/:id", requireAdmin, (req, res) => {
-  const deleted = portfolioStore.deleteProject(req.params.id);
+app.delete("/api/admin/portfolio-projects/:id", requireAdmin, async (req, res) => {
+  const deleted = await portfolioStore.deleteProject(req.params.id);
   if (!deleted) return res.status(404).json({ error: "Project not found." });
   res.json({ ok: true });
 });
 
 // ---------- Admin API ----------
-app.get("/api/admin/application-questions", requireAdmin, (req, res) => {
-  res.json({ questions: store.readApplicationQuestions() });
+app.get("/api/admin/application-questions", requireAdmin, async (req, res) => {
+  res.json({ questions: await store.readApplicationQuestions() });
 });
 
-app.post("/api/admin/application-questions", requireAdmin, (req, res) => {
+app.post("/api/admin/application-questions", requireAdmin, async (req, res) => {
   const { prompt, type } = req.body || {};
   if (!prompt || !String(prompt).trim()) {
     return res.status(400).json({ error: "Question text is required." });
   }
-  const question = store.addApplicationQuestion({
+  const question = await store.addApplicationQuestion({
     id: crypto.randomUUID(),
     prompt: String(prompt).trim(),
     type: type === "long" ? "long" : "short"
@@ -569,21 +620,21 @@ app.post("/api/admin/application-questions", requireAdmin, (req, res) => {
   res.json({ question });
 });
 
-app.put("/api/admin/application-questions/:id", requireAdmin, (req, res) => {
-  const question = store.updateApplicationQuestion(req.params.id, req.body || {});
+app.put("/api/admin/application-questions/:id", requireAdmin, async (req, res) => {
+  const question = await store.updateApplicationQuestion(req.params.id, req.body || {});
   if (!question) return res.status(404).json({ error: "Question not found." });
   res.json({ question });
 });
 
-app.delete("/api/admin/application-questions/:id", requireAdmin, (req, res) => {
-  store.deleteApplicationQuestion(req.params.id);
+app.delete("/api/admin/application-questions/:id", requireAdmin, async (req, res) => {
+  await store.deleteApplicationQuestion(req.params.id);
   res.json({ ok: true });
 });
 
-app.get("/api/admin/applications", requireAdmin, (req, res) => {
+app.get("/api/admin/applications", requireAdmin, async (req, res) => {
   res.json({
-    questions: store.readApplicationQuestions(),
-    applications: store.readApplications()
+    questions: await store.readApplicationQuestions(),
+    applications: await store.readApplications()
   });
 });
 
@@ -596,9 +647,9 @@ function csvEscape(value) {
 }
 
 // Shared by both the sibrp and ta application exports — same shape, different kind.
-function buildApplicationsCsv(kind) {
-  const questions = store.readApplicationQuestions(kind);
-  const applications = store.readApplications(kind);
+async function buildApplicationsCsv(kind) {
+  const questions = await store.readApplicationQuestions(kind);
+  const applications = await store.readApplications(kind);
 
   // Column order follows the live question list; any answers left over from
   // since-deleted questions still get a column so no submitted data is lost.
@@ -630,31 +681,31 @@ function buildApplicationsCsv(kind) {
   return "﻿" + lines.join("\r\n");
 }
 
-app.get("/api/admin/applications/export.csv", requireAdmin, (req, res) => {
+app.get("/api/admin/applications/export.csv", requireAdmin, async (req, res) => {
   const filename = `synbase-applications-${new Date().toISOString().slice(0, 10)}.csv`;
   res.setHeader("Content-Type", "text/csv; charset=utf-8");
   res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
-  res.send(buildApplicationsCsv("sibrp"));
+  res.send(await buildApplicationsCsv("sibrp"));
 });
 
-app.post("/api/admin/applications/reset", requireAdmin, (req, res) => {
+app.post("/api/admin/applications/reset", requireAdmin, async (req, res) => {
   const { userId } = req.body || {};
   if (!userId) return res.status(400).json({ error: "userId is required." });
-  store.deleteApplication(userId);
+  await store.deleteApplication(userId);
   res.json({ ok: true });
 });
 
 // ---------- TA application (admin-managed questions, gated by admin-granted eligibility) ----------
-app.get("/api/admin/ta-application-questions", requireAdmin, (req, res) => {
-  res.json({ questions: store.readApplicationQuestions("ta") });
+app.get("/api/admin/ta-application-questions", requireAdmin, async (req, res) => {
+  res.json({ questions: await store.readApplicationQuestions("ta") });
 });
 
-app.post("/api/admin/ta-application-questions", requireAdmin, (req, res) => {
+app.post("/api/admin/ta-application-questions", requireAdmin, async (req, res) => {
   const { prompt, type } = req.body || {};
   if (!prompt || !String(prompt).trim()) {
     return res.status(400).json({ error: "Question text is required." });
   }
-  const question = store.addApplicationQuestion({
+  const question = await store.addApplicationQuestion({
     id: crypto.randomUUID(),
     prompt: String(prompt).trim(),
     type: type === "long" ? "long" : "short"
@@ -662,89 +713,90 @@ app.post("/api/admin/ta-application-questions", requireAdmin, (req, res) => {
   res.json({ question });
 });
 
-app.put("/api/admin/ta-application-questions/:id", requireAdmin, (req, res) => {
-  const question = store.updateApplicationQuestion(req.params.id, req.body || {});
+app.put("/api/admin/ta-application-questions/:id", requireAdmin, async (req, res) => {
+  const question = await store.updateApplicationQuestion(req.params.id, req.body || {});
   if (!question) return res.status(404).json({ error: "Question not found." });
   res.json({ question });
 });
 
-app.delete("/api/admin/ta-application-questions/:id", requireAdmin, (req, res) => {
-  store.deleteApplicationQuestion(req.params.id);
+app.delete("/api/admin/ta-application-questions/:id", requireAdmin, async (req, res) => {
+  await store.deleteApplicationQuestion(req.params.id);
   res.json({ ok: true });
 });
 
-app.get("/api/admin/ta-applications", requireAdmin, (req, res) => {
+app.get("/api/admin/ta-applications", requireAdmin, async (req, res) => {
   res.json({
-    questions: store.readApplicationQuestions("ta"),
-    applications: store.readApplications("ta")
+    questions: await store.readApplicationQuestions("ta"),
+    applications: await store.readApplications("ta")
   });
 });
 
-app.get("/api/admin/ta-applications/export.csv", requireAdmin, (req, res) => {
+app.get("/api/admin/ta-applications/export.csv", requireAdmin, async (req, res) => {
   const filename = `synbase-ta-applications-${new Date().toISOString().slice(0, 10)}.csv`;
   res.setHeader("Content-Type", "text/csv; charset=utf-8");
   res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
-  res.send(buildApplicationsCsv("ta"));
+  res.send(await buildApplicationsCsv("ta"));
 });
 
-app.post("/api/admin/ta-applications/reset", requireAdmin, (req, res) => {
+app.post("/api/admin/ta-applications/reset", requireAdmin, async (req, res) => {
   const { userId } = req.body || {};
   if (!userId) return res.status(400).json({ error: "userId is required." });
-  store.deleteApplication(userId, "ta");
+  await store.deleteApplication(userId, "ta");
   res.json({ ok: true });
 });
 
-app.post("/api/admin/set-ta-eligible", requireAdmin, (req, res) => {
+app.post("/api/admin/set-ta-eligible", requireAdmin, async (req, res) => {
   const { userId, eligible } = req.body || {};
-  if (!store.findUserById(userId)) return res.status(400).json({ error: "Unknown userId." });
-  store.setTaEligible(userId, !!eligible);
+  if (!(await store.findUserById(userId))) return res.status(400).json({ error: "Unknown userId." });
+  await store.setTaEligible(userId, !!eligible);
   res.json({ ok: true });
 });
 
 const APPLICATION_KINDS = new Set(["sibrp", "ta"]);
 
-app.get("/api/admin/application-window/:kind", requireAdmin, (req, res) => {
+app.get("/api/admin/application-window/:kind", requireAdmin, async (req, res) => {
   if (!APPLICATION_KINDS.has(req.params.kind)) return res.status(400).json({ error: "Unknown application kind." });
-  res.json({ window: store.getApplicationWindow(req.params.kind) });
+  res.json({ window: await store.getApplicationWindow(req.params.kind) });
 });
 
-app.post("/api/admin/application-window/:kind", requireAdmin, (req, res) => {
+app.post("/api/admin/application-window/:kind", requireAdmin, async (req, res) => {
   if (!APPLICATION_KINDS.has(req.params.kind)) return res.status(400).json({ error: "Unknown application kind." });
   const { opensAt, closesAt } = req.body || {};
-  const window = store.setApplicationWindow(req.params.kind, { opensAt, closesAt });
+  const window = await store.setApplicationWindow(req.params.kind, { opensAt, closesAt });
   res.json({ window });
 });
 
-app.get("/api/admin/users", requireAdmin, (req, res) => {
-  const users = store.listUsers().map(u => ({
+app.get("/api/admin/users", requireAdmin, async (req, res) => {
+  const rawUsers = await store.listUsers();
+  const users = await Promise.all(rawUsers.map(async u => ({
     id: u.id,
     name: u.name,
     email: u.email,
     isAdmin: !!u.isAdmin,
     taEligible: !!u.taEligible,
     createdAt: u.createdAt,
-    progress: store.readProgress(u.id)
-  }));
+    progress: await store.readProgress(u.id)
+  })));
   res.json({ users });
 });
 
-app.post("/api/admin/set-admin", requireAdmin, (req, res) => {
+app.post("/api/admin/set-admin", requireAdmin, async (req, res) => {
   const { userId, isAdmin } = req.body || {};
-  const target = store.findUserById(userId);
+  const target = await store.findUserById(userId);
   if (!target) return res.status(400).json({ error: "Unknown userId." });
   if (target.id === req.user.id && !isAdmin) {
     return res.status(400).json({ error: "You can't remove your own admin access." });
   }
-  store.setUserAdmin(userId, !!isAdmin);
+  await store.setUserAdmin(userId, !!isAdmin);
   res.json({ ok: true });
 });
 
-app.post("/api/admin/reset-progress", requireAdmin, (req, res) => {
+app.post("/api/admin/reset-progress", requireAdmin, async (req, res) => {
   const { userId } = req.body || {};
-  if (!userId || !store.findUserById(userId)) {
+  if (!userId || !(await store.findUserById(userId))) {
     return res.status(400).json({ error: "Unknown userId." });
   }
-  store.resetProgress(userId);
+  await store.resetProgress(userId);
   res.json({ ok: true });
 });
 
@@ -758,12 +810,17 @@ app.get("/", (req, res) => res.redirect("/home.html"));
 // the HTML from being served at all without a valid session cookie.
 const PUBLIC_PATHS = new Set([
   "/login.html", "/signup.html", "/home.html", "/about.html", "/curriculum.html", "/beyond-sibrp.html", "/project.html",
-  "/forgot-password.html", "/reset-password.html"
+  "/forgot-password.html", "/reset-password.html", "/confirm-email.html"
 ]);
 const ADMIN_PATHS = new Set(["/admin.html"]);
-app.get(/\.html$/, (req, res, next) => {
+app.get(/\.html$/, async (req, res, next) => {
   if (PUBLIC_PATHS.has(req.path)) return next();
-  const user = getUserFromRequest(req);
+  let user;
+  try {
+    user = await getUserFromRequest(req, res);
+  } catch (e) {
+    return next(e);
+  }
   if (!user) {
     return res.redirect(`/login.html?next=${encodeURIComponent(req.originalUrl)}`);
   }

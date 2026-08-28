@@ -1,226 +1,194 @@
-// SQLite-backed data access. Every exported function name/signature matches
-// the old flat-file version exactly, so server.js's routes didn't need to
-// change (except the progress-write path, which now uses atomic per-field
-// upserts instead of read-modify-write — see markSectionComplete/setVideoWatched).
+// Supabase-backed data access. Every exported function name/signature matches
+// the old SQLite version exactly (now async, since Supabase calls are all
+// network round trips) — server.js's routes just gained `await` in front of
+// these calls, nothing else changed about how they're used.
+//
+// User identity/auth itself (signup, login, password reset) is handled
+// directly in server.js via supabase.auth.* — this file only covers the
+// `profiles` table (the isAdmin/taEligible/name fields Supabase's own
+// auth.users table doesn't have room for) plus all the app's own data.
 const db = require("./db");
 
-// ---------- Users ----------
-const insertUserStmt = db.prepare(`
-  INSERT INTO users (id, name, email, passwordHash, isAdmin, createdAt)
-  VALUES (@id, @name, @email, @passwordHash, @isAdmin, @createdAt)
-`);
-const findUserByEmailStmt = db.prepare(`SELECT * FROM users WHERE email = ?`);
-const findUserByIdStmt = db.prepare(`SELECT * FROM users WHERE id = ?`);
-const countUsersStmt = db.prepare(`SELECT COUNT(*) AS count FROM users`);
-const listUsersStmt = db.prepare(`SELECT * FROM users ORDER BY createdAt ASC`);
-const setUserAdminStmt = db.prepare(`UPDATE users SET isAdmin = ? WHERE id = ?`);
-const setTaEligibleStmt = db.prepare(`UPDATE users SET taEligible = ? WHERE id = ?`);
-const setResetTokenStmt = db.prepare(`UPDATE users SET resetTokenHash = ?, resetTokenExpiresAt = ? WHERE id = ?`);
-const findUserByResetTokenHashStmt = db.prepare(`SELECT * FROM users WHERE resetTokenHash = ?`);
-const clearResetTokenStmt = db.prepare(`UPDATE users SET resetTokenHash = NULL, resetTokenExpiresAt = NULL WHERE id = ?`);
-const updatePasswordStmt = db.prepare(`UPDATE users SET passwordHash = ? WHERE id = ?`);
+function unwrap({ data, error }) {
+  if (error) throw new Error(error.message);
+  return data;
+}
 
+// ---------- Users (profiles table) ----------
 function rowToUser(row) {
   if (!row) return null;
-  return { ...row, isAdmin: !!row.isAdmin, taEligible: !!row.taEligible };
+  return {
+    id: row.id,
+    name: row.name,
+    email: row.email,
+    isAdmin: !!row.is_admin,
+    taEligible: !!row.ta_eligible,
+    createdAt: row.created_at
+  };
 }
 
-function findUserByEmail(email) {
-  const norm = String(email || "").trim().toLowerCase();
-  return rowToUser(findUserByEmailStmt.get(norm));
+async function findUserById(id) {
+  if (!id) return null;
+  const { data, error } = await db.from("profiles").select("*").eq("id", id).maybeSingle();
+  if (error) throw new Error(error.message);
+  return rowToUser(data);
 }
 
-function findUserById(id) {
-  return rowToUser(findUserByIdStmt.get(id));
+async function countUsers() {
+  const { count, error } = await db.from("profiles").select("*", { count: "exact", head: true });
+  if (error) throw new Error(error.message);
+  return count;
 }
 
-function countUsers() {
-  return countUsersStmt.get().count;
+async function listUsers() {
+  const rows = unwrap(await db.from("profiles").select("*").order("created_at", { ascending: true }));
+  return rows.map(rowToUser);
 }
 
-function listUsers() {
-  return listUsersStmt.all().map(rowToUser);
+async function setUserAdmin(userId, isAdmin) {
+  unwrap(await db.from("profiles").update({ is_admin: !!isAdmin }).eq("id", userId));
 }
 
-// Throws with a UNIQUE-constraint message if the email is already taken —
-// callers should check findUserByEmail first for the common case, but this
-// stays atomic as a backstop against two simultaneous signups with the same email.
-function createUser({ id, name, email, passwordHash, isAdmin }) {
-  insertUserStmt.run({
-    id,
-    name,
-    email: String(email).trim().toLowerCase(),
-    passwordHash,
-    isAdmin: isAdmin ? 1 : 0,
-    createdAt: new Date().toISOString()
-  });
-  return findUserById(id);
-}
-
-function setUserAdmin(userId, isAdmin) {
-  setUserAdminStmt.run(isAdmin ? 1 : 0, userId);
-}
-
-function setTaEligible(userId, eligible) {
-  setTaEligibleStmt.run(eligible ? 1 : 0, userId);
-}
-
-function setResetToken(userId, tokenHash, expiresAt) {
-  setResetTokenStmt.run(tokenHash, expiresAt, userId);
-}
-
-function findUserByResetTokenHash(tokenHash) {
-  const row = findUserByResetTokenHashStmt.get(tokenHash);
-  if (!row) return null;
-  if (!row.resetTokenExpiresAt || Date.now() > row.resetTokenExpiresAt) return null;
-  return rowToUser(row);
-}
-
-function clearResetToken(userId) {
-  clearResetTokenStmt.run(userId);
-}
-
-function updatePassword(userId, passwordHash) {
-  updatePasswordStmt.run(passwordHash, userId);
+async function setTaEligible(userId, eligible) {
+  unwrap(await db.from("profiles").update({ ta_eligible: !!eligible }).eq("id", userId));
 }
 
 // ---------- Progress ----------
-// Each of these is a single atomic statement — no app-level read-modify-write,
-// so two concurrent requests (even for the same user) can never clobber each
-// other or corrupt data. This is the actual fix for the flat-file race condition.
-const upsertSectionStmt = db.prepare(`
-  INSERT INTO progress_sections (userId, moduleId, sectionId, completed)
-  VALUES (?, ?, ?, 1)
-  ON CONFLICT(userId, moduleId, sectionId) DO UPDATE SET completed = 1
-`);
-const upsertVideoStmt = db.prepare(`
-  INSERT INTO progress_video (userId, moduleId, watched)
-  VALUES (?, ?, ?)
-  ON CONFLICT(userId, moduleId) DO UPDATE SET watched = excluded.watched
-`);
-const sectionsForUserStmt = db.prepare(`SELECT moduleId, sectionId FROM progress_sections WHERE userId = ?`);
-const videoForUserStmt = db.prepare(`SELECT moduleId, watched FROM progress_video WHERE userId = ?`);
-const deleteSectionsForUserStmt = db.prepare(`DELETE FROM progress_sections WHERE userId = ?`);
-const deleteVideoForUserStmt = db.prepare(`DELETE FROM progress_video WHERE userId = ?`);
-
-function markSectionComplete(userId, moduleId, sectionId) {
-  upsertSectionStmt.run(userId, moduleId, sectionId);
+// Each of these is a single atomic upsert/delete — no app-level
+// read-modify-write, so two concurrent requests for the same user can never
+// clobber each other.
+async function markSectionComplete(userId, moduleId, sectionId) {
+  unwrap(await db.from("progress_sections").upsert(
+    { user_id: userId, module_id: moduleId, section_id: sectionId, completed: true },
+    { onConflict: "user_id,module_id,section_id" }
+  ));
 }
 
-function setVideoWatched(userId, moduleId, watched) {
-  upsertVideoStmt.run(userId, moduleId, watched ? 1 : 0);
+async function setVideoWatched(userId, moduleId, watched) {
+  unwrap(await db.from("progress_video").upsert(
+    { user_id: userId, module_id: moduleId, watched: !!watched },
+    { onConflict: "user_id,module_id" }
+  ));
 }
 
 // Reconstructs the same { module1: { sections: {...}, videoWatched }, ... }
 // shape the rest of the app (and the client) already expects.
-function readProgress(userId) {
+async function readProgress(userId) {
+  const [sections, videos] = await Promise.all([
+    unwrap(await db.from("progress_sections").select("module_id,section_id").eq("user_id", userId)),
+    unwrap(await db.from("progress_video").select("module_id,watched").eq("user_id", userId))
+  ]);
+
   const progress = {};
-  for (const row of sectionsForUserStmt.all(userId)) {
-    if (!progress[row.moduleId]) progress[row.moduleId] = { sections: {}, videoWatched: false };
-    progress[row.moduleId].sections[row.sectionId] = true;
+  for (const row of sections) {
+    if (!progress[row.module_id]) progress[row.module_id] = { sections: {}, videoWatched: false };
+    progress[row.module_id].sections[row.section_id] = true;
   }
-  for (const row of videoForUserStmt.all(userId)) {
-    if (!progress[row.moduleId]) progress[row.moduleId] = { sections: {}, videoWatched: false };
-    progress[row.moduleId].videoWatched = !!row.watched;
+  for (const row of videos) {
+    if (!progress[row.module_id]) progress[row.module_id] = { sections: {}, videoWatched: false };
+    progress[row.module_id].videoWatched = !!row.watched;
   }
   return progress;
 }
 
-function resetProgress(userId) {
-  deleteSectionsForUserStmt.run(userId);
-  deleteVideoForUserStmt.run(userId);
+async function resetProgress(userId) {
+  await Promise.all([
+    db.from("progress_sections").delete().eq("user_id", userId),
+    db.from("progress_video").delete().eq("user_id", userId)
+  ]);
 }
 
 // ---------- Application questions (admin-managed) ----------
 // "kind" separates independent application tracks (e.g. the SiBRP course
 // application vs a TA application) that otherwise share this exact schema.
-const insertQuestionStmt = db.prepare(`INSERT INTO application_questions (id, kind, prompt, type) VALUES (?, ?, ?, ?)`);
-const listQuestionsStmt = db.prepare(`SELECT id, prompt, type FROM application_questions WHERE kind = ? ORDER BY rowid ASC`);
-const findQuestionStmt = db.prepare(`SELECT id, prompt, type FROM application_questions WHERE id = ?`);
-const updateQuestionStmt = db.prepare(`UPDATE application_questions SET prompt = ?, type = ? WHERE id = ?`);
-const deleteQuestionStmt = db.prepare(`DELETE FROM application_questions WHERE id = ?`);
-
-function readApplicationQuestions(kind = "sibrp") {
-  return listQuestionsStmt.all(kind);
+function rowToQuestion(row) {
+  return row ? { id: row.id, prompt: row.prompt, type: row.type } : null;
 }
 
-function addApplicationQuestion({ id, prompt, type }, kind = "sibrp") {
-  insertQuestionStmt.run(id, kind, prompt, type === "long" ? "long" : "short");
-  return findQuestionStmt.get(id);
+async function readApplicationQuestions(kind = "sibrp") {
+  const rows = unwrap(await db.from("application_questions")
+    .select("id,prompt,type")
+    .eq("kind", kind)
+    .order("created_at", { ascending: true }));
+  return rows.map(rowToQuestion);
 }
 
-function updateApplicationQuestion(id, { prompt, type }) {
-  const existing = findQuestionStmt.get(id);
+async function addApplicationQuestion({ id, prompt, type }, kind = "sibrp") {
+  unwrap(await db.from("application_questions").insert({
+    id, kind, prompt, type: type === "long" ? "long" : "short"
+  }));
+  const row = unwrap(await db.from("application_questions").select("id,prompt,type").eq("id", id).single());
+  return rowToQuestion(row);
+}
+
+async function updateApplicationQuestion(id, { prompt, type }) {
+  const existing = unwrap(await db.from("application_questions").select("id,prompt,type").eq("id", id).maybeSingle());
   if (!existing) return null;
   const nextPrompt = typeof prompt === "string" ? prompt : existing.prompt;
   const nextType = type ? (type === "long" ? "long" : "short") : existing.type;
-  updateQuestionStmt.run(nextPrompt, nextType, id);
-  return findQuestionStmt.get(id);
+  unwrap(await db.from("application_questions").update({ prompt: nextPrompt, type: nextType }).eq("id", id));
+  return rowToQuestion({ id, prompt: nextPrompt, type: nextType });
 }
 
-function deleteApplicationQuestion(id) {
-  deleteQuestionStmt.run(id);
+async function deleteApplicationQuestion(id) {
+  await db.from("application_questions").delete().eq("id", id);
 }
 
 // ---------- Applications (student submissions) ----------
-const insertApplicationStmt = db.prepare(`
-  INSERT INTO applications (userId, kind, name, email, answers, submittedAt)
-  VALUES (?, ?, ?, ?, ?, ?)
-`);
-const findApplicationByUserIdStmt = db.prepare(`SELECT * FROM applications WHERE userId = ? AND kind = ?`);
-const listApplicationsStmt = db.prepare(`SELECT * FROM applications WHERE kind = ? ORDER BY submittedAt DESC`);
-const deleteApplicationStmt = db.prepare(`DELETE FROM applications WHERE userId = ? AND kind = ?`);
-
 function rowToApplication(row) {
   if (!row) return null;
-  return { ...row, answers: JSON.parse(row.answers) };
+  return {
+    userId: row.user_id,
+    kind: row.kind,
+    name: row.name,
+    email: row.email,
+    answers: row.answers, // jsonb comes back as a real object already
+    submittedAt: row.submitted_at
+  };
 }
 
-function findApplicationByUserId(userId, kind = "sibrp") {
-  return rowToApplication(findApplicationByUserIdStmt.get(userId, kind));
+async function findApplicationByUserId(userId, kind = "sibrp") {
+  const row = unwrap(await db.from("applications").select("*").eq("user_id", userId).eq("kind", kind).maybeSingle());
+  return rowToApplication(row);
 }
 
-// The primary key on (userId, kind) makes this atomic: if two submits race,
+// The primary key on (user_id, kind) makes this atomic: if two submits race,
 // the second INSERT fails on the constraint and we just return the first one
 // — never two rows, never a lost/duplicated submission. One user can still
 // hold one application per kind (e.g. both a sibrp and a ta application).
-function saveApplication({ userId, name, email, answers }, kind = "sibrp") {
-  try {
-    insertApplicationStmt.run(userId, kind, name, email, JSON.stringify(answers), new Date().toISOString());
-  } catch (e) {
-    if (!/UNIQUE constraint failed/.test(e.message)) throw e;
-  }
+async function saveApplication({ userId, name, email, answers }, kind = "sibrp") {
+  const { error } = await db.from("applications").insert({
+    user_id: userId, kind, name, email, answers
+  });
+  if (error && error.code !== "23505") throw new Error(error.message); // 23505 = unique_violation
   return findApplicationByUserId(userId, kind);
 }
 
-function readApplications(kind = "sibrp") {
-  return listApplicationsStmt.all(kind).map(rowToApplication);
+async function readApplications(kind = "sibrp") {
+  const rows = unwrap(await db.from("applications").select("*").eq("kind", kind).order("submitted_at", { ascending: false }));
+  return rows.map(rowToApplication);
 }
 
-function deleteApplication(userId, kind = "sibrp") {
-  deleteApplicationStmt.run(userId, kind);
+async function deleteApplication(userId, kind = "sibrp") {
+  await db.from("applications").delete().eq("user_id", userId).eq("kind", kind);
 }
 
 // ---------- Application open/close windows (admin-managed, per kind) ----------
-const getWindowStmt = db.prepare(`SELECT opensAt, closesAt FROM application_windows WHERE kind = ?`);
-const upsertWindowStmt = db.prepare(`
-  INSERT INTO application_windows (kind, opensAt, closesAt) VALUES (?, ?, ?)
-  ON CONFLICT(kind) DO UPDATE SET opensAt = excluded.opensAt, closesAt = excluded.closesAt
-`);
-
-function getApplicationWindow(kind = "sibrp") {
-  return getWindowStmt.get(kind) || { opensAt: null, closesAt: null };
+async function getApplicationWindow(kind = "sibrp") {
+  const row = unwrap(await db.from("application_windows").select("opens_at,closes_at").eq("kind", kind).maybeSingle());
+  return row ? { opensAt: row.opens_at, closesAt: row.closes_at } : { opensAt: null, closesAt: null };
 }
 
-function setApplicationWindow(kind, { opensAt, closesAt }) {
-  upsertWindowStmt.run(kind, opensAt || null, closesAt || null);
+async function setApplicationWindow(kind, { opensAt, closesAt }) {
+  unwrap(await db.from("application_windows").upsert(
+    { kind, opens_at: opensAt || null, closes_at: closesAt || null },
+    { onConflict: "kind" }
+  ));
   return getApplicationWindow(kind);
 }
 
 module.exports = {
-  findUserByEmail,
   findUserById,
-  createUser,
   countUsers,
   listUsers,
   setUserAdmin,
@@ -229,10 +197,6 @@ module.exports = {
   markSectionComplete,
   setVideoWatched,
   resetProgress,
-  setResetToken,
-  findUserByResetTokenHash,
-  clearResetToken,
-  updatePassword,
   readApplicationQuestions,
   addApplicationQuestion,
   updateApplicationQuestion,

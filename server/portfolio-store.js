@@ -4,51 +4,70 @@ const crypto = require("crypto");
 const db = require("./db");
 
 const COLUMNS = ["student", "title", "year", "tag", "accent", "image", "shortDescription", "fullStory", "anecdote", "link"];
+const COLUMN_TO_DB = {
+  student: "student", title: "title", year: "year", tag: "tag", accent: "accent",
+  image: "image", shortDescription: "short_description", fullStory: "full_story",
+  anecdote: "anecdote", link: "link"
+};
 
-const insertStmt = db.prepare(`
-  INSERT INTO portfolio_projects (id, student, title, year, tag, accent, image, shortDescription, fullStory, anecdote, link, createdAt)
-  VALUES (@id, @student, @title, @year, @tag, @accent, @image, @shortDescription, @fullStory, @anecdote, @link, @createdAt)
-`);
-const updateStmt = db.prepare(`
-  UPDATE portfolio_projects SET
-    student = @student, title = @title, year = @year, tag = @tag, accent = @accent,
-    image = @image, shortDescription = @shortDescription, fullStory = @fullStory,
-    anecdote = @anecdote, link = @link
-  WHERE id = @id
-`);
-const listStmt = db.prepare(`SELECT * FROM portfolio_projects ORDER BY createdAt DESC`);
-const findByIdStmt = db.prepare(`SELECT * FROM portfolio_projects WHERE id = ?`);
-const deleteStmt = db.prepare(`DELETE FROM portfolio_projects WHERE id = ?`);
-
-function listProjects() {
-  return listStmt.all();
+function unwrap({ data, error }) {
+  if (error) throw new Error(error.message);
+  return data;
 }
 
-function findProjectById(id) {
-  return findByIdStmt.get(id) || null;
+function rowToProject(row) {
+  if (!row) return null;
+  return {
+    id: row.id,
+    student: row.student,
+    title: row.title,
+    year: row.year,
+    tag: row.tag,
+    accent: row.accent,
+    image: row.image,
+    shortDescription: row.short_description,
+    fullStory: row.full_story,
+    anecdote: row.anecdote,
+    link: row.link,
+    createdAt: row.created_at
+  };
 }
 
-function addProject(fields) {
+function fieldsToRow(fields) {
+  const row = {};
+  COLUMNS.forEach(c => { row[COLUMN_TO_DB[c]] = fields[c]; });
+  return row;
+}
+
+async function listProjects() {
+  const rows = unwrap(await db.from("portfolio_projects").select("*").order("created_at", { ascending: false }));
+  return rows.map(rowToProject);
+}
+
+async function findProjectById(id) {
+  const row = unwrap(await db.from("portfolio_projects").select("*").eq("id", id).maybeSingle());
+  return rowToProject(row);
+}
+
+async function addProject(fields) {
   const id = crypto.randomUUID();
-  const row = { id, createdAt: new Date().toISOString() };
-  COLUMNS.forEach(c => { row[c] = fields[c] || ""; });
-  insertStmt.run(row);
+  unwrap(await db.from("portfolio_projects").insert({ id, ...fieldsToRow(fields) }));
   return findProjectById(id);
 }
 
-function updateProject(id, fields) {
-  const existing = findProjectById(id);
+async function updateProject(id, fields) {
+  const existing = await findProjectById(id);
   if (!existing) return null;
-  const row = { id };
-  COLUMNS.forEach(c => { row[c] = fields[c] !== undefined ? fields[c] : existing[c]; });
-  updateStmt.run(row);
+  const merged = {};
+  COLUMNS.forEach(c => { merged[c] = fields[c] !== undefined ? fields[c] : existing[c]; });
+  unwrap(await db.from("portfolio_projects").update(fieldsToRow(merged)).eq("id", id));
   return findProjectById(id);
 }
 
-function deleteProject(id) {
-  const existing = findProjectById(id);
+async function deleteProject(id) {
+  const existing = await findProjectById(id);
   if (!existing) return false;
-  deleteStmt.run(id);
+  await db.from("portfolio_projects").delete().eq("id", id);
   return true;
 }
 

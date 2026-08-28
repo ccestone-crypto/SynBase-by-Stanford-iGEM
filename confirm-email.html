@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Confirming — SynBase</title>
+<link rel="stylesheet" href="css/style.css?v=73">
+</head>
+<body>
+
+<div class="auth-page">
+  <div class="auth-card">
+    <div class="auth-brand"><img class="brand-logo" src="assets/img/site/logo.png" alt="SynBase"><span class="brand-suffix">by Stanford iGEM</span></div>
+    <p class="auth-subtitle" id="auth-subtitle">Confirming your account&hellip;</p>
+
+    <div class="auth-error" id="auth-error"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script>
+  // Safe to expose client-side — see reset-password.html for why. This page
+  // only ever talks to Supabase's own Auth API to detect the confirmation
+  // link, then hands the resulting tokens to our own server so it can set
+  // its normal httpOnly session cookie (see POST /api/session-from-tokens).
+  const supabaseClient = supabase.createClient(
+    "https://mbravmycmxvqfzrixthz.supabase.co",
+    "sb_publishable_h8W87aAIjsZTLhu9DP_ZSA_OdyRtxfM"
+  );
+
+  const subtitleEl = document.getElementById("auth-subtitle");
+  const errorEl = document.getElementById("auth-error");
+
+  function showError(msg) {
+    subtitleEl.textContent = "Something went wrong.";
+    errorEl.textContent = msg;
+    errorEl.classList.add("show");
+  }
+
+  let handled = false;
+  supabaseClient.auth.onAuthStateChange(async (event, session) => {
+    if (handled || event !== "SIGNED_IN" || !session) return;
+    handled = true;
+
+    try {
+      const res = await fetch("/api/session-from-tokens", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ access_token: session.access_token, refresh_token: session.refresh_token })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        showError(data.error || "Could not finish confirming your account.");
+        return;
+      }
+      await supabaseClient.auth.signOut(); // the client-side session isn't needed once our cookie is set
+      location.href = "index.html";
+    } catch (err) {
+      showError("Could not reach the server. Please try again.");
+    }
+  });
+
+  setTimeout(() => {
+    if (!handled) showError("This confirmation link is invalid or has expired. Try signing up again.");
+  }, 5000);
+</script>
+</body>
+</html>

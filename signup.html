@@ -14,6 +14,7 @@
     <p class="auth-subtitle">Create an account to track your progress through the curriculum.</p>
 
     <div class="auth-error" id="auth-error"></div>
+    <div class="auth-success" id="auth-success"></div>
 
     <form id="signup-form" novalidate>
       <div class="auth-field">
@@ -78,6 +79,13 @@
         showError(data.error || "Something went wrong. Please try again.");
         submitBtn.disabled = false;
         submitBtn.textContent = "Create Account";
+        return;
+      }
+      if (data.needsConfirmation) {
+        form.style.display = "none";
+        const successEl = document.getElementById("auth-success");
+        successEl.textContent = data.message || "Check your email to confirm your account, then log in.";
+        successEl.classList.add("show");
         return;
       }
       location.href = "index.html";
