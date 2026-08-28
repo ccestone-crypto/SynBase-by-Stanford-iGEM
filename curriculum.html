@@ -27,8 +27,8 @@
 <!-- Stats band -->
 <section class="stats-band">
   <div class="stats-row">
-    <div class="stat-big tint-green"><span class="num">8</span><span class="label">Course Modules</span></div>
-    <div class="stat-big tint-purple"><span class="num" id="stat-live">&mdash;</span><span class="label">Live Now</span></div>
+    <div class="stat-big tint-green"><span class="num">8</span><span class="label">Modules (More Coming)</span></div>
+    <div class="stat-big tint-purple"><span class="num" id="stat-topics">&mdash;</span><span class="label">Topics</span></div>
     <div class="stat-big tint-blue"><span class="num">100%</span><span class="label">Free</span></div>
   </div>
 </section>
@@ -95,6 +95,7 @@
 </footer>
 
 <script src="js/modules-meta.js?v=16"></script>
+<script src="js/course-outline.js?v=16"></script>
 <script src="js/progress.js?v=26"></script>
 <script>
 function escapeHtml(str) {
@@ -269,7 +270,8 @@ function renderSyllabus(mountEl) {
 (async () => {
   await renderPublicHeader(document.getElementById("site-header"), true);
   renderSyllabus(document.getElementById("syllabus-list"));
-  document.getElementById("stat-live").textContent = SYLLABUS.filter(m => m.live).length;
+  const topicCount = MODULES_META.reduce((sum, m) => sum + (COURSE_OUTLINE[m.id] || []).length, 0);
+  document.getElementById("stat-topics").textContent = topicCount;
 })();
 </script>
 </body>
