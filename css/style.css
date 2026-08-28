@@ -516,6 +516,8 @@ a:hover { text-decoration: underline; }
 .page-dot:hover { transform: scale(1.25); }
 .page-dot.done { background: var(--syn-green); }
 .page-dot.current { background: var(--syn-purple); width: 15px; height: 15px; }
+.page-dot.locked { cursor: not-allowed; opacity: 0.5; }
+.page-dot.locked:hover { transform: none; }
 
 #page-viewport { scroll-margin-top: 80px; }
 .page-card {

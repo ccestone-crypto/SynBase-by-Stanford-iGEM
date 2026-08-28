@@ -88,11 +88,25 @@ function renderModulePage(MODULE) {
   document.title = `${MODULE.title} — SynBase`;
 }
 
+// The furthest page a student is allowed to jump to directly: the first
+// not-yet-completed page, or the last page once everything is done. Pages
+// past this are locked — students must complete each page's check (or hit
+// Continue, for a read page) in order to reach the next one.
+function maxReachableIndex(MODULE) {
+  const firstIncomplete = MODULE.pages.findIndex(p => !isSectionComplete(MODULE.id, p.id));
+  return firstIncomplete === -1 ? MODULE.pages.length - 1 : firstIncomplete;
+}
+
 function resolveStartPageIndex(MODULE) {
   const hash = location.hash.replace(/^#page-/, "");
   if (hash) {
     const idx = MODULE.pages.findIndex(p => p.id === hash);
-    if (idx !== -1) return idx;
+    // A completed page stays reachable even beyond maxReachable (see the
+    // same note in renderPageNavMount) — only clamp a jump into genuinely
+    // unfinished territory.
+    if (idx !== -1) return idx <= maxReachableIndex(MODULE) || isSectionComplete(MODULE.id, MODULE.pages[idx].id)
+      ? idx
+      : maxReachableIndex(MODULE);
   }
   const firstIncomplete = MODULE.pages.findIndex(p => !isSectionComplete(MODULE.id, p.id));
   return firstIncomplete === -1 ? 0 : firstIncomplete;
@@ -174,6 +188,7 @@ function renderPageNavMount(MODULE, index) {
   const groupIdx = groups.findIndex(g => index >= g.start && index <= g.end);
   const group = groups[groupIdx];
   const mount = document.getElementById("page-nav-mount");
+  const maxReachable = maxReachableIndex(MODULE);
 
   const breadcrumb = (groups.length > 1 && group.label)
     ? `<div class="page-part-label">Part ${groupIdx + 1} of ${groups.length} &middot; ${group.label}</div>`
@@ -182,12 +197,19 @@ function renderPageNavMount(MODULE, index) {
   const dots = [];
   for (let i = group.start; i <= group.end; i++) {
     const p = MODULE.pages[i];
-    const state = i === index ? "current" : isSectionComplete(MODULE.id, p.id) ? "done" : "";
-    dots.push(`<button type="button" class="page-dot ${state}" data-page-index="${i}" title="${p.title}" aria-label="${p.title}"></button>`);
+    const done = isSectionComplete(MODULE.id, p.id);
+    // A completed page stays reachable for review even if an earlier page
+    // was somehow left incomplete (e.g. older progress data) — only an
+    // unfinished page beyond maxReachable is actually locked.
+    const locked = i > maxReachable && !done;
+    const state = i === index ? "current" : done ? "done" : locked ? "locked" : "";
+    const label = locked ? "Complete earlier pages to unlock" : p.title;
+    dots.push(`<button type="button" class="page-dot ${state}" data-page-index="${i}" title="${label}" aria-label="${label}" ${locked ? "disabled" : ""}></button>`);
   }
 
   mount.innerHTML = `${breadcrumb}<div class="page-dot-row">${dots.join("")}</div>`;
   mount.querySelectorAll(".page-dot").forEach(btn => {
+    if (btn.disabled) return;
     btn.addEventListener("click", () => renderPageAt(MODULE, Number(btn.dataset.pageIndex)));
   });
 }
