@@ -84,7 +84,7 @@
       <div class="app-subpanel" id="sibrp-responses-subpanel" style="display:none;">
         <div class="response-toolbar">
           <input type="text" class="response-search" id="sibrp-response-search" placeholder="Search by name or email...">
-          <a class="btn small secondary" href="/api/admin/applications/export.csv" download>Export as CSV</a>
+          <button type="button" class="btn small secondary" id="sibrp-export-csv-btn">Export as CSV</button>
         </div>
         <div id="sibrp-response-viewer"></div>
       </div>
@@ -131,7 +131,7 @@
       <div class="app-subpanel" id="ta-responses-subpanel" style="display:none;">
         <div class="response-toolbar">
           <input type="text" class="response-search" id="ta-response-search" placeholder="Search by name or email...">
-          <a class="btn small secondary" href="/api/admin/ta-applications/export.csv" download>Export as CSV</a>
+          <button type="button" class="btn small secondary" id="ta-export-csv-btn">Export as CSV</button>
         </div>
         <div id="ta-response-viewer"></div>
       </div>
@@ -233,7 +233,9 @@
 
 <script src="js/modules-meta.js?v=16"></script>
 <script src="js/portfolio-data.js?v=2"></script>
-<script src="js/progress.js?v=27"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="js/supabase-client.js?v=1"></script>
+<script src="js/progress.js?v=28"></script>
 <script>
 function calcModuleProgress(progress, moduleId, sectionCount) {
   const mod = (progress && progress[moduleId]) || { sections: {} };
@@ -269,14 +271,37 @@ function renderModuleColumnHeaders() {
   overallTh.insertAdjacentHTML("beforebegin", moduleThs);
 }
 
+// Admin sees every profile (RLS: profiles_select_own_or_admin) and every
+// progress row (progress_sections_select_own_or_admin) — one query each,
+// grouped client-side, rather than one round trip per student like the old
+// server-side loop would've needed anyway.
 async function loadUsers() {
-  const res = await fetch("/api/admin/users");
-  if (!res.ok) {
+  const [{ data: profiles, error: pErr }, { data: sections }] = await Promise.all([
+    supabaseClient.from("profiles").select("*").order("created_at", { ascending: true }),
+    supabaseClient.from("progress_sections").select("user_id,module_id,section_id")
+  ]);
+  if (pErr) {
     document.getElementById("admin-table-body").innerHTML = `<tr><td colspan="${ADMIN_TABLE_COLSPAN}">Could not load users.</td></tr>`;
     return;
   }
-  const data = await res.json();
-  renderUsers(data.users);
+
+  const progressByUser = {};
+  (sections || []).forEach(row => {
+    if (!progressByUser[row.user_id]) progressByUser[row.user_id] = {};
+    if (!progressByUser[row.user_id][row.module_id]) progressByUser[row.user_id][row.module_id] = { sections: {} };
+    progressByUser[row.user_id][row.module_id].sections[row.section_id] = true;
+  });
+
+  const users = (profiles || []).map(p => ({
+    id: p.id,
+    name: p.name,
+    email: p.email,
+    isAdmin: !!p.is_admin,
+    taEligible: !!p.ta_eligible,
+    createdAt: p.created_at,
+    progress: progressByUser[p.id] || {}
+  }));
+  renderUsers(users);
 }
 
 function renderUsers(users) {
@@ -316,19 +341,8 @@ function renderUsers(users) {
       const verb = nextIsAdmin ? "grant admin access to" : "revoke admin access from";
       if (!confirm(`Are you sure you want to ${verb} ${name}?`)) return;
       btn.disabled = true;
-      try {
-        const res = await fetch("/api/admin/set-admin", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userId, isAdmin: nextIsAdmin })
-        });
-        if (!res.ok) {
-          const data = await res.json().catch(() => ({}));
-          alert(data.error || `Could not update admin access (HTTP ${res.status}).`);
-        }
-      } catch (err) {
-        alert("Could not reach the server. Please try again.");
-      }
+      const { error } = await supabaseClient.from("profiles").update({ is_admin: nextIsAdmin }).eq("id", userId);
+      if (error) alert(error.message || "Could not update admin access.");
       loadUsers();
     });
   });
@@ -338,22 +352,10 @@ function renderUsers(users) {
       const userId = btn.getAttribute("data-toggle-ta");
       const name = btn.getAttribute("data-toggle-ta-name");
       const nextEligible = btn.getAttribute("data-toggle-ta-next") === "1";
-      const verb = nextEligible ? "allow" : "revoke TA application access for";
       if (!confirm(nextEligible ? `Allow ${name} to apply for a TA position?` : `Revoke TA application access for ${name}?`)) return;
       btn.disabled = true;
-      try {
-        const res = await fetch("/api/admin/set-ta-eligible", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userId, eligible: nextEligible })
-        });
-        if (!res.ok) {
-          const data = await res.json().catch(() => ({}));
-          alert(data.error || `Could not update TA eligibility (HTTP ${res.status}).`);
-        }
-      } catch (err) {
-        alert("Could not reach the server. Please try again.");
-      }
+      const { error } = await supabaseClient.from("profiles").update({ ta_eligible: nextEligible }).eq("id", userId);
+      if (error) alert(error.message || "Could not update TA eligibility.");
       loadUsers();
     });
   });
@@ -365,19 +367,11 @@ function renderUsers(users) {
       if (!confirm(`Reset all progress for ${name}? This can't be undone.`)) return;
       btn.disabled = true;
       btn.textContent = "Resetting…";
-      try {
-        const res = await fetch("/api/admin/reset-progress", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userId })
-        });
-        if (!res.ok) {
-          const data = await res.json().catch(() => ({}));
-          alert(data.error || `Could not reset progress (HTTP ${res.status}).`);
-        }
-      } catch (err) {
-        alert("Could not reach the server. Please try again.");
-      }
+      const [{ error: e1 }, { error: e2 }] = await Promise.all([
+        supabaseClient.from("progress_sections").delete().eq("user_id", userId),
+        supabaseClient.from("progress_video").delete().eq("user_id", userId)
+      ]);
+      if (e1 || e2) alert((e1 || e2).message || "Could not reset progress.");
       loadUsers();
     });
   });
@@ -397,9 +391,9 @@ function createApplicationSection(cfg) {
   let editingQuestionId = null;
 
   async function loadQuestions() {
-    const res = await fetch(cfg.questionsApi);
-    const data = await res.json();
-    renderQuestions(data.questions || []);
+    const { data } = await supabaseClient.from("application_questions")
+      .select("id,prompt,type").eq("kind", cfg.kind).order("created_at", { ascending: true });
+    renderQuestions(data || []);
   }
 
   function renderQuestions(questions) {
@@ -465,24 +459,14 @@ function createApplicationSection(cfg) {
           return;
         }
         btn.disabled = true;
-        try {
-          const res = await fetch(`${cfg.questionsApi}/${btn.getAttribute("data-save-question")}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ prompt, type })
-          });
-          if (!res.ok) {
-            const data = await res.json().catch(() => ({}));
-            errorEl.textContent = data.error || `Could not save that question (HTTP ${res.status}).`;
-            errorEl.classList.add("show");
-            return;
-          }
-          editingQuestionId = null;
-        } catch (err) {
-          errorEl.textContent = "Could not reach the server. Please try again.";
+        const { error } = await supabaseClient.from("application_questions")
+          .update({ prompt, type }).eq("id", btn.getAttribute("data-save-question"));
+        if (error) {
+          errorEl.textContent = error.message || "Could not save that question.";
           errorEl.classList.add("show");
           return;
         }
+        editingQuestionId = null;
         loadQuestions();
       });
     });
@@ -491,18 +475,10 @@ function createApplicationSection(cfg) {
       btn.addEventListener("click", async () => {
         if (!confirm("Delete this question?")) return;
         errorEl.classList.remove("show");
-        try {
-          const res = await fetch(`${cfg.questionsApi}/${btn.getAttribute("data-delete-question")}`, {
-            method: "DELETE"
-          });
-          if (!res.ok) {
-            const data = await res.json().catch(() => ({}));
-            errorEl.textContent = data.error || `Could not delete that question (HTTP ${res.status}).`;
-            errorEl.classList.add("show");
-            return;
-          }
-        } catch (err) {
-          errorEl.textContent = "Could not reach the server. Please try again.";
+        const { error } = await supabaseClient.from("application_questions")
+          .delete().eq("id", btn.getAttribute("data-delete-question"));
+        if (error) {
+          errorEl.textContent = error.message || "Could not delete that question.";
           errorEl.classList.add("show");
           return;
         }
@@ -527,27 +503,21 @@ function createApplicationSection(cfg) {
 
     btn.disabled = true;
     btn.textContent = "Adding…";
-    try {
-      const res = await fetch(cfg.questionsApi, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt, type: typeSelect.value })
-      });
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        errorEl.textContent = data.error || `Could not add that question (HTTP ${res.status}).`;
-        errorEl.classList.add("show");
-        return;
-      }
+    const { error } = await supabaseClient.from("application_questions").insert({
+      id: crypto.randomUUID(),
+      kind: cfg.kind,
+      prompt,
+      type: typeSelect.value === "long" ? "long" : "short"
+    });
+    if (error) {
+      errorEl.textContent = error.message || "Could not add that question.";
+      errorEl.classList.add("show");
+    } else {
       promptInput.value = "";
       loadQuestions();
-    } catch (err) {
-      errorEl.textContent = "Could not reach the server. Please try again.";
-      errorEl.classList.add("show");
-    } finally {
-      btn.disabled = false;
-      btn.textContent = "Add";
     }
+    btn.disabled = false;
+    btn.textContent = "Add";
   }
 
   // ---------- Responses (Google Forms-style: one at a time, not a giant list) ----------
@@ -561,10 +531,15 @@ function createApplicationSection(cfg) {
   let currentIndex = 0;
 
   async function loadApplications() {
-    const res = await fetch(cfg.applicationsApi);
-    const data = await res.json();
-    allApplications = data.applications || [];
-    allQuestions = data.questions || [];
+    const [{ data: apps }, { data: questions }] = await Promise.all([
+      supabaseClient.from("applications").select("*").eq("kind", cfg.kind).order("submitted_at", { ascending: false }),
+      supabaseClient.from("application_questions").select("id,prompt,type").eq("kind", cfg.kind).order("created_at", { ascending: true })
+    ]);
+    // Map to the camelCase shape (submittedAt, userId) the render code below expects.
+    allApplications = (apps || []).map(a => ({
+      userId: a.user_id, kind: a.kind, name: a.name, email: a.email, answers: a.answers, submittedAt: a.submitted_at
+    }));
+    allQuestions = questions || [];
     document.getElementById(cfg.responseCountEl).textContent = allApplications.length;
     applyResponseFilter();
   }
@@ -635,20 +610,9 @@ function createApplicationSection(cfg) {
       const name = btn.getAttribute("data-reset-app-name");
       if (!confirm(`Allow ${name} to resubmit? This deletes their current application.`)) return;
       btn.disabled = true;
-      try {
-        const res = await fetch(cfg.resetApi, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userId })
-        });
-        if (!res.ok) {
-          const data = await res.json().catch(() => ({}));
-          alert(data.error || `Could not reset that application (HTTP ${res.status}).`);
-          btn.disabled = false;
-          return;
-        }
-      } catch (err) {
-        alert("Could not reach the server. Please try again.");
+      const { error } = await supabaseClient.from("applications").delete().eq("user_id", userId).eq("kind", cfg.kind);
+      if (error) {
+        alert(error.message || "Could not reset that application.");
         btn.disabled = false;
         return;
       }
@@ -660,6 +624,53 @@ function createApplicationSection(cfg) {
 
   document.getElementById(cfg.addBtnEl).addEventListener("click", addQuestion);
 
+  // Mirrors server.js's csvEscape()/buildApplicationsCsv() — generated and
+  // downloaded entirely client-side now, from data the admin already has
+  // full read access to via RLS, rather than a server endpoint.
+  function csvEscape(value) {
+    let str = value == null ? "" : String(value);
+    if (/^[=+\-@]/.test(str)) str = `'${str}`;
+    return /[",\r\n]/.test(str) ? `"${str.replace(/"/g, '""')}"` : str;
+  }
+
+  document.getElementById(cfg.exportCsvBtnEl).addEventListener("click", () => {
+    const questionOrder = allQuestions.map(q => q.id);
+    const promptById = {};
+    allQuestions.forEach(q => { promptById[q.id] = q.prompt; });
+    const seen = new Set(questionOrder);
+    allApplications.forEach(a => {
+      Object.keys(a.answers || {}).forEach(qid => {
+        if (!seen.has(qid)) {
+          seen.add(qid);
+          questionOrder.push(qid);
+        }
+      });
+    });
+
+    const headers = ["Name", "Email", "Submitted At", ...questionOrder.map(qid => promptById[qid] || "Question (removed)")];
+    const lines = [headers.map(csvEscape).join(",")];
+    allApplications.forEach(a => {
+      const row = [
+        a.name,
+        a.email,
+        new Date(a.submittedAt).toLocaleString(),
+        ...questionOrder.map(qid => (a.answers || {})[qid] || "")
+      ];
+      lines.push(row.map(csvEscape).join(","));
+    });
+
+    const csv = "﻿" + lines.join("\r\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `synbase-${cfg.kind === "ta" ? "ta-" : ""}applications-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  });
+
   function toLocalInputValue(iso) {
     if (!iso) return "";
     const d = new Date(iso);
@@ -668,11 +679,9 @@ function createApplicationSection(cfg) {
   }
 
   async function loadWindow() {
-    const res = await fetch(cfg.windowApi);
-    const data = await res.json();
-    const w = data.window || { opensAt: null, closesAt: null };
-    document.getElementById(cfg.windowOpensEl).value = toLocalInputValue(w.opensAt);
-    document.getElementById(cfg.windowClosesEl).value = toLocalInputValue(w.closesAt);
+    const { data } = await supabaseClient.from("application_windows").select("opens_at,closes_at").eq("kind", cfg.kind).maybeSingle();
+    document.getElementById(cfg.windowOpensEl).value = toLocalInputValue(data && data.opens_at);
+    document.getElementById(cfg.windowClosesEl).value = toLocalInputValue(data && data.closes_at);
   }
 
   document.getElementById(cfg.windowSaveBtnEl).addEventListener("click", async () => {
@@ -680,22 +689,15 @@ function createApplicationSection(cfg) {
     const closesVal = document.getElementById(cfg.windowClosesEl).value;
     const btn = document.getElementById(cfg.windowSaveBtnEl);
     btn.disabled = true;
-    try {
-      const res = await fetch(cfg.windowApi, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          opensAt: opensVal ? new Date(opensVal).toISOString() : null,
-          closesAt: closesVal ? new Date(closesVal).toISOString() : null
-        })
-      });
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        alert(data.error || `Could not save the application window (HTTP ${res.status}).`);
-      }
-    } catch (err) {
-      alert("Could not reach the server. Please try again.");
-    }
+    const { error } = await supabaseClient.from("application_windows").upsert(
+      {
+        kind: cfg.kind,
+        opens_at: opensVal ? new Date(opensVal).toISOString() : null,
+        closes_at: closesVal ? new Date(closesVal).toISOString() : null
+      },
+      { onConflict: "kind" }
+    );
+    if (error) alert(error.message || "Could not save the application window.");
     btn.disabled = false;
     loadWindow();
   });
@@ -704,10 +706,7 @@ function createApplicationSection(cfg) {
 }
 
 const sibrpApplicationSection = createApplicationSection({
-  questionsApi: "/api/admin/application-questions",
-  applicationsApi: "/api/admin/applications",
-  resetApi: "/api/admin/applications/reset",
-  windowApi: "/api/admin/application-window/sibrp",
+  kind: "sibrp",
   questionListEl: "question-list",
   questionErrorEl: "question-error",
   newPromptEl: "new-question-prompt",
@@ -718,14 +717,12 @@ const sibrpApplicationSection = createApplicationSection({
   windowSaveBtnEl: "window-save-btn",
   responseCountEl: "sibrp-response-count",
   responseSearchEl: "sibrp-response-search",
-  responseViewerEl: "sibrp-response-viewer"
+  responseViewerEl: "sibrp-response-viewer",
+  exportCsvBtnEl: "sibrp-export-csv-btn"
 });
 
 const taApplicationSection = createApplicationSection({
-  questionsApi: "/api/admin/ta-application-questions",
-  applicationsApi: "/api/admin/ta-applications",
-  resetApi: "/api/admin/ta-applications/reset",
-  windowApi: "/api/admin/application-window/ta",
+  kind: "ta",
   questionListEl: "ta-question-list",
   questionErrorEl: "ta-question-error",
   newPromptEl: "ta-new-question-prompt",
@@ -736,16 +733,16 @@ const taApplicationSection = createApplicationSection({
   windowSaveBtnEl: "ta-window-save-btn",
   responseCountEl: "ta-response-count",
   responseSearchEl: "ta-response-search",
-  responseViewerEl: "ta-response-viewer"
+  responseViewerEl: "ta-response-viewer",
+  exportCsvBtnEl: "ta-export-csv-btn"
 });
 
 // ---------- Beyond SiBRP projects ----------
 let editingProjectId = null;
 
 async function loadProjects() {
-  const res = await fetch("/api/portfolio-projects");
-  const data = await res.json();
-  renderProjectList(data.projects || []);
+  const { data: rows } = await supabaseClient.from("portfolio_projects").select("*").order("created_at", { ascending: false });
+  renderProjectList((rows || []).map(rowToPortfolioProject));
 }
 
 function renderProjectList(projects) {
@@ -779,15 +776,8 @@ function renderProjectList(projects) {
     btn.addEventListener("click", async () => {
       if (!confirm("Delete this project?")) return;
       btn.disabled = true;
-      try {
-        const res = await fetch(`/api/admin/portfolio-projects/${btn.getAttribute("data-delete-project")}`, { method: "DELETE" });
-        if (!res.ok) {
-          const data = await res.json().catch(() => ({}));
-          alert(data.error || `Could not delete that project (HTTP ${res.status}).`);
-        }
-      } catch (err) {
-        alert("Could not reach the server. Please try again.");
-      }
+      const { error } = await supabaseClient.from("portfolio_projects").delete().eq("id", btn.getAttribute("data-delete-project"));
+      if (error) alert(error.message || "Could not delete that project.");
       loadProjects();
     });
   });
@@ -836,47 +826,72 @@ document.getElementById("portfolio-form").addEventListener("submit", async (e) =
     return;
   }
 
-  const formData = new FormData();
-  formData.append("student", student);
-  formData.append("title", title);
-  formData.append("year", document.getElementById("pf-year").value.trim());
-  formData.append("tag", document.getElementById("pf-tag").value.trim());
-  formData.append("accent", document.getElementById("pf-accent").value);
-  formData.append("link", document.getElementById("pf-link").value.trim());
-  formData.append("shortDescription", shortDescription);
-  formData.append("fullStory", document.getElementById("pf-full").value.trim());
-  formData.append("anecdote", document.getElementById("pf-anecdote").value.trim());
-  const photoFile = document.getElementById("pf-photo").files[0];
-  if (photoFile) formData.append("image", photoFile);
+  const link = document.getElementById("pf-link").value.trim();
+  if (link && !/^https?:\/\//i.test(link)) {
+    errorEl.textContent = "Link must start with http:// or https://.";
+    errorEl.classList.add("show");
+    return;
+  }
 
   const wasEditing = editingProjectId;
   btn.disabled = true;
   btn.textContent = wasEditing ? "Saving…" : "Adding…";
-  try {
-    const url = wasEditing ? `/api/admin/portfolio-projects/${wasEditing}` : "/api/admin/portfolio-projects";
-    const res = await fetch(url, { method: wasEditing ? "PUT" : "POST", body: formData });
-    const data = await res.json();
-    if (!res.ok) {
-      errorEl.textContent = data.error || `Could not save that project (HTTP ${res.status}).`;
+
+  const fields = {
+    student,
+    title,
+    year: document.getElementById("pf-year").value.trim(),
+    tag: document.getElementById("pf-tag").value.trim(),
+    accent: ["teal", "gold", "cardinal"].includes(document.getElementById("pf-accent").value) ? document.getElementById("pf-accent").value : "teal",
+    link,
+    short_description: shortDescription,
+    full_story: document.getElementById("pf-full").value.trim(),
+    anecdote: document.getElementById("pf-anecdote").value.trim()
+  };
+
+  const photoFile = document.getElementById("pf-photo").files[0];
+  if (photoFile) {
+    const path = `${crypto.randomUUID()}${photoFile.name.slice(photoFile.name.lastIndexOf("."))}`;
+    const { error: uploadErr } = await supabaseClient.storage.from("portfolio-images").upload(path, photoFile);
+    if (uploadErr) {
+      errorEl.textContent = uploadErr.message || "Could not upload that photo.";
       errorEl.classList.add("show");
+      btn.disabled = false;
+      btn.textContent = wasEditing ? "Save Changes" : "Add Project";
       return;
     }
+    fields.image = supabaseClient.storage.from("portfolio-images").getPublicUrl(path).data.publicUrl;
+  }
+
+  const { error } = wasEditing
+    ? await supabaseClient.from("portfolio_projects").update(fields).eq("id", wasEditing)
+    : await supabaseClient.from("portfolio_projects").insert({ id: crypto.randomUUID(), image: "", ...fields });
+
+  if (error) {
+    errorEl.textContent = error.message || "Could not save that project.";
+    errorEl.classList.add("show");
+  } else {
     resetProjectForm();
     loadProjects();
-  } catch (err) {
-    errorEl.textContent = "Could not reach the server. Please try again.";
-    errorEl.classList.add("show");
-  } finally {
-    btn.disabled = false;
-    btn.textContent = wasEditing ? "Save Changes" : "Add Project";
   }
+  btn.disabled = false;
+  btn.textContent = wasEditing ? "Save Changes" : "Add Project";
 });
 
 // ---------- Speaker Series ----------
+function adminTalkWithUrls(row) {
+  return {
+    id: row.id,
+    title: row.title,
+    speakerName: row.speaker_name,
+    description: row.description,
+    thumbnailUrl: `https://img.youtube.com/vi/${row.youtube_id}/hqdefault.jpg`
+  };
+}
+
 async function loadSpeakerTalks() {
-  const res = await fetch("/api/speaker-talks");
-  const data = await res.json();
-  renderSpeakerAdminList(data.talks || []);
+  const { data: rows } = await supabaseClient.from("speaker_talks").select("*").order("uploaded_at", { ascending: false });
+  renderSpeakerAdminList((rows || []).map(adminTalkWithUrls));
 }
 
 function renderSpeakerAdminList(talks) {
@@ -900,18 +915,20 @@ function renderSpeakerAdminList(talks) {
     btn.addEventListener("click", async () => {
       if (!confirm("Delete this talk?")) return;
       btn.disabled = true;
-      try {
-        const res = await fetch(`/api/admin/speaker-talks/${btn.getAttribute("data-delete-talk")}`, { method: "DELETE" });
-        if (!res.ok) {
-          const data = await res.json().catch(() => ({}));
-          alert(data.error || `Could not delete that talk (HTTP ${res.status}).`);
-        }
-      } catch (err) {
-        alert("Could not reach the server. Please try again.");
-      }
+      const { error } = await supabaseClient.from("speaker_talks").delete().eq("id", btn.getAttribute("data-delete-talk"));
+      if (error) alert(error.message || "Could not delete that talk.");
       loadSpeakerTalks();
     });
   });
+}
+
+// Mirrors server.js's extractYoutubeId() — accepts any common YouTube URL
+// shape or a bare 11-character video ID.
+function extractYoutubeId(input) {
+  const str = String(input || "").trim();
+  if (/^[a-zA-Z0-9_-]{11}$/.test(str)) return str;
+  const match = str.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+  return match ? match[1] : null;
 }
 
 document.getElementById("speaker-upload-form").addEventListener("submit", async (e) => {
@@ -920,41 +937,43 @@ document.getElementById("speaker-upload-form").addEventListener("submit", async 
   const btn = document.getElementById("speaker-upload-btn");
   errorEl.classList.remove("show");
 
-  const youtubeUrl = document.getElementById("talk-youtube-url").value.trim();
-  if (!youtubeUrl) {
-    errorEl.textContent = "Paste a YouTube link.";
+  const title = document.getElementById("talk-title").value.trim();
+  const speakerName = document.getElementById("talk-speaker").value.trim();
+  if (!title) {
+    errorEl.textContent = "Title is required.";
+    errorEl.classList.add("show");
+    return;
+  }
+  if (!speakerName) {
+    errorEl.textContent = "Speaker name is required.";
+    errorEl.classList.add("show");
+    return;
+  }
+  const youtubeId = extractYoutubeId(document.getElementById("talk-youtube-url").value);
+  if (!youtubeId) {
+    errorEl.textContent = "Please enter a valid YouTube link.";
     errorEl.classList.add("show");
     return;
   }
 
   btn.disabled = true;
   btn.textContent = "Adding…";
-  try {
-    const res = await fetch("/api/admin/speaker-talks", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        title: document.getElementById("talk-title").value,
-        speakerName: document.getElementById("talk-speaker").value,
-        description: document.getElementById("talk-description").value,
-        youtubeUrl
-      })
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      errorEl.textContent = data.error || `Could not add that talk (HTTP ${res.status}).`;
-      errorEl.classList.add("show");
-      return;
-    }
+  const { error } = await supabaseClient.from("speaker_talks").insert({
+    id: crypto.randomUUID(),
+    title,
+    speaker_name: speakerName,
+    description: document.getElementById("talk-description").value.trim(),
+    youtube_id: youtubeId
+  });
+  if (error) {
+    errorEl.textContent = error.message || "Could not add that talk.";
+    errorEl.classList.add("show");
+  } else {
     document.getElementById("speaker-upload-form").reset();
     loadSpeakerTalks();
-  } catch (err) {
-    errorEl.textContent = "Could not reach the server. Please try again.";
-    errorEl.classList.add("show");
-  } finally {
-    btn.disabled = false;
-    btn.textContent = "Add Talk";
   }
+  btn.disabled = false;
+  btn.textContent = "Add Talk";
 });
 
 // ---------- Tabs: top-level (SiBRP / TA / Beyond SiBRP / Speaker Series) and sub-tabs (Questions vs Responses) ----------

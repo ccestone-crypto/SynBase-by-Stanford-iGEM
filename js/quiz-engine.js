@@ -780,6 +780,26 @@ function renderBoardEntries(el, board) {
   });
 }
 
+const FREE_RESPONSE_BOARD_LIMIT = 3;
+
+// RLS (see supabase/migrations/0002_static_frontend_rls.sql,
+// free_responses_select_own_or_after_posting) does the actual gating here —
+// if this user hasn't posted their own answer for this section yet, the
+// board query below naturally comes back empty no matter what this
+// function does, since Postgres itself won't return anyone else's rows.
+async function loadFreeResponse(moduleId, sectionId) {
+  const [{ data: mine }, { data: board }] = await Promise.all([
+    supabaseClient.from("free_responses").select("answer,updated_at")
+      .eq("user_id", CURRENT_USER.id).eq("module_id", moduleId).eq("section_id", sectionId)
+      .maybeSingle(),
+    supabaseClient.from("free_responses").select("answer,updated_at")
+      .eq("module_id", moduleId).eq("section_id", sectionId)
+      .order("updated_at", { ascending: false })
+      .limit(FREE_RESPONSE_BOARD_LIMIT)
+  ]);
+  return { response: mine || null, board: board || [] };
+}
+
 function wireFreeResponse(MODULE, page, index) {
   if (!page.freeResponse) return;
   const box = document.querySelector(`.free-response-box[data-fr-for="${page.id}"]`);
@@ -790,12 +810,9 @@ function wireFreeResponse(MODULE, page, index) {
   const boardList = box.querySelector("[data-fr-board-list]");
 
   // Prefill from a previous attempt, if any, so students can see and revise
-  // their last answer instead of starting from a blank box every visit. The
-  // discussion board only arrives in the response once they've already
-  // answered — gated server-side, not something the client decides.
+  // their last answer instead of starting from a blank box every visit.
   renderBoardLocked(boardList);
-  fetch(`/api/free-response/${encodeURIComponent(MODULE.id)}/${encodeURIComponent(page.id)}`)
-    .then(res => res.ok ? res.json() : null)
+  loadFreeResponse(MODULE.id, page.id)
     .then(data => {
       if (data && data.response) {
         input.value = data.response.answer || "";
@@ -811,27 +828,28 @@ function wireFreeResponse(MODULE, page, index) {
       status.className = "free-response-status incorrect";
       return;
     }
+    if (answer.length > 4000) {
+      status.textContent = "Keep your response under 4000 characters.";
+      status.className = "free-response-status incorrect";
+      return;
+    }
 
     submitBtn.disabled = true;
     status.textContent = "Posting…";
     status.className = "free-response-status";
 
     try {
-      const res = await fetch("/api/free-response", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          moduleId: MODULE.id,
-          sectionId: page.id,
-          answer
-        })
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Something went wrong.");
+      const { error } = await supabaseClient.from("free_responses").upsert(
+        { user_id: CURRENT_USER.id, module_id: MODULE.id, section_id: page.id, answer, updated_at: new Date().toISOString() },
+        { onConflict: "user_id,module_id,section_id" }
+      );
+      if (error) throw new Error(error.message);
+
+      const { board } = await loadFreeResponse(MODULE.id, page.id);
 
       status.textContent = "Posted! Revise and resubmit anytime.";
       status.className = "free-response-status correct";
-      renderBoardEntries(boardList, data.board);
+      renderBoardEntries(boardList, board);
 
       if (!isSectionComplete(MODULE.id, page.id)) {
         markSectionComplete(MODULE.id, page.id);

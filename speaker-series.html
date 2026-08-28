@@ -26,7 +26,9 @@
 </main>
 
 <script src="js/modules-meta.js?v=16"></script>
-<script src="js/progress.js?v=27"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="js/supabase-client.js?v=1"></script>
+<script src="js/progress.js?v=28"></script>
 <script>
 function escapeHtml(str) {
   const div = document.createElement("div");
@@ -34,10 +36,22 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 
+// Mirrors server.js's talkWithUrls() — everything besides the video ID is
+// derived, not stored.
+function talkWithUrls(row) {
+  return {
+    id: row.id,
+    title: row.title,
+    speakerName: row.speaker_name,
+    description: row.description,
+    watchUrl: `https://www.youtube.com/watch?v=${row.youtube_id}`,
+    thumbnailUrl: `https://img.youtube.com/vi/${row.youtube_id}/hqdefault.jpg`
+  };
+}
+
 async function loadTalks() {
-  const res = await fetch("/api/speaker-talks");
-  const data = await res.json();
-  renderTalks(data.talks || []);
+  const { data: rows } = await supabaseClient.from("speaker_talks").select("*").order("uploaded_at", { ascending: false });
+  renderTalks((rows || []).map(talkWithUrls));
 }
 
 const PLAY_ICON = `<svg viewBox="0 0 68 48" width="52" height="36"><path d="M66.5 7.7c-.8-2.9-2.5-5.2-5.4-6C55.8.1 34 .1 34 .1S12.2.1 6.9 1.7c-2.9.8-4.6 3.1-5.4 6C0 13 0 24 0 24s0 11 1.5 16.3c.8 2.9 2.5 5.1 5.4 5.9C12.2 47.9 34 47.9 34 47.9s21.8 0 27.1-1.7c2.9-.8 4.6-3 5.4-5.9C68 35 68 24 68 24s0-11-1.5-16.3z" fill="#212121" fill-opacity="0.8"/><path d="M27 34.5V13.5L45 24z" fill="#fff"/></svg>`;

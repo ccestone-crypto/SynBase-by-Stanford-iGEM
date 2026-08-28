@@ -18,16 +18,14 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="js/supabase-client.js?v=1"></script>
 <script>
-  // Safe to expose client-side — see reset-password.html for why. This page
-  // only ever talks to Supabase's own Auth API to detect the confirmation
-  // link, then hands the resulting tokens to our own server so it can set
-  // its normal httpOnly session cookie (see POST /api/session-from-tokens).
-  const supabaseClient = supabase.createClient(
-    "https://mbravmycmxvqfzrixthz.supabase.co",
-    "sb_publishable_h8W87aAIjsZTLhu9DP_ZSA_OdyRtxfM"
-  );
-
+  // The confirmation link Supabase emailed lands here with the session
+  // encoded in the URL; supabase-js parses it automatically on load
+  // (detectSessionInUrl, see js/supabase-client.js) and fires this event
+  // once that session is established. There's no server anymore to hand
+  // tokens off to — this client-side session IS the real session now,
+  // stored the same way (localStorage) it would be after a normal login.
   const subtitleEl = document.getElementById("auth-subtitle");
   const errorEl = document.getElementById("auth-error");
 
@@ -38,26 +36,10 @@
   }
 
   let handled = false;
-  supabaseClient.auth.onAuthStateChange(async (event, session) => {
-    if (handled || event !== "SIGNED_IN" || !session) return;
+  supabaseClient.auth.onAuthStateChange((event) => {
+    if (handled || event !== "SIGNED_IN") return;
     handled = true;
-
-    try {
-      const res = await fetch("/api/session-from-tokens", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ access_token: session.access_token, refresh_token: session.refresh_token })
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        showError(data.error || "Could not finish confirming your account.");
-        return;
-      }
-      await supabaseClient.auth.signOut(); // the client-side session isn't needed once our cookie is set
-      location.href = "index.html";
-    } catch (err) {
-      showError("Could not reach the server. Please try again.");
-    }
+    location.href = "index.html";
   });
 
   setTimeout(() => {

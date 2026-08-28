@@ -40,6 +40,8 @@
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="js/supabase-client.js?v=1"></script>
 <script>
   const form = document.getElementById("signup-form");
   const errorEl = document.getElementById("auth-error");
@@ -56,6 +58,10 @@
 
     const password = document.getElementById("password").value;
     const confirm = document.getElementById("confirm").value;
+    if (password.length < 8) {
+      showError("Password must be at least 8 characters.");
+      return;
+    }
     if (password !== confirm) {
       showError("Passwords don't match.");
       return;
@@ -64,36 +70,42 @@
     submitBtn.disabled = true;
     submitBtn.textContent = "Creating account…";
 
-    try {
-      const res = await fetch("/api/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: document.getElementById("name").value,
-          email: document.getElementById("email").value,
-          password
-        })
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        showError(data.error || "Something went wrong. Please try again.");
-        submitBtn.disabled = false;
-        submitBtn.textContent = "Create Account";
-        return;
-      }
-      if (data.needsConfirmation) {
-        form.style.display = "none";
-        const successEl = document.getElementById("auth-success");
-        successEl.textContent = data.message || "Check your email to confirm your account, then log in.";
-        successEl.classList.add("show");
-        return;
-      }
-      location.href = "index.html";
-    } catch (err) {
-      showError("Could not reach the server. Please try again.");
+    const name = document.getElementById("name").value.trim();
+    if (!name) {
+      showError("Please enter your name.");
       submitBtn.disabled = false;
       submitBtn.textContent = "Create Account";
+      return;
     }
+
+    // Note: admin status is never granted here, even if you tried to pass
+    // it — see supabase/migrations/0003_fix_admin_trigger_security.sql.
+    const { data, error } = await supabaseClient.auth.signUp({
+      email: document.getElementById("email").value.trim().toLowerCase(),
+      password,
+      options: { data: { name } }
+    });
+
+    if (error) {
+      showError(/already registered|already exists|already been registered/i.test(error.message)
+        ? "An account with that email already exists."
+        : error.message);
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Create Account";
+      return;
+    }
+
+    if (!data.session) {
+      // "Confirm email" is on for this project — signUp() creates the
+      // account but doesn't log them in yet.
+      form.style.display = "none";
+      const successEl = document.getElementById("auth-success");
+      successEl.textContent = "Check your email to confirm your account, then log in.";
+      successEl.classList.add("show");
+      return;
+    }
+
+    location.href = "index.html";
   });
 </script>
 </body>

@@ -33,6 +33,8 @@
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="js/supabase-client.js?v=1"></script>
 <script>
   function getParam(name) {
     return new URLSearchParams(location.search).get(name);
@@ -59,29 +61,22 @@
     submitBtn.disabled = true;
     submitBtn.textContent = "Logging in…";
 
-    try {
-      const res = await fetch("/api/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: document.getElementById("email").value,
-          password: document.getElementById("password").value
-        })
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        showError(data.error || "Something went wrong. Please try again.");
-        submitBtn.disabled = false;
-        submitBtn.textContent = "Log In";
-        return;
-      }
-      const next = getParam("next");
-      location.href = next && next.startsWith("/") ? next : "index.html";
-    } catch (err) {
-      showError("Could not reach the server. Please try again.");
+    const { error } = await supabaseClient.auth.signInWithPassword({
+      email: document.getElementById("email").value.trim().toLowerCase(),
+      password: document.getElementById("password").value
+    });
+
+    if (error) {
+      showError(/email not confirmed/i.test(error.message)
+        ? "Please confirm your email first — check your inbox for the confirmation link."
+        : "Incorrect email or password.");
       submitBtn.disabled = false;
       submitBtn.textContent = "Log In";
+      return;
     }
+
+    const next = getParam("next");
+    location.href = next && next.startsWith("/") ? next : "index.html";
   });
 </script>
 </body>

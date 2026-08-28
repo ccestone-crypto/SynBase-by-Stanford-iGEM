@@ -6,6 +6,18 @@
       "runtimeExecutable": "node",
       "runtimeArgs": ["server.js"],
       "port": 8420
+    },
+    {
+      "name": "clara-cestone-site",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "8421", "--directory", "C:\\Users\\clces\\clara-cestone-site"],
+      "port": 8421
+    },
+    {
+      "name": "static-no-backend-test",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "8422"],
+      "port": 8422
     }
   ]
 }

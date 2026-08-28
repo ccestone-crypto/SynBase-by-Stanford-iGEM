@@ -21,7 +21,9 @@
 <main class="container narrow" id="app-main"></main>
 
 <script src="js/modules-meta.js?v=16"></script>
-<script src="js/progress.js?v=27"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="js/supabase-client.js?v=1"></script>
+<script src="js/progress.js?v=28"></script>
 <script>
 function escapeHtml(str) {
   const div = document.createElement("div");
@@ -29,22 +31,44 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 
+// Mirrors server/course-config.js's isCourseComplete() — module_sections is
+// the same data, seeded into Postgres by
+// supabase/migrations/0002_static_frontend_rls.sql, and publicly readable.
+async function isCourseComplete() {
+  const { data: required } = await supabaseClient.from("module_sections").select("module_id,section_id");
+  return (required || []).every(r => {
+    const mod = PROGRESS_CACHE[r.module_id];
+    return !!(mod && mod.sections && mod.sections[r.section_id]);
+  });
+}
+
+async function getApplicationWindow(kind) {
+  const { data } = await supabaseClient.from("application_windows").select("opens_at,closes_at").eq("kind", kind).maybeSingle();
+  return data ? { opensAt: data.opens_at, closesAt: data.closes_at } : { opensAt: null, closesAt: null };
+}
+
+function windowStatus(window) {
+  const now = Date.now();
+  if (window.opensAt && now < new Date(window.opensAt).getTime()) return "not-open";
+  if (window.closesAt && now > new Date(window.closesAt).getTime()) return "closed";
+  return "open";
+}
+
 async function loadApplicationState() {
   const mainEl = document.getElementById("app-main");
-  const [meRes, qRes] = await Promise.all([
-    fetch("/api/application/me"),
-    fetch("/api/application/questions")
+  const [{ data: myApp }, { data: questionRows }] = await Promise.all([
+    supabaseClient.from("applications").select("*").eq("user_id", CURRENT_USER.id).eq("kind", "sibrp").maybeSingle(),
+    supabaseClient.from("application_questions").select("id,prompt,type").eq("kind", "sibrp").order("created_at", { ascending: true })
   ]);
-  const me = await meRes.json();
-  const qData = await qRes.json();
-  const questions = qData.questions || [];
+  const questions = questionRows || [];
 
-  if (me.application) {
-    renderSubmitted(mainEl, me.application, questions);
+  if (myApp) {
+    renderSubmitted(mainEl, myApp, questions);
     return;
   }
 
-  if (!me.courseComplete) {
+  const courseComplete = await isCourseComplete();
+  if (!courseComplete) {
     const overall = overallProgress();
     mainEl.innerHTML = `
       <div class="locked-panel">
@@ -57,23 +81,26 @@ async function loadApplicationState() {
     return;
   }
 
-  if (me.windowStatus === "not-open") {
+  const window = await getApplicationWindow("sibrp");
+  const status = windowStatus(window);
+
+  if (status === "not-open") {
     mainEl.innerHTML = `
       <div class="locked-panel">
         <div class="locked-icon">${LOCK_ICON}</div>
         <h2>Applications aren't open yet</h2>
-        <p>Applications open ${escapeHtml(new Date(me.window.opensAt).toLocaleString())}. Check back then.</p>
+        <p>Applications open ${escapeHtml(new Date(window.opensAt).toLocaleString())}. Check back then.</p>
       </div>
     `;
     return;
   }
 
-  if (me.windowStatus === "closed") {
+  if (status === "closed") {
     mainEl.innerHTML = `
       <div class="locked-panel">
         <div class="locked-icon">${LOCK_ICON}</div>
         <h2>Applications are closed</h2>
-        <p>Applications closed ${escapeHtml(new Date(me.window.closesAt).toLocaleString())}.</p>
+        <p>Applications closed ${escapeHtml(new Date(window.closesAt).toLocaleString())}.</p>
       </div>
     `;
     return;
@@ -83,7 +110,7 @@ async function loadApplicationState() {
 }
 
 function renderSubmitted(mainEl, application, questions) {
-  const submitted = new Date(application.submittedAt).toLocaleString();
+  const submitted = new Date(application.submitted_at).toLocaleString();
   const promptById = {};
   questions.forEach(q => { promptById[q.id] = q.prompt; });
 
@@ -138,31 +165,38 @@ function renderForm(mainEl, questions) {
     btn.textContent = "Submitting…";
 
     const answers = {};
-    questions.forEach(q => {
-      answers[q.id] = document.getElementById(`q-${q.id}`).value;
-    });
-
-    try {
-      const res = await fetch("/api/application", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ answers })
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        errorEl.textContent = data.error || "Something went wrong. Please try again.";
+    for (const q of questions) {
+      const value = document.getElementById(`q-${q.id}`).value.trim();
+      if (!value) {
+        errorEl.textContent = `Please answer: "${q.prompt}"`;
         errorEl.classList.add("show");
         btn.disabled = false;
         btn.textContent = "Submit Application";
         return;
       }
-      loadApplicationState();
-    } catch (err) {
-      errorEl.textContent = "Could not reach the server. Please try again.";
+      answers[q.id] = value;
+    }
+
+    const { error } = await supabaseClient.from("applications").insert({
+      user_id: CURRENT_USER.id,
+      kind: "sibrp",
+      name: CURRENT_USER.name,
+      email: CURRENT_USER.email,
+      answers
+    });
+
+    if (error) {
+      errorEl.textContent = /duplicate key|23505/i.test(error.message)
+        ? "You've already submitted an application."
+        : /row-level security/i.test(error.message)
+        ? "You're not eligible to apply right now."
+        : (error.message || "Something went wrong. Please try again.");
       errorEl.classList.add("show");
       btn.disabled = false;
       btn.textContent = "Submit Application";
+      return;
     }
+    loadApplicationState();
   });
 }
 

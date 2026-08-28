@@ -1,9 +1,13 @@
-// Progress tracking shared by the homepage and every module page. Progress is
-// now stored server-side per account (see server.js + server/store.js) instead
-// of localStorage, so it follows a student across browsers/devices. Each page
-// must call bootstrapAuthAndProgress(fromRoot) once before any of the render
-// helpers below are used — it populates CURRENT_USER and PROGRESS_CACHE, and
-// redirects to the login page if there's no valid session.
+// Progress tracking shared by the homepage and every module page. Progress
+// lives in Supabase Postgres (progress_sections/progress_video), read and
+// written directly from the browser via supabaseClient (see
+// js/supabase-client.js) — there's no server in this build, so Row Level
+// Security (supabase/migrations/0002_static_frontend_rls.sql) is what
+// actually stops a user from reading or writing anyone else's progress, not
+// this file. Each page must call bootstrapAuthAndProgress(fromRoot) once
+// before any of the render helpers below are used — it populates
+// CURRENT_USER and PROGRESS_CACHE, and redirects to the login page if
+// there's no valid session.
 let CURRENT_USER = null;
 let PROGRESS_CACHE = {};
 
@@ -17,39 +21,88 @@ function loginPath(fromRoot) {
   return fromRoot ? "login.html" : "../login.html";
 }
 
-async function bootstrapAuthAndProgress(fromRoot) {
-  const meRes = await fetch("/api/me");
-  const me = await meRes.json();
+// Reconstructs the same { module1: { sections: {...}, videoWatched }, ... }
+// shape the rest of this file (and every page's render code) already
+// expects — this used to be server.js's store.readProgress().
+async function loadProgressCache(userId) {
+  const [{ data: sections }, { data: videos }] = await Promise.all([
+    supabaseClient.from("progress_sections").select("module_id,section_id").eq("user_id", userId),
+    supabaseClient.from("progress_video").select("module_id,watched").eq("user_id", userId)
+  ]);
+  const progress = {};
+  (sections || []).forEach(row => {
+    if (!progress[row.module_id]) progress[row.module_id] = { sections: {}, videoWatched: false };
+    progress[row.module_id].sections[row.section_id] = true;
+  });
+  (videos || []).forEach(row => {
+    if (!progress[row.module_id]) progress[row.module_id] = { sections: {}, videoWatched: false };
+    progress[row.module_id].videoWatched = !!row.watched;
+  });
+  return progress;
+}
 
-  if (!me.user) {
+async function loadCurrentUser(authUser) {
+  const { data: profile } = await supabaseClient.from("profiles").select("*").eq("id", authUser.id).maybeSingle();
+  if (!profile) {
+    // The session token is still locally valid but its profile row is gone
+    // (e.g. the account was deleted while the browser held onto the
+    // session) — clear it rather than treating this as logged in.
+    await supabaseClient.auth.signOut();
+    return null;
+  }
+  return {
+    id: authUser.id,
+    name: profile.name,
+    email: profile.email,
+    isAdmin: !!profile.is_admin,
+    taEligible: !!profile.ta_eligible
+  };
+}
+
+async function bootstrapAuthAndProgress(fromRoot) {
+  const { data: { session } } = await supabaseClient.auth.getSession();
+
+  if (!session) {
     const next = encodeURIComponent(location.pathname + location.search);
     location.href = `${loginPath(fromRoot)}?next=${next}`;
     return null;
   }
 
-  CURRENT_USER = me.user;
-
-  const progRes = await fetch("/api/progress");
-  const data = await progRes.json();
-  PROGRESS_CACHE = data.progress || {};
+  CURRENT_USER = await loadCurrentUser(session.user);
+  if (!CURRENT_USER) {
+    const next = encodeURIComponent(location.pathname + location.search);
+    location.href = `${loginPath(fromRoot)}?next=${next}`;
+    return null;
+  }
+  PROGRESS_CACHE = await loadProgressCache(session.user.id);
 
   return CURRENT_USER;
 }
 
 // The local cache is already updated by the caller, so most callers don't
-// wait on this network round trip. It returns its promise, though, because
+// wait on this round trip. It returns its promise, though, because
 // completing the very last page of a module immediately navigates to the
 // next module (or congratulations.html) in the same click handler — that
-// specific caller awaits this so the section is actually persisted server-
-// side before the browser tears down the page's fetch. keepalive is kept as
-// a second line of defense for that same case.
+// specific caller awaits this so the section is actually persisted before
+// the browser tears down the page.
 function syncProgress(moduleId, patch) {
-  return fetch("/api/progress", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ moduleId, ...patch }),
-    keepalive: true
-  }).catch(() => {});
+  const userId = CURRENT_USER && CURRENT_USER.id;
+  if (!userId) return Promise.resolve();
+
+  const ops = [];
+  if (patch.sectionId) {
+    ops.push(supabaseClient.from("progress_sections").upsert(
+      { user_id: userId, module_id: moduleId, section_id: patch.sectionId, completed: true },
+      { onConflict: "user_id,module_id,section_id" }
+    ));
+  }
+  if (typeof patch.videoWatched === "boolean") {
+    ops.push(supabaseClient.from("progress_video").upsert(
+      { user_id: userId, module_id: moduleId, watched: patch.videoWatched },
+      { onConflict: "user_id,module_id" }
+    ));
+  }
+  return Promise.all(ops).catch(() => {});
 }
 
 function isSectionComplete(moduleId, sectionId) {
@@ -218,14 +271,13 @@ function renderHeader(mountEl, fromRoot) {
 async function renderPublicHeader(mountEl, fromRoot) {
   let user = null;
   try {
-    const res = await fetch("/api/me");
-    const data = await res.json();
-    user = data.user;
-    if (user) {
-      CURRENT_USER = user;
-      const progRes = await fetch("/api/progress");
-      const progData = await progRes.json();
-      PROGRESS_CACHE = progData.progress || {};
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (session) {
+      user = await loadCurrentUser(session.user);
+      if (user) {
+        CURRENT_USER = user;
+        PROGRESS_CACHE = await loadProgressCache(session.user.id);
+      }
     }
   } catch (e) {}
   renderHeaderCore(mountEl, fromRoot, user);
