@@ -318,7 +318,7 @@ function renderCelebrationScreen(MODULE, nextModule) {
   const el = document.getElementById("page-viewport");
   el.innerHTML = `
     <article class="page-card celebration-card">
-      <img class="celebration-mascot" src="../assets/img/site/Mascot Panels - transparent bg/204-achievement.png" alt="A cheerful DNA mascot holding a large star">
+      <img class="celebration-mascot" src="../assets/img/site/Mascot Panels - transparent bg/207-cheering.png" alt="A cheerful DNA mascot cheering">
       <h2>Module ${MODULE.number} complete!</h2>
       <p>Nice work finishing <strong>${MODULE.title}</strong>. Ready for what's next?</p>
       <button type="button" class="btn" data-celebration-continue>Continue to Module ${nextModule.number}: ${nextModule.title} &rarr;</button>
