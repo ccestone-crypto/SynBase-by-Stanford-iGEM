@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Module 2: Core Concepts in Molecular and Cellular Biology — SynBase</title>
-<link rel="stylesheet" href="../css/style.css?v=70">
+<link rel="stylesheet" href="../css/style.css?v=72">
 </head>
 <body>
 
@@ -19,325 +19,426 @@
   <div class="page-footer-nav" id="page-footer-nav"></div>
 </div>
 
-<script src="../js/modules-meta.js?v=12"></script>
+<script src="../js/modules-meta.js?v=13"></script>
 <script src="../js/progress.js?v=24"></script>
-<script src="../js/quiz-engine.js?v=16"></script>
+<script src="../js/quiz-engine.js?v=17"></script>
 <script>
-const PART1 = "Part 1: Biology of Cells";
-const PART2 = "Part 2: Exploring DNA";
-const PART3 = "Part 3: Engineering Applications in Molecular Biology";
-const PART4 = "Part 4: Inserting Foreign DNA Into Cells";
-
 const MODULE = {
   id: "module2",
   number: 2,
   title: "Core Concepts in Molecular and Cellular Biology",
-  lede: "This module is split into four parts: the biology of cells, the biology of DNA, engineering applications in molecular biology, and inserting foreign DNA into cells — the toolkit for everything else in this course.",
+  lede: "Now that you know where synthetic biology fits into the bigger picture, it's time to get into the biology itself — starting with cells and DNA, working through the central dogma, and ending with how engineers actually get new genetic material into a cell.",
   pages: [
-    // ---------------- Part 1: Biology of Cells ----------------
     {
-      id: "c1r", type: "read", part: PART1, title: "Cells and DNA: An Overview",
+      id: "2.1r", type: "read", title: "Welcome to Module 2",
       html: `
-        <figure class="topic-figure">
-          <img src="../assets/img/module2/slide-01.png" alt="The four parts of this module: Biology of Cells, Biology of DNA, Engineering Applications in Molecular Biology, and Inserting DNA Into Cells." loading="lazy">
-          <figcaption>Overview of this module's four parts. (Images from the Protein Data Bank, Biorender)</figcaption>
-        </figure>
-        <p>This module is split into four parts: 1) the biology of cells, 2) the biology of DNA, 3) engineering applications in molecular biology, and 4) inserting DNA into cells.</p>
-        <p><strong>Cells</strong> are the building blocks of biological life. They are the smallest biological units that can live, grow, and replicate. Humans, plants, animals, and bacteria are all made up of cells.</p>
-        <figure class="topic-figure">
-          <img src="../assets/img/module2/slide-02.png" alt="DNA holds the instruction manual for biological life, inside cells." loading="lazy">
-          <figcaption>DNA holds the instruction manual for biological life. (Biorender)</figcaption>
-        </figure>
-        <p><strong>DNA</strong> (short for Deoxyribonucleic Acid) contains the instruction manual for all biological life. In us humans, it encodes our personalities, appearances, metabolism, immune responses, thoughts, and so many other traits. DNA makes you, <em>you</em>.</p>
+        <p>Welcome to Module 2 of SynBase! This session is split into four parts: the biology of cells, the biology of DNA, engineering applications in molecular biology, and inserting DNA into cells.</p>
+        <p>Let's start with the basics. Cells are the building blocks of biological life — the smallest biological units that can live, grow, and replicate. Humans, plants, animals, and bacteria are all made up of cells.</p>
+        <p>DNA (short for deoxyribonucleic acid) contains the instruction manual for all biological life. In us humans, it encodes our personalities, appearances, metabolism, immune responses, thoughts, and countless other traits. DNA makes you, YOU!</p>
       `
     },
     {
-      id: "c2r", type: "read", part: PART1, title: "The Three Domains of Life",
+      id: "2.2r", type: "read", title: "Three Domains of Life", part: "Part 1: Biology of Cells",
       html: `
-        <figure class="topic-figure">
-          <img src="../assets/img/module2/slide-03.png" alt="Part 1: Biology of Cells — section divider." loading="lazy">
-          <figcaption>Part 1: Biology of Cells. (Biorender)</figcaption>
-        </figure>
         <p>Life is separated into three domains: Eukarya, Bacteria, and Archaea.</p>
-        <figure class="topic-figure">
-          <img src="../assets/img/module2/slide-04.png" alt="Diagram comparing Eukarya, Bacteria, and Archaea cells and their membranes/cell walls." loading="lazy">
-          <figcaption>The three domains of life: Eukarya, Bacteria, and Archaea. (Biorender, LibreTexts)</figcaption>
-        </figure>
-        <p><strong>Eukarya</strong> consists of organisms that have cells containing a <strong>membrane-bound nucleus</strong>. They include plant, human, animal, fungal, or protist cells.</p>
-        <p><strong>Bacteria</strong> consist of single-celled organisms that do not contain a nucleus. All of them have a cell wall that contains peptidoglycan.</p>
-        <p><strong>Archaea</strong> consist of single-celled organisms that do not contain a nucleus. Unlike organisms in the Bacteria domain, those in the Archaea domain have a cell wall that does not contain peptidoglycan.</p>
-        <p>In this course, we'll focus on <strong>Eukarya</strong> and <strong>Bacteria</strong>, because they're more commonly used in synthetic biology experiments. Within those domains, there are three types of cells we frequently use in synthetic biology: bacterial cells, mammalian cells, and plant cells.</p>
-        <p>Bacterial cells belong to the Bacteria domain, while mammalian and plant cells belong to the Eukarya domain.</p>
+        <p>Eukarya consists of organisms whose cells contain a membrane-bound nucleus — plant, human, animal, fungal, and protist cells all belong here. Bacteria consists of single-celled organisms that do not contain a nucleus; all of them have a cell wall that contains peptidoglycan. Archaea also consists of single-celled organisms without a nucleus, but unlike Bacteria, their cell walls do not contain peptidoglycan.</p>
       `
     },
     {
-      id: "c3r", type: "read", part: PART1, title: "Model Cell Lines",
+      id: "2.3r", type: "read", title: "Cells We Use in Synthetic Biology", part: "Part 1: Biology of Cells",
       html: `
-        <figure class="topic-figure">
-          <img src="../assets/img/module2/slide-05.png" alt="Three common cell types used in bioengineering: bacterial (E. coli), mammalian (HEK 293), and plant (BY-2) cells." loading="lazy">
-          <figcaption>Three common cell types used in bioengineering and their model cell lines. (Biorender)</figcaption>
-        </figure>
-        <p>Model cell lines are simple cell populations used to represent other, more complex cells of interest. They are used because they are easy to culture, samples are highly uniform, and they have high growth rates. They can be cultured for many cycles in cell dishes if well maintained.</p>
-        <p><em>E. coli</em> is a common model cell line for bacterial cells. These cells are found in the intestines of humans and warm-blooded animals, as well as in contaminated water or raw meat (<a href="https://www.cdc.gov/ecoli/about/index.html" target="_blank" rel="noopener">CDC</a>).</p>
-        <p><em>HEK 293</em> (human embryonic kidney cells) is a common model organism for mammalian cells. These cells are derived from human embryonic kidney tissue, through transfection of normal human embryonic kidney cells with adenovirus 5 DNA (<a href="https://www.beckman.com/resources/product-applications/lead-optimization/cell-line-development/human-embryonic-kidney-293" target="_blank" rel="noopener">Beckman</a>).</p>
-        <p><em>BY-2</em> is a common model organism for plant cells. These cells are derived from the tobacco Bright Yellow 2 line (<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10587202/" target="_blank" rel="noopener">PMC</a>).</p>
+        <p>In this course, we'll focus on Eukarya and Bacteria, since they're more commonly used in synthetic biology experiments. Within those domains, there are three types of cells we frequently use: bacterial cells, mammalian cells, and plant cells. Bacterial cells belong to the Bacteria domain, while mammalian and plant cells belong to Eukarya.</p>
+        <p>Model cell lines are simple cell populations used to represent other, more complex cells of interest. They're popular because they're easy to culture, samples are highly uniform, and they have high growth rates — and if well maintained, they can be cultured for many cycles in cell dishes.</p>
+        <p><em>E. coli</em> is a common model cell line for bacterial cells; it's found in the intestines of humans and warm-blooded animals, as well as in contaminated water or raw meat. HEK 293 (human embryonic kidney cells) is a common model organism for mammalian cells, derived from human embryonic kidney tissue through transfection with adenovirus 5 DNA. BY-2 is a common model organism for plant cells, derived from the tobacco Bright Yellow 2 plant.</p>
       `
     },
     {
-      id: "c4r", type: "read", part: PART1, title: "Anatomy of a Bacterial Cell",
+      id: "2.4p", type: "practice", title: "Domain Properties Check", part: "Part 1: Biology of Cells",
+      question: {
+        prompt: "Which of the following domains do NOT have cells with a membrane-bound nucleus? Select all that apply.",
+        multi: true,
+        options: [
+          { text: "Eukarya", correct: false },
+          { text: "Bacteria", correct: true },
+          { text: "Archaea", correct: true }
+        ],
+        explanation: "Eukarya is defined by having a membrane-bound nucleus — that's the whole point of the name. Bacteria and Archaea both lack one; the difference between them is whether their cell wall contains peptidoglycan (Bacteria: yes, Archaea: no)."
+      }
+    },
+    {
+      id: "2.5r", type: "read", title: "Parts of a Bacterial Cell", part: "Part 1: Biology of Cells",
       html: `
-        <figure class="topic-figure">
-          <img src="../assets/img/module2/slide-06.png" alt="Labeled diagram of a bacterial cell: nucleoid, cytoplasm, plasmid, ribosomes, and cell wall." loading="lazy">
-          <figcaption>The parts of a bacterial cell. (Biorender)</figcaption>
-        </figure>
-        <p>A bacterial cell is encapsulated by a <strong>cell wall</strong>, which protects and maintains the shape of the cell. Inside the cell is the <strong>cytoplasm</strong>, a gel-like fluid enclosed by the cell membrane. <strong>Ribosomes</strong> synthesize proteins from genetic material. A <strong>plasmid</strong> is small, circular DNA that typically contains an antibiotic-resistance gene. The <strong>nucleoid</strong> hosts genetic material — note that it does not have a nuclear membrane.</p>
+        <p>A cell has many parts! Let's start by talking about the parts of bacterial cells.</p>
+        <p>A bacterial cell is encapsulated by a cell wall, which protects and maintains the shape of the cell. Inside is the cytoplasm, a gel-like fluid enclosed by the cell membrane. Ribosomes synthesize proteins from genetic material. A plasmid is small, circular DNA that typically contains an antibiotic-resistance gene. The nucleoid hosts the cell's genetic material — but unlike a nucleus, it has no nuclear membrane around it.</p>
       `
     },
     {
-      id: "c5r", type: "read", part: PART1, title: "Anatomy of a Eukaryotic Cell",
+      id: "2.6r", type: "read", title: "Parts of a Eukaryotic Cell", part: "Part 1: Biology of Cells",
       html: `
-        <figure class="topic-figure">
-          <img src="../assets/img/module2/slide-07.png" alt="Labeled diagram of a eukaryotic cell: nucleus, ribosomes, cell membrane, and cytoplasm." loading="lazy">
-          <figcaption>The parts of a eukaryotic cell. (Biorender)</figcaption>
-        </figure>
-        <p>A eukaryotic cell is encapsulated by a <strong>cell membrane</strong>, which regulates movement in and out of the cell (note that plant cells also have a cell wall). The <strong>cytoplasm</strong> is gel-like fluid enclosed by the cell membrane. <strong>Ribosomes</strong> synthesize proteins from genetic material, just as in bacteria. The <strong>nucleus</strong> hosts genetic material (DNA).</p>
+        <p>A eukaryotic cell is encapsulated by a cell membrane, which regulates movement in and out of the cell (plant cells also have a cell wall, on top of the membrane). The cytoplasm is a gel-like fluid enclosed by the cell membrane, just like in bacterial cells. Ribosomes synthesize proteins from genetic material. The nucleus hosts the cell's genetic material (DNA) — enclosed by its own nuclear membrane, which is what a bacterial nucleoid lacks.</p>
       `
     },
     {
-      id: "c6r", type: "read", part: PART1, title: "Outside the Cell: The ECM and Cell Membrane",
-      html: `
-        <figure class="topic-figure">
-          <img src="../assets/img/module2/slide-08.png" alt="The extracellular matrix (ECM) found outside the cell, including collagen." loading="lazy">
-          <figcaption>The extracellular matrix (ECM) is found outside the cell. (Biorender)</figcaption>
-        </figure>
-        <p>The extracellular matrix (ECM) is a complex network of proteins found outside the cell. Collagen is a common ECM protein, responsible for providing structure and strength to skin, muscles, and bones.</p>
-        <figure class="topic-figure">
-          <img src="../assets/img/module2/slide-09.png" alt="The cell membrane with protein channels, integral proteins, and the phospholipid bilayer." loading="lazy">
-          <figcaption>The cell membrane is the gate that separates the cell from the environment. (Biorender)</figcaption>
-        </figure>
-        <p>The cell membrane is the gate that separates the cell from the environment. Many membrane proteins are embedded in the cell membrane, including <strong>protein channels</strong>, which facilitate movement of large or hydrophilic molecules, and <strong>integral proteins</strong>, which help the cell communicate with the extracellular environment (e.g., receptors, cell adhesion molecules). The membrane is made up of a <strong>phospholipid bilayer</strong>, which contains hydrophilic heads that face out, and hydrophobic tails that face inward.</p>
-        <figure class="topic-figure">
-          <img src="../assets/img/module2/slide-10.png" alt="Anatomy of a phospholipid showing the hydrophilic head and hydrophobic tails, illustrating why the bilayer is semipermeable." loading="lazy">
-          <figcaption>The phospholipid bilayer is semipermeable. (Biorender)</figcaption>
-        </figure>
-        <p>The principle of "like dissolves like" means that substances with similar polarities can attract and dissolve each other. Both the extracellular matrix and the cytoplasm are largely hydrophilic, which is why the phospholipid bilayer's hydrophilic heads face outward toward them, while the hydrophobic tails tuck away in the middle.</p>
-      `
+      id: "2.7p", type: "practice", title: "DNA Storage Check", part: "Part 1: Biology of Cells",
+      question: {
+        prompt: "Which part of the cell is known for storing the body's main genetic DNA?",
+        options: [
+          { text: "The Cell Membrane", correct: false },
+          { text: "The Nucleus", correct: true },
+          { text: "The Extracellular Matrix", correct: false },
+          { text: "Ribosomes", correct: false }
+        ],
+        explanation: "The nucleus is where eukaryotic cells (like the ones that make up your body) store their genetic material, enclosed by a nuclear membrane. (Bacterial cells store their DNA in a nucleoid instead, which has no nuclear membrane — but bacteria aren't part of \"the body\" this question is asking about.)"
+      }
     },
-
-    // ---------------- Part 2: Exploring DNA ----------------
     {
-      id: "d1r", type: "read", part: PART2, title: "The Central Dogma",
+      id: "2.8m", type: "matching", title: "Cell Structures Recap", part: "Part 1: Biology of Cells",
+      matching: {
+        instructions: "Match the structure to its function.",
+        pairs: [
+          { left: "Cell wall", right: "Protects and maintains the shape of a bacterial (or plant) cell" },
+          { left: "Cytoplasm", right: "The gel-like fluid enclosed by the cell membrane" },
+          { left: "Ribosomes", right: "Synthesize proteins from genetic material" },
+          { left: "Plasmid", right: "Small, circular DNA that typically carries an antibiotic-resistance gene" },
+          { left: "Nucleoid", right: "Hosts genetic material in cells that have no nuclear membrane" },
+          { left: "Nucleus", right: "Hosts genetic material in cells that have a nuclear membrane" }
+        ]
+      }
+    },
+    {
+      id: "2.9r", type: "read", title: "Outside the Cell: The Extracellular Matrix", part: "Part 1: Biology of Cells",
       html: `
-        <figure class="topic-figure">
-          <img src="../assets/img/module2/slide-11.png" alt="Part 2: Exploring DNA — section divider." loading="lazy">
-          <figcaption>Part 2: Exploring DNA. (Biorender)</figcaption>
-        </figure>
-        <figure class="topic-figure">
-          <img src="../assets/img/module2/slide-12.png" alt="Diagram of the central dogma: DNA to RNA to protein." loading="lazy">
-          <figcaption>The central dogma of molecular biology. (Image from the City University of Hong Kong)</figcaption>
-        </figure>
-        <p>The central dogma of molecular biology consists of DNA undergoing <strong>transcription</strong> to become RNA, and RNA undergoing <strong>translation</strong> to become proteins. DNA can also undergo <strong>replication</strong> to result in more DNA.</p>
+        <p>Now let's examine what's outside the cell. The extracellular matrix (ECM) is a complex network of proteins found outside the cell. Collagen is a common ECM protein, responsible for providing structure and strength to skin, muscles, and bones.</p>
       `
     },
     {
-      id: "d2r", type: "read", part: PART2, title: "DNA and RNA Bases",
+      id: "2.10r", type: "read", title: "The Cell Membrane and Its Proteins", part: "Part 1: Biology of Cells",
       html: `
-        <figure class="topic-figure">
-          <img src="../assets/img/module2/slide-13.png" alt="The building blocks of DNA: a nucleotide with sugar-phosphate backbone and nucleobase." loading="lazy">
-          <figcaption>The building blocks of DNA: nucleotides. (Biorender)</figcaption>
-        </figure>
-        <p>DNA has four bases: Adenine, Cytosine, Guanine, and Thymine.</p>
-        <figure class="topic-figure">
-          <img src="../assets/img/module2/slide-14.png" alt="The building blocks of RNA: a nucleotide with uracil." loading="lazy">
-          <figcaption>The building blocks of RNA: nucleotides. (Biorender)</figcaption>
-        </figure>
-        <p>RNA has the same bases as DNA, except Uracil replaces Thymine.</p>
-        <figure class="topic-figure">
-          <img src="../assets/img/module2/slide-15.png" alt="Complementary base-pairing in DNA: GC pairing has 3 hydrogen bonds, AT pairing has 2." loading="lazy">
-          <figcaption>Complementary base-pairing in DNA. (Biorender)</figcaption>
-        </figure>
-        <p>In DNA, A binds to T, while C binds to G. Note that A binds to U in RNA.</p>
-        <p>GC-pairing has 3 hydrogen bonds, while AT-pairing has 2 hydrogen bonds.</p>
+        <p>The cell membrane is the gate that separates the cell from its environment. Many membrane proteins are embedded in it, including protein channels that facilitate movement of large or hydrophobic molecules, and integral proteins that help the cell communicate with the extracellular environment — receptors and cell adhesion molecules, for example.</p>
+        <p>The membrane itself is made of a phospholipid bilayer, with hydrophilic heads facing outward and hydrophobic tails facing inward.</p>
       `
     },
     {
-      id: "d3r", type: "read", part: PART2, title: "The Double Helix and Antiparallel Strands",
+      id: "2.11r", type: "read", title: "Like Dissolves Like", part: "Part 1: Biology of Cells",
       html: `
-        <figure class="topic-figure">
-          <img src="../assets/img/module2/slide-16.png" alt="DNA's double-helix structure, with strands running in antiparallel 5' to 3' directions." loading="lazy">
-          <figcaption>DNA has a double-helix structure. (Biorender)</figcaption>
-        </figure>
-        <p>DNA operates under a double-helix structure and runs in antiparallel directions. The 5' end of one strand binds to the 3' end of the other strand.</p>
-        <figure class="topic-figure">
-          <img src="../assets/img/module2/slide-17.png" alt="Diagram comparing the DNA coding strand and template strand." loading="lazy">
-          <figcaption>Transcription in more detail: DNA coding vs. template strands. (Biorender)</figcaption>
-        </figure>
-        <p>DNA has two strands — the coding strand and the template strand. The coding strand is the DNA strand found in databases, and it's also the same sequence (except Thymine becomes Uracil) as the RNA produced after transcription.</p>
-        <p>The template strand is the complement of the coding strand — the transcribed RNA is the RNA-complement of this template sequence.</p>
-        <figure class="topic-figure">
-          <img src="../assets/img/module2/slide-18.png" alt="Worked example transcribing a DNA coding strand and template strand into an RNA strand." loading="lazy">
-          <figcaption>Transcription in more detail: the mechanism. (Biorender)</figcaption>
-        </figure>
-        <p>In more detail: if the original DNA coding base is A, the corresponding template base is T, and the resulting RNA base is A. If the original DNA coding base is T, the corresponding template base is A, and the resulting RNA base is U.</p>
+        <p>The principle of "like dissolves like" means substances with similar polarities can attract and dissolve into one another. Both the extracellular matrix and the cytoplasm are largely hydrophilic — which matters for what can and can't cross the hydrophobic core of the phospholipid bilayer between them.</p>
       `
     },
     {
-      id: "d4r", type: "read", part: PART2, title: "From DNA to mRNA: Leaving the Nucleus",
+      id: "2.12p", type: "practice", title: "Membrane Permeability Check", part: "Part 1: Biology of Cells",
+      question: {
+        prompt: "What molecules can pass through the phospholipid bilayer unassisted?",
+        options: [
+          { text: "Glucose", correct: false },
+          { text: "K+", correct: false },
+          { text: "CO2", correct: true },
+          { text: "Na+", correct: false }
+        ],
+        explanation: "The phospholipid bilayer's core is hydrophobic, so only small, nonpolar molecules like CO2 and O2 can slip through unassisted. Glucose and the charged ions K+ and Na+ are hydrophilic — \"like dissolves like\" means they need a protein channel to cross."
+      }
+    },
+    {
+      id: "2.13r", type: "read", title: "The Central Dogma", part: "Part 2: Exploring DNA",
       html: `
-        <figure class="topic-figure">
-          <img src="../assets/img/module2/slide-19.png" alt="Modifications made to RNA to become mRNA, ready for translation." loading="lazy">
-          <figcaption>Modifications made to RNA during and after transcription. (Biorender)</figcaption>
-        </figure>
-        <p>After transcription, several modifications are made. First, the RNA has to leave the nucleus. mRNA, short for messenger RNA, moves out of the nucleus to find a ribosome within the cytoplasm that can help make proteins. The ribosome is the site where translation (the process of making protein from RNA) occurs. mRNA is also structured to be resistant to degradation in the cytoplasm.</p>
+        <p>The central dogma of molecular biology describes how DNA undergoes transcription to become RNA, and RNA undergoes translation to become protein. DNA can also undergo replication, producing more DNA. Over the rest of this part, we'll walk through each piece of that process in more detail.</p>
       `
     },
     {
-      id: "d5r", type: "read", part: PART2, title: "Translation: Ribosomes, tRNA, and the Codon Table",
+      id: "2.14r", type: "read", title: "The Building Blocks of DNA and RNA", part: "Part 2: Exploring DNA",
       html: `
-        <figure class="topic-figure">
-          <img src="../assets/img/module2/slide-20.png" alt="Structure of a ribosome showing a codon, anticodon, tRNA, and amino acid during translation." loading="lazy">
-          <figcaption>Translation occurs in ribosomes. (Biorender)</figcaption>
-        </figure>
-        <p>Ribosomes are tiny "protein factories" within the cytoplasm. In ribosomes, codons are read, and proteins are synthesized from the codon sequence. Codons are three-base sequences that code for a particular amino acid.</p>
-        <p>tRNAs (which carry amino acids corresponding to the codon of the mRNA) have complementary anticodons. They base-pair with the mRNA codons, then add new amino acids to the growing protein chain.</p>
-        <figure class="topic-figure">
-          <img src="../assets/img/module2/slide-21.png" alt="A codon table, showing the codon AUG codes for the amino acid Met." loading="lazy">
-          <figcaption>Reading a codon table. (Image from Khan Academy)</figcaption>
-        </figure>
-        <p>The codon table specifies the codons that map to each amino acid. Some amino acids can be coded for by multiple codons.</p>
-      `
-    },
-
-    // ---------------- Part 3: Engineering Applications in Molecular Biology ----------------
-    {
-      id: "e1r", type: "read", part: PART3, title: "DNA Engineering Examples",
-      html: `
-        <figure class="topic-figure">
-          <img src="../assets/img/module2/slide-22.png" alt="Part 3: Engineering Applications in Molecular Biology — section divider." loading="lazy">
-          <figcaption>Part 3: Engineering Applications in Molecular Biology. (Images from the City University of Hong Kong)</figcaption>
-        </figure>
-        <figure class="topic-figure">
-          <img src="../assets/img/module2/slide-23.png" alt="Wheat genetically modified with the HB4 trait to improve drought resistance." loading="lazy">
-          <figcaption>Wheat can be genetically modified with the HB4 trait to improve drought resistance. (Images from Bio.News, USWheat.org, and World-Grain.com)</figcaption>
-        </figure>
-        <p>The first example is genetically modified wheat. In this example, wheat is genetically modified with Hahb4, a drought-resistant gene present in sunflower seeds, to enable wheat to overcome drought seasons. In 2024, the USDA approved this genetic modification for wheat.</p>
-        <figure class="topic-figure">
-          <img src="../assets/img/module2/slide-24.png" alt="Casgevy, a CRISPR-Cas9 treatment for sickle cell disease." loading="lazy">
-          <figcaption>Casgevy is a CRISPR-Cas9 treatment for sickle cell disease. (Images from Biorender, Kang et al., 2025)</figcaption>
-        </figure>
-        <p>Sickle cell disease is an abnormal blood disorder that affects hemoglobin, the oxygen carrier in red blood cells, and can affect blood flow to the rest of the body. Casgevy is a CRISPR-Cas9 treatment that suppresses the BCL11A enhancer, causing elevated production of hemoglobin.</p>
+        <p>DNA has four bases: Adenine, Cytosine, Guanine, and Thymine. RNA has the same bases as DNA, except Uracil takes the place of Thymine.</p>
       `
     },
     {
-      id: "e2r", type: "read", part: PART3, title: "RNA Engineering Examples",
+      id: "2.15r", type: "read", title: "Base Pairing", part: "Part 2: Exploring DNA",
       html: `
-        <figure class="topic-figure">
-          <img src="../assets/img/module2/slide-25.png" alt="Engineering mRNA to develop COVID-19 vaccines." loading="lazy">
-          <figcaption>Engineering mRNA to develop COVID-19 vaccines. (Images from the FDA, MIT News, Lu et al., 2020)</figcaption>
-        </figure>
-        <p>Perhaps the most famous example is the COVID-19 vaccine. This technology uses engineered mRNA to produce virus-like particles and antibodies to fight it, making the immune system more prepared to fight infections.</p>
-        <figure class="topic-figure">
-          <img src="../assets/img/module2/slide-26.png" alt="Patisiran, an RNA interference drug that treats transthyretin-mediated amyloidosis." loading="lazy">
-          <figcaption>Patisiran is an RNA interference (RNAi) drug that treats transthyretin-mediated amyloidosis. (Images from Nature Reviews, GoodRx)</figcaption>
-        </figure>
+        <p>In DNA, A binds to T, while C binds to G; in RNA, A binds to U instead. GC-pairing forms 3 hydrogen bonds, while AT-pairing forms only 2 — which means GC-rich stretches of DNA hold together more tightly than AT-rich stretches.</p>
+      `
+    },
+    {
+      id: "2.16s", type: "shortanswer", title: "Base Pairing Recall", part: "Part 2: Exploring DNA",
+      shortAnswer: {
+        prompt: "In DNA, guanine (G) pairs with which base?",
+        acceptedAnswers: ["cytosine", "C"],
+        explanation: "As covered on the page above, C binds to G in DNA base pairing — a GC pair forms 3 hydrogen bonds, more than the 2 formed by an A-T pair."
+      }
+    },
+    {
+      id: "2.17p", type: "practice", title: "DNA Melting Check", part: "Part 2: Exploring DNA",
+      question: {
+        prompt: "If the following sequences were subject to increasing temperature, which double-stranded DNA molecule would separate first?",
+        options: [
+          { text: "ATGTTATCCTAAT", correct: true },
+          { text: "TACAATAGGATTA", correct: false },
+          { text: "TGCCGGATGCGA", correct: false },
+          { text: "ACGGCCTACGCT", correct: false }
+        ],
+        explanation: "These four strands actually describe two duplexes: ATGTTATCCTAAT pairs with TACAATAGGATTA to form one molecule, and TGCCGGATGCGA pairs with ACGGCCTACGCT to form the other. The first molecule is mostly A/T bases (2 hydrogen bonds each), while the second is mostly G/C (3 hydrogen bonds each) — so the first, lower-GC molecule needs less heat energy to pull its strands apart and separates first."
+      }
+    },
+    {
+      id: "2.18r", type: "read", title: "The Double Helix", part: "Part 2: Exploring DNA",
+      html: `
+        <p>DNA has a double-helix structure, and its two strands run in antiparallel directions — the 5' end of one strand lines up with the 3' end of the other.</p>
+      `
+    },
+    {
+      id: "2.19r", type: "read", title: "Coding vs. Template Strand", part: "Part 2: Exploring DNA",
+      html: `
+        <p>DNA has two strands: the coding strand and the template strand. The coding strand is the strand you'll find listed in sequence databases — it's also the same sequence as the RNA produced after transcription (except Thymine becomes Uracil). The template strand is the complement of the coding strand; the RNA that gets transcribed is the RNA complement of this template sequence.</p>
+      `
+    },
+    {
+      id: "2.20r", type: "read", title: "Transcription in Detail", part: "Part 2: Exploring DNA",
+      html: `
+        <p>Here's what that looks like base by base: if the original DNA coding base is A, the corresponding template base is T, and the resulting RNA base is A. If the original DNA coding base is T, the corresponding template base is A, and the resulting RNA base is U.</p>
+      `
+    },
+    {
+      id: "2.21p", type: "practice", title: "Coding Strand Check", part: "Part 2: Exploring DNA",
+      question: {
+        prompt: "The DNA coding strand reads 5'-ATG-3'. What will the resulting mRNA sequence be after transcription?",
+        options: [
+          { text: "5'-AUG-3'", correct: true },
+          { text: "5'-TAC-3'", correct: false },
+          { text: "5'-UAC-3'", correct: false },
+          { text: "5'-CAT-3'", correct: false }
+        ],
+        explanation: "The coding strand has the same sequence as the resulting mRNA, just with T swapped for U — so ATG becomes AUG. UAC would be what you'd get if you (incorrectly) transcribed off the coding strand instead of the template strand; TAC is the DNA template strand itself, not RNA."
+      }
+    },
+    {
+      id: "2.22r", type: "read", title: "From RNA to mRNA", part: "Part 2: Exploring DNA",
+      html: `
+        <p>After transcription, several modifications are made to the RNA. First, it has to leave the nucleus: mRNA, short for messenger RNA, moves out of the nucleus to find a ribosome in the cytoplasm that can help make proteins from it. mRNA is also structured to resist degradation once it's out in the cytoplasm.</p>
+      `
+    },
+    {
+      id: "2.23p", type: "practice", title: "Transcription Fact Check", part: "Part 2: Exploring DNA",
+      question: {
+        prompt: "Which of the following is FALSE about transcription?",
+        options: [
+          { text: "It synthesizes a new RNA based on a template DNA sequence.", correct: false },
+          { text: "The output RNA is single-stranded.", correct: false },
+          { text: "The RNA bases are A, C, U, and G.", correct: false },
+          { text: "Occurs in the nucleus for all cell types.", correct: true }
+        ],
+        explanation: "Transcription does synthesize single-stranded RNA (A, C, U, G) from a DNA template — the first three statements are true. But bacterial cells don't have a nucleus at all (they use a nucleoid instead), so \"occurs in the nucleus for all cell types\" is false."
+      }
+    },
+    {
+      id: "2.24r", type: "read", title: "Ribosomes and Codons", part: "Part 2: Exploring DNA",
+      html: `
+        <p>Ribosomes are tiny "protein factories" in the cytoplasm. Inside them, codons are read and proteins are synthesized from the codon sequence — a codon being a three-base sequence that codes for a particular amino acid. tRNAs, which carry amino acids that correspond to a given codon, have complementary anticodons: they base-pair with the mRNA's codons, then add their amino acid to the growing protein chain.</p>
+      `
+    },
+    {
+      id: "2.25r", type: "read", title: "Reading a Codon Table", part: "Part 2: Exploring DNA",
+      html: `
+        <p>The codon table specifies which codons map to each amino acid. Some amino acids can be coded for by multiple different codons — you'll use a codon table like this to translate RNA sequences into protein in the practice question below.</p>
+      `
+    },
+    {
+      id: "2.26p", type: "practice", title: "Codon Translation Check", part: "Part 2: Exploring DNA",
+      question: {
+        prompt: "Refer to a codon table. What will the protein output of the following RNA sequence be? AAUAUGCGUGGGGAUUACUGAUUU",
+        options: [
+          { text: "Met-Arg-Gly-Asp-Tyr", correct: true },
+          { text: "Arg-Gly-Asp-Tyr", correct: false },
+          { text: "Met-Arg-Gly-Glu-Tyr", correct: false },
+          { text: "Met-Ser-Gly-Asp-Tyr", correct: false }
+        ],
+        explanation: "Translation starts at the first AUG in the sequence, then reads in groups of three: AUG (Met) – CGU (Arg) – GGG (Gly) – GAU (Asp) – UAC (Tyr) – UGA (stop). That gives Met-Arg-Gly-Asp-Tyr, then translation ends at the UGA stop codon."
+      }
+    },
+    {
+      id: "2.27o", type: "ordering", title: "The Path from DNA to Protein", part: "Part 2: Exploring DNA",
+      ordering: {
+        prompt: "Arrange the following steps of the central dogma in the correct order, from DNA to a finished protein.",
+        items: [
+          "Transcription: DNA is used as a template to synthesize a complementary RNA strand in the nucleus",
+          "The RNA is modified into mRNA and exits the nucleus into the cytoplasm",
+          "Translation: a ribosome reads the mRNA's codons and links amino acids into a growing protein chain"
+        ],
+        explanation: "This is the central dogma in order, as covered across this part: DNA is transcribed into RNA in the nucleus; that RNA is processed into mRNA and exported to the cytoplasm; and ribosomes in the cytoplasm translate the mRNA's codons into protein."
+      }
+    },
+    {
+      id: "2.28r", type: "read", title: "DNA Engineering: Drought-Resistant Wheat", part: "Part 3: Engineering Applications in Molecular Biology",
+      html: `
+        <p>Now let's look at how engineers apply what you've just learned about DNA, RNA, and protein to real biotechnology — starting with DNA engineering examples.</p>
+        <p>The first example is genetically modified wheat. Here, wheat is genetically modified with Hahb4, a drought-resistant gene from sunflower seeds, to help it survive drought seasons. In 2024, the USDA approved this genetic modification for wheat.</p>
+      `
+    },
+    {
+      id: "2.29r", type: "read", title: "DNA Engineering: Treating Sickle Cell Disease", part: "Part 3: Engineering Applications in Molecular Biology",
+      html: `
+        <p>Sickle cell disease is an abnormal blood disorder that affects hemoglobin, the oxygen carrier in red blood cells, and can disrupt blood flow throughout the body. Casgevy is a CRISPR-Cas9 treatment that suppresses the BCL11A enhancer, causing elevated production of a different form of hemoglobin that isn't affected by the sickle cell mutation.</p>
+      `
+    },
+    {
+      id: "2.30p", type: "practice", title: "DNA Engineering Check", part: "Part 3: Engineering Applications in Molecular Biology",
+      question: {
+        prompt: "Casgevy treats sickle cell disease by using CRISPR-Cas9 to target which gene?",
+        options: [
+          { text: "BCL11A", correct: true },
+          { text: "TP53", correct: false },
+          { text: "HaHB4", correct: false },
+          { text: "The bar gene", correct: false }
+        ],
+        explanation: "Casgevy suppresses the BCL11A enhancer to boost production of a healthy form of hemoglobin. HaHB4 and the bar gene are both from the drought-resistant/herbicide-resistant wheat example, not sickle cell disease; TP53 is the tumor-suppressor gene you'll see later in this module's p53 discussion activity."
+      }
+    },
+    {
+      id: "2.31r", type: "read", title: "RNA Engineering: mRNA Vaccines", part: "Part 3: Engineering Applications in Molecular Biology",
+      html: `
+        <p>Perhaps the most famous RNA engineering example is the COVID-19 vaccine. This technology uses engineered mRNA to produce virus-like particles and antibodies, priming the immune system to fight off future infection.</p>
+      `
+    },
+    {
+      id: "2.32r", type: "read", title: "RNA Engineering: Patisiran", part: "Part 3: Engineering Applications in Molecular Biology",
+      html: `
         <p>Patisiran uses RNA interference to reduce levels of transthyretin, helping treat transthyretin-mediated amyloidosis.</p>
       `
     },
     {
-      id: "e3r", type: "read", part: PART3, title: "Protein Engineering Examples",
-      html: `
-        <figure class="topic-figure">
-          <img src="../assets/img/module2/slide-27.png" alt="Engineering enzymes that convert waste CO2 into useful chemicals." loading="lazy">
-          <figcaption>Engineering enzymes that convert waste CO2 into useful chemicals. (Images from Stanford University, Professor Michael Jewett)</figcaption>
-        </figure>
-        <p>Stanford Bioengineering Professor Michael Jewett's lab engineered enzymes that can convert waste carbon dioxide into useful body metabolites. The system is called the Reductive Formate Pathway (abbreviated ReForm). This research is inspiring other scientists to develop other ways to convert CO2 into useful energy.</p>
-        <figure class="topic-figure">
-          <img src="../assets/img/module2/slide-28.png" alt="CAR-T therapy edits a patient's T-cells to fight disease." loading="lazy">
-          <figcaption>CAR-T therapy edits a patient's T-cells to fight disease. (Images from Xu et al., 2023, Novartis, CancerHealth.com)</figcaption>
-        </figure>
-        <p>CAR-T therapy is a type of protein engineering that engineers an individual's T-cells by adding a chimeric antigen receptor so they can recognize and degrade tumor cells.</p>
-        <figure class="topic-figure">
-          <img src="../assets/img/module2/slide-29.png" alt="AlphaFold protein structure visualization, prediction, and modeling." loading="lazy">
-          <figcaption>AlphaFold: protein structure visualization, prediction, and modeling. (Image from Wang et al., 2022, AlphaFold, Nobel Prize)</figcaption>
-        </figure>
-        <p>AlphaFold is a software by Google DeepMind that can generate 3D protein structure predictions.</p>
-      `
-    },
-    {
-      id: "e4r", type: "read", part: PART3, title: "What Is p53?",
-      html: `
-        <p>p53 is a critical tumor-suppression protein. It is encoded by the gene TP53. When it is mutated, it suppresses the cell-division checkpoint, making cancerous cells more likely to accumulate.</p>
-        <p>For the discussion activity on the next page, you'll work with two references:</p>
-        <ul>
-          <li>The DNA sequence for TP53: <a href="https://www.ncbi.nlm.nih.gov/nuccore/NM_000546.6?report=fasta" target="_blank" rel="noopener">NCBI GenBank (FASTA)</a></li>
-          <li>The p53 protein structure: <a href="https://www.rcsb.org/structure/3TS8" target="_blank" rel="noopener">Protein Data Bank — 3TS8</a></li>
-        </ul>
-      `
-    },
-    {
-      id: "e4f", type: "freeresponse", part: PART3, title: "Discussion: Designing with p53",
-      freeResponse: {
-        prompt: "Using the TP53 sequence and p53 structure linked on the previous page:<br>1. Write out the transcribed RNA sequence (feel free to use an online tool to help with the DNA-to-RNA conversion).<br>2. Find the GC content (an online GC-calculator can help).<br>3. Identify the start and stop codons and the base numbers used to identify them, using the GenBank record.<br>4. Look up the p53 structure in the Protein Data Bank. p53 is a tetramer — explain what that means.<br><br>After posting, take a look at what your classmates wrote."
+      id: "2.33p", type: "practice", title: "RNA Engineering Check", part: "Part 3: Engineering Applications in Molecular Biology",
+      question: {
+        prompt: "Which of the following correctly describes Patisiran's mechanism?",
+        options: [
+          { text: "It uses RNA interference to reduce transthyretin levels.", correct: true },
+          { text: "It uses CRISPR-Cas9 to edit the BCL11A gene.", correct: false },
+          { text: "It uses engineered mRNA to produce virus-like particles.", correct: false },
+          { text: "It uses AlphaFold to predict protein structure.", correct: false }
+        ],
+        explanation: "Patisiran works through RNA interference, targeting transthyretin directly. The other three options describe different examples from this module: CRISPR-Cas9/BCL11A is Casgevy, engineered mRNA/virus-like particles is the COVID-19 vaccine, and AlphaFold is a protein-structure prediction tool, not a treatment."
       }
     },
-
-    // ---------------- Part 4: Inserting Foreign DNA Into Cells ----------------
     {
-      id: "i1r", type: "read", part: PART4, title: "Why and How We Edit DNA",
+      id: "2.34r", type: "read", title: "Protein Engineering: Turning CO2 into Useful Chemicals", part: "Part 3: Engineering Applications in Molecular Biology",
       html: `
-        <figure class="topic-figure">
-          <img src="../assets/img/module2/slide-30.png" alt="Part 4: Inserting Foreign DNA Into Cells — section divider." loading="lazy">
-          <figcaption>Part 4: Inserting Foreign DNA Into Cells. (Biorender)</figcaption>
-        </figure>
-        <figure class="topic-figure">
-          <img src="../assets/img/module2/slide-31.png" alt="Synthetic biology often involves editing DNA or cellular features." loading="lazy">
-          <figcaption>Synthetic biology often involves editing DNA or cellular features. (Biorender)</figcaption>
-        </figure>
-        <p>Synthetic biology often involves editing damaged DNA or cell features, often involving adding, removing, or replacing certain parts of a DNA sequence.</p>
-        <figure class="topic-figure">
-          <img src="../assets/img/module2/slide-32.png" alt="A classic example of DNA engineering: CRISPR-Cas9." loading="lazy">
-          <figcaption>A classic example of DNA engineering: CRISPR-Cas9. (Image from Üsküdar University)</figcaption>
-        </figure>
-        <p>One classic example is CRISPR-Cas9. CRISPR-Cas9 is a gene-editing technology that involves recruiting a guide RNA that recognizes the target DNA sequence, recruits a Cas9 enzyme to cut at that site, and then the cell's repair machinery edits the DNA by adding, deleting, or swapping DNA sequences.</p>
-        <p>To make edits, foreign genetic material is often inserted into cells. That genetic material can be DNA or RNA.</p>
+        <p>Stanford Bioengineering Professor Michael Jewett's lab engineered enzymes that can convert waste carbon dioxide into useful body metabolites. The system is called the Reductive Formate Pathway (ReForm), and it's inspiring other scientists to develop new ways of converting CO2 into useful energy.</p>
       `
     },
     {
-      id: "i2r", type: "read", part: PART4, title: "Plasmids: Making DNA Insertable",
+      id: "2.35r", type: "read", title: "Protein Engineering: CAR-T Therapy", part: "Part 3: Engineering Applications in Molecular Biology",
       html: `
-        <figure class="topic-figure">
-          <img src="../assets/img/module2/slide-33.png" alt="Plasmids are circular loops of DNA that are easy to insert into cells." loading="lazy">
-          <figcaption>Plasmids are circular loops of DNA that are easy to insert into cells. (Biorender)</figcaption>
-        </figure>
-        <p>In order to insert DNA, it must be made into a circular shape to form a <strong>plasmid</strong>. Plasmids are circular DNA loops that are easy to insert into cells, because circular DNA has no exposed ends — which protects it from degradation — and circular DNA is compact. Since DNA can only work in the nucleus, it can get destroyed if inserted linearly, as it travels through the cytoplasm.</p>
-        <p>RNA, on the other hand, can be inserted in a linear shape; it doesn't have to be a plasmid shape like DNA to be successfully inserted into cells. The key reason: RNA works in the cytoplasm, so it can be immediately translated once it enters the cell. It doesn't have to survive cell division the way DNA does.</p>
+        <p>CAR-T therapy is a type of protein engineering that modifies an individual's T-cells by adding a chimeric antigen receptor, letting those cells recognize and destroy tumor cells.</p>
       `
     },
     {
-      id: "i3r", type: "read", part: PART4, title: "Delivery Mechanisms",
+      id: "2.36r", type: "read", title: "Protein Engineering: AlphaFold", part: "Part 3: Engineering Applications in Molecular Biology",
       html: `
-        <figure class="topic-figure">
-          <img src="../assets/img/module2/slide-34.png" alt="Tools to deliver foreign genetic material into cells: viral vectors, lipid nanoparticles, lipoplexation, and electroporation." loading="lazy">
-          <figcaption>Tools to deliver foreign genetic material (DNA/RNA) into cells. (Biorender)</figcaption>
-        </figure>
-        <p>Different delivery mechanisms are used to deliver foreign genetic material into cells:</p>
-        <ul>
-          <li><strong>Viral vectors</strong> are harmless viruses that insert genetic material by "infecting" cells.</li>
-          <li><strong>Lipid nanoparticles</strong> are microscopic fat bubbles that encapsulate and deliver genetic material to cells.</li>
-          <li><strong>Lipoplexation</strong> uses positively-charged lipids that bind to negatively-charged DNA to deliver genetic material.</li>
-          <li><strong>Electroporation</strong> uses electrical pulses that poke holes in cell membranes so genetic material can travel inside.</li>
-        </ul>
+        <p>AlphaFold is software developed by Google DeepMind that can generate 3D protein structure predictions — dramatically speeding up work that used to require slow, expensive lab techniques.</p>
       `
     },
     {
-      id: "i4r", type: "read", part: PART4, title: "Stable vs. Transient Expression",
+      id: "2.37p", type: "practice", title: "Central Dogma Engineering Recap", part: "Part 3: Engineering Applications in Molecular Biology",
+      question: {
+        prompt: "Which of the following are engineering innovations related to the central dogma (DNA, RNA, or proteins)?",
+        options: [
+          { text: "CRISPR gene therapies", correct: false },
+          { text: "Engineering mRNA to develop COVID-19 vaccines", correct: false },
+          { text: "Computational protein design", correct: false },
+          { text: "All of the above", correct: true }
+        ],
+        explanation: "Each of the examples in this part targets a different stage of the central dogma — CRISPR-Cas9 treatments like Casgevy edit DNA, mRNA vaccines work at the RNA level, and tools like AlphaFold (computational protein design) work at the protein level. Central dogma engineering spans all three."
+      }
+    },
+    {
+      id: "2.38r", type: "read", title: "Discussion Prep: p53 and Cancer", part: "Part 3: Engineering Applications in Molecular Biology",
       html: `
-        <figure class="topic-figure">
-          <img src="../assets/img/module2/slide-35.png" alt="Stable expression integrates into the host cell's genome; transient expression does not." loading="lazy">
-          <figcaption>Stable versus transient expression. (Image from Eppendorf)</figcaption>
-        </figure>
-        <p><strong>Stable expression</strong> means that the foreign genetic material successfully integrates into the host cell's genome. <strong>Transient expression</strong> indicates that foreign genetic material does not integrate into the host cell's genome.</p>
+        <p>p53 is a critical tumor-suppressor protein, encoded by the gene TP53. When TP53 is mutated, p53 can no longer properly enforce the cell-division checkpoint, making cells more likely to divide uncontrollably and become cancerous.</p>
       `
+    },
+    {
+      id: "2.39p", type: "practice", title: "p53 Mutation Check", part: "Part 3: Engineering Applications in Molecular Biology",
+      question: {
+        prompt: "Which of the following is more likely to happen if your cells have mutated (incorrectly altered) p53?",
+        options: [
+          { text: "You become more prone to developing cancer.", correct: true },
+          { text: "You become less prone to developing cancer.", correct: false }
+        ],
+        explanation: "A working p53 protein enforces the cell-division checkpoint, catching cells that shouldn't be allowed to divide. When TP53 is mutated, that checkpoint breaks down, making uncontrolled (cancerous) cell division more likely."
+      }
+    },
+    {
+      id: "2.40f", type: "freeresponse", title: "Discussion Forum Activity: p53 Design", part: "Part 3: Engineering Applications in Molecular Biology",
+      freeResponse: {
+        prompt: "Here is the DNA sequence for TP53 (<a href=\"https://www.ncbi.nlm.nih.gov/nuccore/NM_000546.6?report=fasta\" target=\"_blank\" rel=\"noopener\">NCBI GenBank, accession NM_000546.6</a>).<br><br>Your task:<br>1. Write out the transcribed RNA sequence. Feel free to use online software to help convert the sequence from DNA to RNA.<br>2. Find the GC content. Feel free to use an online GC calculator.<br>3. Identify the start and stop codons and the base numbers used to identify them, using the GenBank record linked above.<br>4. Go to the <a href=\"https://www.rcsb.org/\" target=\"_blank\" rel=\"noopener\">Protein Data Bank</a> and find the p53 structure (<a href=\"https://www.rcsb.org/structure/3TS8\" target=\"_blank\" rel=\"noopener\">PDB entry 3TS8</a>). p53 is a tetramer — explain what that means.<br><br>Please type your response here."
+      }
+    },
+    {
+      id: "2.41r", type: "read", title: "Editing DNA and Cellular Features", part: "Part 4: Inserting Foreign DNA Into Cells",
+      html: `
+        <p>Synthetic biology often involves editing damaged DNA or cell features — adding, removing, or replacing parts of a DNA sequence.</p>
+      `
+    },
+    {
+      id: "2.42r", type: "read", title: "CRISPR-Cas9", part: "Part 4: Inserting Foreign DNA Into Cells",
+      html: `
+        <p>One classic example is CRISPR-Cas9, a gene-editing technology that works by recruiting a guide RNA that recognizes the target DNA sequence, recruiting a Cas9 enzyme to cut at that site, and letting the cell's own repair machinery make the edit — adding, deleting, or swapping DNA sequences.</p>
+        <p>To make edits like this, foreign genetic material is often inserted into cells. That material can be DNA or RNA.</p>
+      `
+    },
+    {
+      id: "2.43r", type: "read", title: "Why DNA Needs to Be Circular", part: "Part 4: Inserting Foreign DNA Into Cells",
+      html: `
+        <p>To insert DNA, it's usually made into a circular shape to form a plasmid. Plasmids are easy to insert into cells because circular DNA has no exposed ends, which protects it from degradation, and because circular DNA is compact. Since DNA can only work in the nucleus, a linear piece could get destroyed as it travels through the cytoplasm on its way there.</p>
+        <p>RNA, by contrast, can be inserted in a linear shape — it doesn't need to be circularized like DNA to be successfully inserted into cells. The key reason is that RNA works in the cytoplasm, so it can be translated immediately once it enters the cell; it doesn't need to survive cell division the way DNA does.</p>
+      `
+    },
+    {
+      id: "2.44p", type: "practice", title: "DNA vs. RNA Insertion Check", part: "Part 4: Inserting Foreign DNA Into Cells",
+      question: {
+        prompt: "Why can RNA be inserted into cells in a linear shape, while DNA typically needs to be circular?",
+        options: [
+          { text: "RNA works in the cytoplasm and doesn't need to survive cell division, so it doesn't need the protection a circular (plasmid) shape provides.", correct: true },
+          { text: "RNA is naturally circular already, so the question doesn't apply.", correct: false },
+          { text: "DNA is too large to ever exist in a linear form.", correct: false },
+          { text: "RNA cannot be delivered into cells by any method.", correct: false }
+        ],
+        explanation: "DNA needs to reach and survive in the nucleus, including through cell division, so its exposed ends need the protection a circular plasmid provides. RNA acts immediately in the cytoplasm and doesn't need to persist that long, so it can safely stay linear."
+      }
+    },
+    {
+      id: "2.45r", type: "read", title: "Delivery Mechanisms", part: "Part 4: Inserting Foreign DNA Into Cells",
+      html: `
+        <p>Different delivery mechanisms are used to get foreign genetic material into cells. Viral vectors are harmless viruses that insert genetic material by "infecting" cells. Lipid nanoparticles are microscopic fat bubbles that encapsulate and deliver genetic material. Lipoplexation uses positively charged lipids that bind to negatively charged DNA to deliver it. Electroporation uses electrical pulses to poke holes in cell membranes so genetic material can travel inside.</p>
+      `
+    },
+    {
+      id: "2.46r", type: "read", title: "Stable vs. Transient Expression", part: "Part 4: Inserting Foreign DNA Into Cells",
+      html: `
+        <p>Stable expression means the foreign genetic material successfully integrates into the host cell's genome. Transient expression means the foreign genetic material does not integrate into the host cell's genome — it's expressed for a while, but doesn't become a permanent part of it.</p>
+      `
+    },
+    {
+      id: "2.47p", type: "practice", title: "Synthetic Biology Fact Check", part: "Part 4: Inserting Foreign DNA Into Cells",
+      question: {
+        prompt: "Which of the following is FALSE about synthetic biology?",
+        options: [
+          { text: "Foreign DNA can be inserted into cells, but foreign RNA cannot.", correct: true },
+          { text: "Viral vectors, lipid nanoparticles, and electroporation are all valid methods to insert genetic material into cells.", correct: false },
+          { text: "Stable expression involves incorporating foreign DNA into the cell's genome.", correct: false },
+          { text: "Circular loops of DNA (plasmids) are easier to insert into cells due to the lack of exposed ends.", correct: false }
+        ],
+        explanation: "Foreign RNA absolutely can be inserted into cells — in fact, RNA is often easier to insert since it doesn't need to be circularized. The other three statements are all true, as covered on the pages above."
+      }
+    },
+    {
+      id: "2.48m", type: "matching", title: "Module 2 Recap", part: "Part 4: Inserting Foreign DNA Into Cells",
+      matching: {
+        instructions: "Match the term to its definition.",
+        pairs: [
+          { left: "Transcription", right: "The process of copying DNA into RNA" },
+          { left: "Translation", right: "The process of building a protein from an RNA sequence" },
+          { left: "Codon", right: "A three-base sequence that codes for a particular amino acid" },
+          { left: "Plasmid", right: "A small, circular piece of DNA that's easy to insert into cells" },
+          { left: "Stable expression", right: "Foreign genetic material integrates into the host cell's genome" },
+          { left: "Transient expression", right: "Foreign genetic material does not integrate into the host cell's genome" }
+        ]
+      }
     }
   ]
 };
@@ -350,3 +451,4 @@ const MODULE = {
 </script>
 </body>
 </html>
+</content>

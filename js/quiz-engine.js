@@ -17,6 +17,11 @@
 //       part: "Part 2: Exploring DNA",      // optional — groups consecutive pages
 //       question: {
 //         prompt: "...",
+//         multi: true|false,                // optional — omit/false for single-answer
+//                                            // (radio buttons); true renders checkboxes
+//                                            // and requires every correct option
+//                                            // checked and no incorrect one checked
+//                                            // ("select all that apply")
 //         options: [{ text: "...", correct: true|false }, ...],
 //         explanation: "..."
 //       }
@@ -32,6 +37,24 @@
 //       matching: {
 //         instructions: "...",
 //         pairs: [{ left: "...", right: "..." }, ...]   // shuffled independently at render time
+//       }
+//     },
+//     {
+//       id, title,
+//       type: "shortanswer",               // a typed-answer recall check
+//       shortAnswer: {
+//         prompt: "...",
+//         acceptedAnswers: ["...", "..."],  // matched case-insensitively, trimmed
+//         explanation: "..."
+//       }
+//     },
+//     {
+//       id, title,
+//       type: "ordering",                  // click items into the correct sequence
+//       ordering: {
+//         prompt: "...",
+//         items: ["...", "...", "..."],     // in correct order; shuffled at render time
+//         explanation: "..."
 //       }
 //     }, ...
 //   ]
@@ -211,6 +234,24 @@ function renderPageAt(MODULE, index) {
       </article>
     `;
     wireMatching(MODULE, page, index);
+  } else if (page.type === "shortanswer") {
+    el.innerHTML = `
+      <article class="page-card page-practice">
+        <div class="quiz-label">Check Your Understanding</div>
+        <h2>${page.title}</h2>
+        ${shortAnswerTemplate(page)}
+      </article>
+    `;
+    wireShortAnswer(MODULE, page, index);
+  } else if (page.type === "ordering") {
+    el.innerHTML = `
+      <article class="page-card page-practice">
+        <div class="quiz-label">Put It In Order</div>
+        <h2>${page.title}</h2>
+        ${orderingTemplate(page)}
+      </article>
+    `;
+    wireOrdering(MODULE, page, index);
   }
   window.scrollTo(0, 0);
 
@@ -231,7 +272,8 @@ function renderPageFooterNav(MODULE, index) {
       : "Finish the Curriculum &rarr;";
 
   const page = MODULE.pages[index];
-  const needsAnswer = (page.type === "practice" || page.type === "matching") && !isSectionComplete(MODULE.id, page.id);
+  const gatedTypes = ["practice", "matching", "shortanswer", "ordering"];
+  const needsAnswer = gatedTypes.includes(page.type) && !isSectionComplete(MODULE.id, page.id);
 
   mount.innerHTML = `
     <button type="button" class="btn secondary" data-page-back ${isFirst ? "disabled" : ""}>&larr; Back</button>
@@ -258,15 +300,19 @@ function renderPageFooterNav(MODULE, index) {
 }
 
 // ---------- Practice (multiple-choice) pages ----------
+// `page.question.multi: true` renders checkboxes and requires every correct
+// option checked and no incorrect option checked ("select all that apply").
+// Omit `multi` (or leave false) for the original single-answer radio behavior.
 function quizTemplate(page) {
   const q = page.question;
+  const inputType = q.multi ? "checkbox" : "radio";
   return `
     <div class="quiz-box" data-quiz-for="${page.id}">
       <p class="quiz-question">${q.prompt}</p>
       <div class="quiz-options">
         ${q.options.map((opt, i) => `
           <label class="quiz-option" data-option-index="${i}">
-            <input type="radio" name="quiz-${page.id}" value="${i}">
+            <input type="${inputType}" name="quiz-${page.id}" value="${i}">
             <span>${opt.text}</span>
           </label>
         `).join("")}
@@ -288,21 +334,22 @@ function wireQuiz(MODULE, page, index) {
   const feedback = box.querySelector("[data-feedback]");
   const explanation = box.querySelector("[data-explanation]");
   const options = Array.from(box.querySelectorAll(".quiz-option"));
+  const isMulti = !!page.question.multi;
 
   checkBtn.addEventListener("click", () => {
-    const selected = box.querySelector("input[type=radio]:checked");
-    if (!selected) {
+    const checked = Array.from(box.querySelectorAll(`input[type=${isMulti ? "checkbox" : "radio"}]:checked`));
+    if (!checked.length) {
       feedback.textContent = "Select an answer first.";
       feedback.className = "quiz-feedback incorrect";
       return;
     }
-    const idx = Number(selected.value);
-    const isCorrect = !!page.question.options[idx].correct;
+    const selectedIdxs = new Set(checked.map(el => Number(el.value)));
+    const isCorrect = page.question.options.every((opt, i) => !!opt.correct === selectedIdxs.has(i));
 
     options.forEach((opt, i) => {
       opt.classList.remove("correct", "incorrect");
       if (page.question.options[i].correct) opt.classList.add("correct");
-      else if (i === idx) opt.classList.add("incorrect");
+      else if (selectedIdxs.has(i)) opt.classList.add("incorrect");
     });
 
     feedback.textContent = isCorrect ? "Correct!" : "Not quite — see the explanation below.";
@@ -316,6 +363,121 @@ function wireQuiz(MODULE, page, index) {
       renderPageNavMount(MODULE, index);
       renderPageFooterNav(MODULE, index);
     }
+  });
+}
+
+// ---------- Short-answer pages ----------
+// page.shortAnswer: { prompt, acceptedAnswers: ["...", ...], explanation }
+// Correct if the trimmed, case-insensitive input matches any accepted answer.
+function shortAnswerTemplate(page) {
+  const sa = page.shortAnswer;
+  return `
+    <div class="quiz-box" data-shortanswer-for="${page.id}">
+      <p class="quiz-question">${sa.prompt}</p>
+      <input type="text" class="short-answer-input" data-sa-input placeholder="Type your answer...">
+      <div class="quiz-actions">
+        <button type="button" class="btn small" data-check-btn>Check Answer</button>
+        <span class="quiz-feedback" data-feedback></span>
+      </div>
+      <div class="quiz-explanation" data-explanation>${sa.explanation}</div>
+    </div>
+  `;
+}
+
+function wireShortAnswer(MODULE, page, index) {
+  if (!page.shortAnswer) return;
+  const box = document.querySelector(`.quiz-box[data-shortanswer-for="${page.id}"]`);
+  if (!box) return;
+  const input = box.querySelector("[data-sa-input]");
+  const checkBtn = box.querySelector("[data-check-btn]");
+  const feedback = box.querySelector("[data-feedback]");
+  const explanation = box.querySelector("[data-explanation]");
+  const accepted = page.shortAnswer.acceptedAnswers.map(a => a.trim().toLowerCase());
+
+  checkBtn.addEventListener("click", () => {
+    const answer = input.value.trim();
+    if (!answer) {
+      feedback.textContent = "Type an answer first.";
+      feedback.className = "quiz-feedback incorrect";
+      return;
+    }
+    const isCorrect = accepted.includes(answer.toLowerCase());
+
+    input.classList.remove("correct", "incorrect");
+    input.classList.add(isCorrect ? "correct" : "incorrect");
+    feedback.textContent = isCorrect ? "Correct!" : "Not quite — see the explanation below.";
+    feedback.className = "quiz-feedback " + (isCorrect ? "correct" : "incorrect");
+    explanation.classList.add("show");
+
+    if (isCorrect && !isSectionComplete(MODULE.id, page.id)) {
+      markSectionComplete(MODULE.id, page.id);
+      const meta = MODULES_META.find(m => m.id === MODULE.id);
+      refreshModuleProgressBar(MODULE, meta);
+      renderPageNavMount(MODULE, index);
+      renderPageFooterNav(MODULE, index);
+    }
+  });
+}
+
+// ---------- Ordering pages ----------
+// page.ordering: { prompt, items: ["...", ...] (in correct order), explanation }
+// Items are shuffled for display; clicking them in the correct order locks
+// each one in place with a position badge. A click out of order flashes red
+// and the student tries again — same recovery pattern as the matching page.
+function orderingTemplate(page) {
+  const o = page.ordering;
+  const shuffled = shuffleArray(o.items.map((text, i) => ({ text, correctIndex: i })));
+  return `
+    <p class="quiz-question">${o.prompt}</p>
+    <div class="ordering-box" data-ordering-for="${page.id}">
+      <div class="ordering-list">
+        ${shuffled.map(item => `
+          <button type="button" class="ordering-item" data-correct-index="${item.correctIndex}">${item.text}</button>
+        `).join("")}
+      </div>
+      <p class="ordering-status" data-ordering-status></p>
+      <div class="quiz-explanation" data-explanation>${o.explanation}</div>
+    </div>
+  `;
+}
+
+function wireOrdering(MODULE, page, index) {
+  const box = document.querySelector(`.ordering-box[data-ordering-for="${page.id}"]`);
+  if (!box) return;
+  const total = page.ordering.items.length;
+  const status = box.querySelector("[data-ordering-status]");
+  const explanation = box.querySelector("[data-explanation]");
+  let nextIndex = 0;
+
+  function updateStatus() {
+    status.textContent = nextIndex === total ? "All in order — nice work!" : `${nextIndex}/${total} placed`;
+  }
+  updateStatus();
+
+  box.querySelectorAll(".ordering-item").forEach(btn => {
+    btn.addEventListener("click", () => {
+      if (btn.classList.contains("picked")) return;
+      const correctIndex = Number(btn.dataset.correctIndex);
+      if (correctIndex === nextIndex) {
+        btn.classList.add("picked");
+        btn.insertAdjacentHTML("afterbegin", `<span class="ordering-item-badge">${nextIndex + 1}</span>`);
+        nextIndex++;
+        updateStatus();
+        if (nextIndex === total) {
+          explanation.classList.add("show");
+          if (!isSectionComplete(MODULE.id, page.id)) {
+            markSectionComplete(MODULE.id, page.id);
+            const meta = MODULES_META.find(m => m.id === MODULE.id);
+            refreshModuleProgressBar(MODULE, meta);
+            renderPageNavMount(MODULE, index);
+            renderPageFooterNav(MODULE, index);
+          }
+        }
+      } else {
+        btn.classList.add("wrong");
+        setTimeout(() => btn.classList.remove("wrong"), 450);
+      }
+    });
   });
 }
 

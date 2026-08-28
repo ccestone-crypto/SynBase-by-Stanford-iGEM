@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 8: Ethics and Broader Applications — SynBase</title>
+<link rel="stylesheet" href="../css/style.css?v=72">
+</head>
+<body>
+
+<header class="site-header" id="site-header"></header>
+<section class="module-hero" id="module-hero"></section>
+
+<div class="container narrow">
+  <div class="page-nav-mount" id="page-nav-mount"></div>
+</div>
+<main class="container narrow" id="page-viewport"></main>
+<div class="container narrow">
+  <div class="page-footer-nav" id="page-footer-nav"></div>
+</div>
+
+<script src="../js/modules-meta.js?v=13"></script>
+<script src="../js/progress.js?v=24"></script>
+<script src="../js/quiz-engine.js?v=17"></script>
+<script>
+const MODULE = {
+  id: "module8",
+  number: 8,
+  title: "Ethics and Broader Applications",
+  lede: "We close the curriculum by zooming out one last time — from how synthetic biology works to whether, and how, it should be used, through real cases that ask what responsible bioengineering actually looks like in practice.",
+  pages: [
+    {
+      id: "8.1r", type: "read", title: "Welcome to Ethics and Broader Applications", part: "Part 1: Foundations",
+      html: `
+        <p>Last but certainly not least, let's zoom all the way out again and take a look at the ethics of synthetic biology.</p>
+        <p>This topic sits at the intersection of philosophy, law, biology, medicine, public policy…the list goes on. With bioengineering, the goal is not simply for our work to exist in an isolated lab bubble. We also have to ask ourselves: Should we even do this? And if so, how can we do it responsibly?</p>
+        <p>Before we get into that question, three terms are important to distinguish.</p>
+      `
+    },
+    {
+      id: "8.2m", type: "matching", title: "Biosecurity, Biosafety, and Bioethics", part: "Part 1: Foundations",
+      matching: {
+        instructions: "What are the differences between these three key concepts in biological research? Match each term to its definition.",
+        pairs: [
+          { left: "Biosecurity", right: "Preventing intentional misuse, theft, or unauthorized access to biological materials, technologies, or information" },
+          { left: "Biosafety", right: "Preventing accidental exposure to or release of biological agents" },
+          { left: "Bioethics", right: "Thinking through the ethical, social, and legal questions that arise in biomedicine and biological research" }
+        ]
+      }
+    },
+    {
+      id: "8.3r", type: "read", title: "A Framework for Research Ethics", part: "Part 1: Foundations",
+      html: `
+        <p>This module focuses most closely on bioethics, but as we'll see, these three areas often overlap.</p>
+        <p>There are multiple frameworks that can guide ethical decision-making.</p>
+        <p>A foundational document for human subjects research in the United States is the Belmont Report, published in 1979. It outlines three main principles for thinking about research involving human participants.</p>
+      `
+    },
+    {
+      id: "8.4m", type: "matching", title: "The Belmont Report's Three Principles", part: "Part 1: Foundations",
+      matching: {
+        instructions: "Match each principle to its definition:",
+        pairs: [
+          { left: "Respect for Persons", right: "Allow people to make informed decisions about participation, while providing additional protection to people with diminished autonomy" },
+          { left: "Beneficence", right: "Maximize possible benefits while minimizing possible harms" },
+          { left: "Justice", right: "Fairly distribute the benefits and burdens of research" }
+        ]
+      }
+    },
+    {
+      id: "8.5s", type: "shortanswer", title: "The Belmont Report's Publication Year", part: "Part 1: Foundations",
+      shortAnswer: {
+        prompt: "In what year was the Belmont Report published?",
+        acceptedAnswers: ["1979"],
+        explanation: "The Belmont Report — a foundational document for human subjects research in the United States that outlines the principles of Respect for Persons, Beneficence, and Justice — was published in 1979."
+      }
+    },
+    {
+      id: "8.6r", type: "read", title: "UK Biobank Data Leaks", part: "Part 2: Case Studies in Human Subjects Research",
+      html: `
+        <p>To better understand what these principles mean, let's take a look at some examples.</p>
+        <p>The UK Biobank is a large biomedical database containing health, genetic, and other information from around 500,000 volunteers. Researchers around the world use this data to study human health and disease.</p>
+        <p>In 2026, an investigation found that researchers had accidentally uploaded UK Biobank data to public repositories such as GitHub. One exposed dataset reportedly contained hospital diagnoses and diagnosis dates for about 413,000 participants, along with information including sex and month and year of birth.</p>
+        <p>The Guardian also reported that, with the cooperation of one volunteer, it was able to match that volunteer to records in an exposed dataset using their month and year of birth and information about a major surgery. UK Biobank disputed the broader implication that its participants could readily be reidentified, but acknowledged the data security incidents.</p>
+        <p>A separate incident later involved UK Biobank data being advertised for sale on Alibaba. UK Biobank revoked data access for the institutions involved and temporarily suspended access while additional protections were introduced.</p>
+      `
+    },
+    {
+      id: "8.7p", type: "practice", title: "UK Biobank: Which Principle, and Why?", part: "Part 2: Case Studies in Human Subjects Research",
+      question: {
+        prompt: "Which Belmont principle is most directly involved in the UK Biobank data leaks?",
+        options: [
+          { text: "Respect for Persons", correct: true },
+          { text: "Beneficence", correct: false },
+          { text: "Justice", correct: false }
+        ],
+        explanation: "People who volunteer their health information for research still have interests in how that information is used and protected. Even when identifying information like names is removed, specific health information may have privacy concerns. Consent and privacy are ongoing priorities that do not end after a participant agrees to join a study. Researchers continue to bear responsibility for how data is stored, shared, and protected."
+      }
+    },
+    {
+      id: "8.8r", type: "read", title: "Henrietta Lacks and HeLa Cells", part: "Part 2: Case Studies in Human Subjects Research",
+      html: `
+        <p>Privacy is one part of Respect for Persons. Another is informed consent.</p>
+        <p>In 1951, Henrietta Lacks was a cervical cancer patient at Johns Hopkins Hospital. During her treatment, cells from her tumor were collected and given to researchers without her knowledge or consent.</p>
+        <p>Those cells turned out to be extraordinary. Why? Unlike most human cells researchers had tried to grow at the time, they continued dividing in the laboratory and became the first immortal cell line. They became known as HeLa cells and have since been used extensively in biomedical research.</p>
+        <p>Decades later, researchers sequencing the HeLa genome created another ethical problem. A person's genome can reveal information not only about that individual, but also about their biological relatives. In 2013, the NIH and members of the Lacks family reached an agreement that established controlled access to certain HeLa genome data and gave members of the family a role in reviewing requests for access.</p>
+      `
+    },
+    {
+      id: "8.9p", type: "practice", title: "HeLa Cells: Which Principle(s), and Why?", part: "Part 2: Case Studies in Human Subjects Research",
+      question: {
+        prompt: "Which principle(s) does the original collection and research use of Lacks's cells most clearly raise? Select all that apply.",
+        multi: true,
+        options: [
+          { text: "Respect for Persons", correct: true },
+          { text: "Beneficence", correct: false },
+          { text: "Justice", correct: true }
+        ],
+        explanation: "Respect for Persons is the clearest answer, because Lacks was never given the opportunity to make an informed decision about whether her cells could be used for research. But this case also raises questions of Justice: Who contributes to scientific research? Who benefits from it? Who gets a voice in deciding how biological materials are used?"
+      }
+    },
+    {
+      id: "8.10r", type: "read", title: "The Havasupai Tribe DNA Case", part: "Part 2: Case Studies in Human Subjects Research",
+      html: `
+        <p>Consent can become even more complicated when a participant agrees to one kind of research, but their samples are later used for something else.</p>
+        <p>Beginning in the 1990s, members of the Havasupai Tribe provided blood samples to researchers studying the tribe's high rates of Type 2 diabetes.</p>
+        <p>Tribe members later learned that the samples had also been used in research involving topics such as schizophrenia, migration, and inbreeding. Some of these topics conflicted with cultural beliefs and were outside what many participants understood themselves to have agreed to.</p>
+        <p>The Tribe eventually filed a lawsuit, which was settled in 2010. Among other terms, remaining blood samples were returned to the tribe.</p>
+        <p>This case raises an important question for modern genetic research: If a biological sample can be stored for decades and used to answer questions that do not even exist yet, what exactly should someone be consenting to?</p>
+      `
+    },
+    {
+      id: "8.11p", type: "practice", title: "Havasupai: Which Principles, and Why?", part: "Part 2: Case Studies in Human Subjects Research",
+      question: {
+        prompt: "Which Belmont principles are relevant to the Havasupai Tribe DNA case? Select all that apply.",
+        multi: true,
+        options: [
+          { text: "Respect for Persons", correct: true },
+          { text: "Beneficence", correct: false },
+          { text: "Justice", correct: true }
+        ],
+        explanation: "Respect for Persons is important because participants should understand what they are agreeing to. Justice is also important: ethical research is not simply about getting a signature on a consent form. Researchers also have to consider the interests, values, and perspectives of the communities involved in their research — particularly when those communities have historically had limited control over how research involving them is conducted."
+      }
+    },
+    {
+      id: "8.12r", type: "read", title: "Jesse Gelsinger and Gene Therapy", part: "Part 2: Case Studies in Human Subjects Research",
+      html: `
+        <p>So far, our cases have focused heavily on consent.</p>
+        <p>But after someone does consent to participate, researchers have another major responsibility: minimizing harm.</p>
+        <p>Jesse Gelsinger was an 18-year-old with ornithine transcarbamylase, or OTC, deficiency, a genetic disorder affecting the body's ability to eliminate excess nitrogen.</p>
+        <p>In 1999, he enrolled in an experimental gene-therapy study at the University of Pennsylvania. Researchers used an adenoviral vector to deliver a functional version of the OTC gene. Four days after receiving the treatment, Gelsinger died following a severe immune response to the vector.</p>
+        <p>Investigations after his death raised concerns about the study's oversight and about information from earlier adverse events and animal experiments. His death became a major event in the history of gene-therapy research and research oversight.</p>
+      `
+    },
+    {
+      id: "8.13p", type: "practice", title: "Jesse Gelsinger: Which Principles, and Why?", part: "Part 2: Case Studies in Human Subjects Research",
+      question: {
+        prompt: "Which Belmont principles are relevant to the Jesse Gelsinger case? Select all that apply.",
+        multi: true,
+        options: [
+          { text: "Respect for Persons", correct: true },
+          { text: "Beneficence", correct: true },
+          { text: "Justice", correct: false }
+        ],
+        explanation: "Beneficence is especially important here. Research will always involve some uncertainty. The ethical requirement is not that research can never be risky. Instead, researchers have to carefully evaluate those risks, minimize them where possible, and determine whether they are reasonable given the potential benefits of the research. Respect for Persons matters too: someone cannot make a truly informed decision about participation if important information about the risks of a study is not adequately communicated."
+      }
+    },
+    {
+      id: "8.14r", type: "read", title: "Germline Editing: He Jiankui's CRISPR Babies", part: "Part 3: Case Studies Beyond the Individual Participant",
+      html: `
+        <p>So far, the people affected by our research could at least theoretically be informed about what was happening to them. But what about when the people affected don't yet exist?</p>
+        <p>CRISPR-Cas systems allow scientists to make targeted changes to DNA. Genome editing can occur in ordinary somatic cells, in which case the changes are limited to the treated person.</p>
+        <p>But editing an embryo can potentially change the germline. If an edited embryo develops into a person, some changes may also be present in their reproductive cells and could therefore be passed on to future generations.</p>
+        <p>In 2018, Chinese scientist He Jiankui announced that twin girls had been born following an experiment in which he used CRISPR-Cas9 to edit the CCR5 gene in embryos.</p>
+        <p>His stated goal was to reduce susceptibility to HIV. The experiment received widespread criticism over its scientific justification, risks, informed-consent process, and lack of appropriate oversight.</p>
+        <p>The case also accelerated international discussions around how human genome editing should be governed. The World Health Organization has since issued recommendations addressing oversight, international collaboration, genome-editing registries, public engagement, and mechanisms for identifying unsafe or unethical research.</p>
+      `
+    },
+    {
+      id: "8.15f", type: "freeresponse", title: "What Makes Germline Editing Different?", part: "Part 3: Case Studies Beyond the Individual Participant",
+      freeResponse: {
+        prompt: "What makes germline editing ethically different from editing cells in an individual patient?<br><br>Consider:<ul><li>Who can consent?</li><li>Who experiences the risks?</li><li>Who receives the benefits?</li><li>Could the change be passed on to future generations?</li><li>What happens if an unintended change cannot easily be reversed?</li><li>Who should get to decide when this technology is acceptable?</li></ul>The Belmont Report gives us a framework for thinking about research involving human participants. But synthetic biology can create another kind of problem: What about when the science affects people who never volunteered to participate at all?"
+      }
+    },
+    {
+      id: "8.16r", type: "read", title: "Gain-of-Function Research and H5N1", part: "Part 3: Case Studies Beyond the Individual Participant",
+      html: `
+        <p>H5N1 is an influenza A virus that primarily infects birds, though it can also infect mammals, including humans. In 2012, researchers published experiments studying what changes could make H5N1 more transmissible.</p>
+        <p>Importantly, the experiments did not demonstrate ordinary airborne transmission between humans. Instead, researchers produced an H5N1 virus capable of airborne transmission between ferrets, which are commonly used as an animal model for influenza transmission.</p>
+        <p>Why do an experiment like this?</p>
+        <p>Understanding which mutations make a virus more transmissible could potentially help scientists recognize dangerous variants and prepare for future outbreaks.</p>
+        <p>But creating a pathogen with new capabilities could create risks if it were accidentally released. And detailed knowledge from the experiment could potentially be misused. This is sometimes described as a dual-use problem: scientific work can have legitimate benefits while also creating knowledge, technologies, or materials that could cause harm.</p>
+      `
+    },
+    {
+      id: "8.17p", type: "practice", title: "Areas of Concern in Gain-of-Function Research", part: "Part 3: Case Studies Beyond the Individual Participant",
+      question: {
+        prompt: "Which areas of concern are involved here? Select all that apply.",
+        multi: true,
+        options: [
+          { text: "Biosecurity", correct: true },
+          { text: "Biosafety", correct: true },
+          { text: "Bioethics", correct: true }
+        ],
+        explanation: "All three. Biosafety: How do we prevent accidental exposure or release? Biosecurity: How do we prevent biological materials or information from being deliberately misused? Bioethics: Are the potential benefits of doing the research worth the risks created by doing it?"
+      }
+    },
+    {
+      id: "8.18f", type: "freeresponse", title: "Safeguards for High-Risk Research", part: "Part 3: Case Studies Beyond the Individual Participant",
+      freeResponse: {
+        prompt: "Notice that the Belmont Report is less helpful here.<br><br>There is no single research participant whose autonomy explains the whole problem. Instead, the risks could extend to laboratory workers, surrounding communities, and potentially the broader public.<br><br>Imagine you are responsible for deciding whether a high-risk biological experiment should be allowed to move forward. What safeguards would you require?<br><br>Some things you might consider:<ul><li>Physical containment</li><li>Biological safety mechanisms</li><li>Training requirements</li><li>Independent review</li><li>Restrictions on who can access materials</li><li>Restrictions on sensitive information</li><li>Risk-benefit analysis before the experiment begins</li><li>Plans for responding to an accident</li><li>Reporting and transparency requirements</li></ul>There is no single safeguard that can remove all risk. Instead, biosafety and biosecurity generally rely on layers of protection: laboratory practices, physical containment, institutional oversight, and broader policy."
+      }
+    },
+    {
+      id: "8.19r", type: "read", title: "Gray Areas: CAR-T Cell Therapy", part: "Part 3: Case Studies Beyond the Individual Participant",
+      html: `
+        <p>Not every ethical problem comes from research that went obviously wrong. Sometimes a technology, like CAR-T cell therapy, works extremely well.</p>
+        <p>CAR-T cell therapy is a form of cancer treatment in which a patient's own T cells are collected and genetically engineered to express a chimeric antigen receptor, or CAR.</p>
+        <p>The engineered cells are then expanded and returned to the patient, where the receptor helps them recognize and attack cancer cells. CAR-T therapies are now used for several blood cancers.</p>
+      `
+    },
+    {
+      id: "8.20f", type: "freeresponse", title: "CAR-T: Ethical Gray Areas", part: "Part 3: Case Studies Beyond the Individual Participant",
+      freeResponse: {
+        prompt: "What are some ethical gray areas in CAR-T cell therapy?"
+      }
+    },
+    {
+      id: "8.21r", type: "read", title: "CAR-T: Access and Risk", part: "Part 3: Case Studies Beyond the Individual Participant",
+      html: `
+        <p>Two major areas include:</p>
+        <h4>Access</h4>
+        <p>CAR-T therapy requires highly specialized manufacturing and treatment centers. Studies have found geographic and socioeconomic barriers that can affect who is realistically able to receive these therapies.</p>
+        <p>This brings us back to Justice: If a treatment can save lives, who gets access to it?</p>
+        <h4>Risk</h4>
+        <p>CAR-T therapies can also cause serious side effects, including cytokine release syndrome and neurological toxicities.</p>
+        <p>This brings us back to Beneficence: How much risk is acceptable when the potential benefit is very large?</p>
+      `
+    },
+    {
+      id: "8.22r", type: "read", title: "Who Actually Decides Whether Research Can Happen?", part: "Part 4: Oversight and Governance",
+      html: `
+        <p>So, who actually reviews all of this?</p>
+        <p>The answer depends on what kind of research you are doing, and there is no single committee that decides whether all scientific research is ethical.</p>
+        <p>Different parts of a project can require different forms of oversight.</p>
+      `
+    },
+    {
+      id: "8.23m", type: "matching", title: "Which Committee Reviews Which Research", part: "Part 4: Oversight and Governance",
+      matching: {
+        instructions: "Match the type of research with the committee that would most likely review it:",
+        pairs: [
+          { left: "Institutional Review Board (IRB)", right: "Research involving human participants" },
+          { left: "Institutional Animal Care and Use Committee (IACUC)", right: "Research involving animals" },
+          { left: "Institutional Biosafety Committee (IBC)", right: "Certain research involving recombinant or synthetic nucleic acids and associated biological risks" }
+        ]
+      }
+    },
+    {
+      id: "8.24r", type: "read", title: "Institutional Review Boards", part: "Part 4: Oversight and Governance",
+      html: `
+        <p>If you are conducting research involving human participants, you may need review from an Institutional Review Board, or IRB. The purpose of an IRB is to protect the rights and welfare of people participating in research.</p>
+        <p>Under U.S. federal regulations, an IRB must have at least five members with different backgrounds. It must include:</p>
+        <ul>
+          <li>At least one member whose primary concerns are scientific</li>
+          <li>At least one member whose primary concerns are nonscientific</li>
+          <li>At least one member who is not affiliated with the institution</li>
+        </ul>
+        <p>Researchers may need to submit information including:</p>
+        <ul>
+          <li>Their research plan</li>
+          <li>Potential risks and benefits</li>
+          <li>Recruitment plans</li>
+          <li>Privacy protections</li>
+          <li>Informed-consent materials</li>
+        </ul>
+        <p>The exact requirements depend on the research being conducted.</p>
+        <p>So if you wanted to interview patients, collect identifiable information from participants, or conduct a clinical study, the IRB might become an important part of your project.</p>
+      `
+    },
+    {
+      id: "8.25r", type: "read", title: "Institutional Animal Care and Use Committees", part: "Part 4: Oversight and Governance",
+      html: `
+        <p>What if your experiment involves animals instead?</p>
+        <p>Research institutions covered by U.S. Public Health Service policy use an Institutional Animal Care and Use Committee, or IACUC, to oversee animal care and use.</p>
+        <p>The committee reviews animal research protocols and oversees the institution's animal program and facilities.</p>
+        <p>Under PHS policy, an IACUC includes members with different perspectives, including a veterinarian, a scientist experienced in animal research, a nonscientist, and someone unaffiliated with the institution.</p>
+        <p>Researchers also have responsibilities for minimizing unnecessary animal pain and distress and maintaining appropriate care and facilities.</p>
+      `
+    },
+    {
+      id: "8.26r", type: "read", title: "Institutional Biosafety Committees", part: "Part 4: Oversight and Governance",
+      html: `
+        <p>And finally, what if you are engineering DNA?</p>
+        <p>The NIH Guidelines for Research Involving Recombinant or Synthetic Nucleic Acid Molecules establish safety and containment practices for covered research involving recombinant or synthetic nucleic acids.</p>
+        <p>An Institutional Biosafety Committee, or IBC, reviews research covered by those guidelines and evaluates factors such as biological risk, containment, facilities, and research procedures.</p>
+        <p>An IBC includes expertise in areas such as recombinant or synthetic nucleic-acid technology and biological safety, along with representation of the surrounding community. The specific expertise required can change depending on the type of research an institution conducts.</p>
+        <p>These committees are not interchangeable.</p>
+      `
+    },
+    {
+      id: "8.27m", type: "matching", title: "Committees Across a Project's Lifecycle", part: "Part 4: Oversight and Governance",
+      matching: {
+        instructions: "Imagine you're developing an immune cell therapy where you: 1) genetically modify human cells, 2) test the therapy in mice, then 3) begin a clinical trial in humans. Which committee might be involved at each step? Match each step to the committee:",
+        pairs: [
+          { left: "Genetic engineering and biosafety", right: "IBC" },
+          { left: "Animal experiments", right: "IACUC" },
+          { left: "Human clinical trial", right: "IRB" }
+        ]
+      }
+    },
+    {
+      id: "8.28r", type: "read", title: "FDA Oversight of Clinical Trials", part: "Part 4: Oversight and Governance",
+      html: `
+        <p>Depending on the product being tested, a human clinical trial may also require oversight from the Food and Drug Administration, or FDA. For example, an Investigational New Drug application includes information about proposed clinical protocols and commitments to obtain informed consent and IRB review.</p>
+      `
+    },
+    {
+      id: "8.29r", type: "read", title: "Who Decides What Research Gets Funded?", part: "Part 4: Oversight and Governance",
+      html: `
+        <p>Approval is also different from funding.</p>
+        <p>A project may be ethically acceptable but never receive the money needed to conduct it.</p>
+        <p>In the United States, different federal agencies fund research according to different missions. For example:</p>
+        <ul>
+          <li>The National Institutes of Health, or NIH, is a major funder of biomedical and health research.</li>
+          <li>The National Science Foundation, or NSF, funds research and education across science and engineering.</li>
+          <li>The Department of Defense, or DoD, funds basic and applied research relevant to defense and national-security priorities.</li>
+          <li>The Department of Energy, or DOE, supports research across areas including energy, computing, physical science, biology, and environmental systems.</li>
+        </ul>
+        <p>Getting funded and getting ethical approval aren't the same. A grant review asks whether a project is worth supporting, while an IRB, IACUC, IBC, or regulatory agency may be asking a very different question about whether and under what conditions that research can actually be conducted.</p>
+      `
+    },
+    {
+      id: "8.30m", type: "matching", title: "Other Rules That Shape Research", part: "Part 4: Oversight and Governance",
+      matching: {
+        instructions: "Committees are also not the only form of oversight. Depending on what you are doing, researchers may have to follow different laws, regulations, and federal policies. Match each rule to its definition:",
+        pairs: [
+          { left: "HIPAA Privacy Rule", right: "Protects certain individually identifiable health information" },
+          { left: "Animal Welfare Act", right: "Establishes minimum standards for the care and treatment of certain animals used in research and other covered activities" },
+          { left: "NIH Guidelines for Research Involving Recombinant or Synthetic Nucleic Acid Molecules", right: "Establishes biosafety and containment requirements for covered recombinant and synthetic nucleic-acid research" },
+          { left: "FDA regulations", right: "Regulates clinical investigations involving medical products under FDA jurisdiction" }
+        ]
+      }
+    },
+    {
+      id: "8.31r", type: "read", title: "Putting It All Together", part: "Part 5: Conclusion",
+      html: `
+        <p>At the beginning of this module, we separated three ideas:</p>
+        <ul>
+          <li>Biosafety: Could something go wrong accidentally?</li>
+          <li>Biosecurity: Could someone deliberately misuse this?</li>
+          <li>Bioethics: Even if we can do something, should we?</li>
+        </ul>
+        <p>But hopefully by now, it is also clear that these questions are not completely separate.</p>
+        <p>A single synthetic biology project might raise questions about:</p>
+        <ul>
+          <li>Informed consent</li>
+          <li>Privacy</li>
+          <li>Risk and benefit</li>
+          <li>Fair access</li>
+          <li>Effects on future generations</li>
+          <li>Accidental release</li>
+          <li>Deliberate misuse</li>
+          <li>Animal welfare</li>
+          <li>Who should have a voice in making decisions</li>
+        </ul>
+        <p>And importantly, ethics is not something that gets added to a project after the science is finished. The decisions you make about what problem to solve, who participates, how you design an experiment, what risks you accept, how you handle data, and who ultimately has access to the technology are already ethical decisions.</p>
+      `
+    },
+    {
+      id: "8.32f", type: "freeresponse", title: "Closing Reflection", part: "Part 5: Conclusion",
+      freeResponse: {
+        prompt: "Imagine your team has developed a new synthetic biology technology. Before moving forward, what questions would you want your team to answer?<br><br>Consider:<ul><li>Who could benefit?</li><li>Who could be harmed?</li><li>Who is taking on the risks?</li><li>Who has the ability to consent?</li><li>Who might be affected without consenting?</li><li>Who will actually have access to the technology?</li><li>What could happen accidentally?</li><li>How could the technology be deliberately misused?</li><li>Who should have a voice in deciding whether the project moves forward?</li></ul>"
+      }
+    }
+  ]
+};
+
+(async () => {
+  const user = await bootstrapAuthAndProgress(false);
+  if (!user) return;
+  renderModulePage(MODULE);
+})();
+</script>
+</body>
+</html>
