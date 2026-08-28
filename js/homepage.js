@@ -14,7 +14,12 @@ const ICONS = {
 
 function renderCourseHeader(mountEl) {
   const overall = overallProgress();
-  const totalLessons = MODULES_META.reduce((sum, m) => sum + m.sectionCount, 0);
+  // Module 0 is a short intro, not one of the "8 modules" the rest of the
+  // site advertises (home.html, curriculum.html) — exclude it here so this
+  // count stays consistent with those. Topic count matches home.html's
+  // calculation too: distinct COURSE_OUTLINE topics, not raw page count.
+  const builtModuleCount = MODULES_META.filter(m => m.number > 0).length;
+  const totalTopics = MODULES_META.reduce((sum, m) => sum + (COURSE_OUTLINE[m.id] || []).length, 0);
 
   if (!MODULES_META.length) {
     mountEl.innerHTML = `
@@ -40,7 +45,7 @@ function renderCourseHeader(mountEl) {
         <h1>Curriculum</h1>
         <img class="page-hero-mascot" src="assets/img/site/Mascot Panels - transparent bg/105-coding.png" alt="">
       </div>
-      <div class="course-meta">${MODULES_META.length} MODULES &middot; ${totalLessons} LESSONS &middot; ${overall.pct}% COMPLETE</div>
+      <div class="course-meta">${builtModuleCount} MODULES &middot; ${totalTopics} TOPICS &middot; ${overall.pct}% COMPLETE</div>
       <p class="course-intro">A self-paced curriculum adapted from Stanford iGEM's SiBRP program. Work through iGEM, bioengineering, cells, DNA, and engineering applications — one lesson at a time.</p>
       <div class="jump-row">
         <div class="jump-pills">

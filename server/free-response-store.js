@@ -16,14 +16,18 @@ async function getResponse(userId, moduleId, sectionId) {
   return row ? { answer: row.answer, updatedAt: row.updated_at } : null;
 }
 
-// Anonymous by design — no userId/name in the result. Ordered chronologically
-// like a discussion thread; capped defensively since this is unpaginated.
+// Anonymous by design — no userId/name in the result. Shows only the most
+// recent handful (most recent first) rather than every response ever posted
+// to a section — this board isn't paginated, and a section that's been live
+// a while could otherwise return hundreds of entries.
+const RECENT_RESPONSE_LIMIT = 3;
+
 async function listAnswersForSection(moduleId, sectionId) {
   const rows = unwrap(await db.from("free_responses")
     .select("answer,updated_at")
     .eq("module_id", moduleId).eq("section_id", sectionId)
-    .order("updated_at", { ascending: true })
-    .limit(200));
+    .order("updated_at", { ascending: false })
+    .limit(RECENT_RESPONSE_LIMIT));
   return rows.map(r => ({ answer: r.answer, updatedAt: r.updated_at }));
 }
 

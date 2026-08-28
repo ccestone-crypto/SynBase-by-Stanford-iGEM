@@ -82,7 +82,7 @@ function renderModulePage(MODULE) {
   renderModuleHero(MODULE, meta);
 
   CURRENT_PAGE_INDEX = resolveStartPageIndex(MODULE);
-  renderPageAt(MODULE, CURRENT_PAGE_INDEX);
+  renderPageAt(MODULE, CURRENT_PAGE_INDEX, true);
 
   document.title = `${MODULE.title} — SynBase`;
 }
@@ -192,7 +192,12 @@ function renderPageNavMount(MODULE, index) {
 }
 
 // ---------- Page body (one page visible at a time) ----------
-function renderPageAt(MODULE, index) {
+// `isInitial` is true only for a module's very first render (a fresh page
+// load) — that one scrolls to the very top so the module hero is visible.
+// Every subsequent page change (Continue/Back/dot click) scrolls to the page
+// content instead of the document top, so the hero (title, lede, progress
+// bar) doesn't force a full re-scroll on every single page turn.
+function renderPageAt(MODULE, index, isInitial = false) {
   CURRENT_PAGE_INDEX = index;
   const page = MODULE.pages[index];
   history.replaceState(null, "", `#page-${page.id}`);
@@ -253,9 +258,82 @@ function renderPageAt(MODULE, index) {
     `;
     wireOrdering(MODULE, page, index);
   }
-  window.scrollTo(0, 0);
+
+  if (isInitial) {
+    window.scrollTo(0, 0);
+  } else {
+    const navMount = document.getElementById("page-nav-mount");
+    const headerEl = document.getElementById("site-header");
+    const headerH = headerEl ? headerEl.offsetHeight : 0;
+    const top = navMount.getBoundingClientRect().top + window.scrollY - headerH - 12;
+    window.scrollTo({ top: Math.max(top, 0) });
+  }
 
   renderPageFooterNav(MODULE, index);
+}
+
+// Smaller, self-contained version of congratulations.html's confetti burst —
+// a quick celebratory moment on a module's last page, not tied to progress
+// or navigation in any way. Builds and tears down its own canvas each call.
+function runMiniConfetti() {
+  if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+  const canvas = document.createElement("canvas");
+  canvas.className = "mini-confetti-canvas";
+  document.body.appendChild(canvas);
+  const ctx = canvas.getContext("2d");
+  const colors = ["#0f5f38", "#7851b3", "#2f8fd6", "#e85fac", "#f2b93d"];
+  const COUNT = 60;
+  const GRAVITY = 0.12;
+  const DURATION = 2200;
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener("resize", resize);
+
+  const pieces = Array.from({ length: COUNT }, () => ({
+    x: Math.random() * canvas.width,
+    y: -20 - Math.random() * canvas.height * 0.3,
+    w: 5 + Math.random() * 4,
+    h: 7 + Math.random() * 6,
+    color: colors[Math.floor(Math.random() * colors.length)],
+    rotation: Math.random() * Math.PI * 2,
+    rotationSpeed: (Math.random() - 0.5) * 0.25,
+    vx: (Math.random() - 0.5) * 3,
+    vy: 2 + Math.random() * 3
+  }));
+
+  const start = performance.now();
+
+  function frame(now) {
+    const elapsed = now - start;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    pieces.forEach(p => {
+      p.vy += GRAVITY * 0.05;
+      p.x += p.vx;
+      p.y += p.vy;
+      p.rotation += p.rotationSpeed;
+
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rotation);
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+      ctx.restore();
+    });
+
+    if (elapsed < DURATION) {
+      requestAnimationFrame(frame);
+    } else {
+      window.removeEventListener("resize", resize);
+      canvas.remove();
+    }
+  }
+  requestAnimationFrame(frame);
 }
 
 function renderPageFooterNav(MODULE, index) {
@@ -272,17 +350,20 @@ function renderPageFooterNav(MODULE, index) {
       : "Finish the Curriculum &rarr;";
 
   const page = MODULE.pages[index];
-  const gatedTypes = ["practice", "matching", "shortanswer", "ordering"];
+  const gatedTypes = ["practice", "matching", "shortanswer", "ordering", "freeresponse"];
   const needsAnswer = gatedTypes.includes(page.type) && !isSectionComplete(MODULE.id, page.id);
 
   mount.innerHTML = `
     <button type="button" class="btn secondary" data-page-back ${isFirst ? "disabled" : ""}>&larr; Back</button>
+    ${isLast ? `<button type="button" class="btn secondary celebrate-btn" data-celebrate-btn title="Celebrate!">🎉</button>` : ""}
     <button type="button" class="btn" data-page-continue ${needsAnswer ? "disabled" : ""} ${needsAnswer ? 'title="Answer the question correctly to continue"' : ""}>${continueLabel}</button>
   `;
 
   mount.querySelector("[data-page-back]").addEventListener("click", () => {
     if (!isFirst) renderPageAt(MODULE, index - 1);
   });
+  const celebrateBtn = mount.querySelector("[data-celebrate-btn]");
+  if (celebrateBtn) celebrateBtn.addEventListener("click", () => runMiniConfetti());
   mount.querySelector("[data-page-continue]").addEventListener("click", async () => {
     let syncPromise = null;
     if (page.type === "read" && !isSectionComplete(MODULE.id, page.id)) {
@@ -354,22 +435,27 @@ function wireQuiz(MODULE, page, index) {
     const selectedIdxs = new Set(checked.map(el => Number(el.value)));
     const isCorrect = page.question.options.every((opt, i) => !!opt.correct === selectedIdxs.has(i));
 
-    options.forEach((opt, i) => {
-      opt.classList.remove("correct", "incorrect");
-      if (page.question.options[i].correct) opt.classList.add("correct");
-      else if (selectedIdxs.has(i)) opt.classList.add("incorrect");
-    });
+    options.forEach((opt, i) => opt.classList.remove("correct", "incorrect"));
 
-    feedback.textContent = isCorrect ? "Correct!" : "Not quite — see the explanation below.";
-    feedback.className = "quiz-feedback " + (isCorrect ? "correct" : "incorrect");
-    explanation.classList.add("show");
+    if (isCorrect) {
+      // Only reveal which option(s) were right once the student actually
+      // picked them — never highlight the correct answer on a wrong attempt.
+      options.forEach((opt, i) => { if (selectedIdxs.has(i)) opt.classList.add("correct"); });
+      feedback.textContent = "Correct!";
+      feedback.className = "quiz-feedback correct";
+      explanation.classList.add("show");
 
-    if (isCorrect && !isSectionComplete(MODULE.id, page.id)) {
-      markSectionComplete(MODULE.id, page.id);
-      const meta = MODULES_META.find(m => m.id === MODULE.id);
-      refreshModuleProgressBar(MODULE, meta);
-      renderPageNavMount(MODULE, index);
-      renderPageFooterNav(MODULE, index);
+      if (!isSectionComplete(MODULE.id, page.id)) {
+        markSectionComplete(MODULE.id, page.id);
+        const meta = MODULES_META.find(m => m.id === MODULE.id);
+        refreshModuleProgressBar(MODULE, meta);
+        renderPageNavMount(MODULE, index);
+        renderPageFooterNav(MODULE, index);
+      }
+    } else {
+      options.forEach((opt, i) => { if (selectedIdxs.has(i)) opt.classList.add("incorrect"); });
+      feedback.textContent = "Not quite — try again.";
+      feedback.className = "quiz-feedback incorrect";
     }
   });
 }
@@ -585,7 +671,7 @@ function freeResponseTemplate(page) {
         <span class="free-response-status" data-fr-status></span>
       </div>
       <div class="discussion-board" data-fr-board>
-        <div class="discussion-board-label">Class Responses</div>
+        <div class="discussion-board-label">Recent Class Responses</div>
         <div class="discussion-board-list" data-fr-board-list></div>
       </div>
     </div>
@@ -673,6 +759,7 @@ function wireFreeResponse(MODULE, page, index) {
         const meta = MODULES_META.find(m => m.id === MODULE.id);
         refreshModuleProgressBar(MODULE, meta);
         renderPageNavMount(MODULE, index);
+        renderPageFooterNav(MODULE, index);
       }
     } catch (err) {
       status.textContent = err.message || "Couldn't post your response. Please try again.";
