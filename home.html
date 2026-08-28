@@ -90,11 +90,11 @@
     </div>
     <div class="step-row">
       <div class="step-icon chip-green">
-        <svg viewBox="0 0 20 20" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="7.5" y="2.5" width="5" height="9" rx="2.5"/><path d="M4.5 9.5a5.5 5.5 0 0 0 11 0"/><path d="M10 15v2.5M7 17.5h6"/></svg>
+        <svg viewBox="0 0 20 20" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5l7 3.5 7-3.5"/><path d="M3 14l7 3.5 7-3.5"/><path d="M10 3l7 3.5-7 3.5-7-3.5z"/><path d="M14 13v-4"/></svg>
       </div>
       <div class="step-copy">
-        <h3>4. Hear from guest speakers</h3>
-        <p>Sessions close with a talk from a working researcher, connecting the curriculum to science happening today.</p>
+        <h3>4. Track your progress</h3>
+        <p>Finishing a module unlocks the next one, and your progress follows you across every session until you reach the end.</p>
       </div>
     </div>
   </div>
@@ -122,7 +122,7 @@
     <div class="trial-copy">
       <p class="about-eyebrow">Example Question</p>
       <h2>Try a real lesson question right now</h2>
-      <p>This is an actual understanding check from Module 1. Each module has questions like this one!</p>
+      <p>Based on a core idea from Module 1. Each module has understanding checks like this one throughout.</p>
       <a class="btn" href="signup.html">Start Module 1</a>
     </div>
     <div class="quiz-box" id="trial-quiz"></div>
@@ -181,27 +181,38 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 
-const MODULE_ICONS = [
-  `<svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="10" cy="10" r="7"/><circle cx="10" cy="10" r="2.2" fill="currentColor" stroke="none"/></svg>`,
-  `<svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M6 3 Q13 6.5 6 10 Q-1 13.5 6 17"/><path d="M14 3 Q7 6.5 14 10 Q21 13.5 14 17"/></svg>`,
-  `<svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3h4"/><path d="M9 3v5.5L4.8 15a1.5 1.5 0 0 0 1.3 2.3h7.8a1.5 1.5 0 0 0 1.3-2.3L11 8.5V3"/></svg>`,
-  `<svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="10" r="6"/><path d="M2 10h6M12 7l4 3-4 3"/></svg>`,
-  `<svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="8"/><path d="M6.5 10.2l2.4 2.4 4.6-5"/></svg>`
-];
-const EXPLORE_TINTS = ["green", "purple", "blue"];
 const ARROW_ICON = `<svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 15L15 5M7 5h8v8"/></svg>`;
 
-function renderExploreGrid(mountEl) {
-  if (!MODULES_META.length) {
-    mountEl.innerHTML = `<div class="explore-empty">New modules are on the way — check back soon.</div>`;
-    return;
+// Three broad categories spanning the curriculum, not a card per module —
+// keeps this section skimmable as the module count grows.
+const EXPLORE_CATEGORIES = [
+  {
+    tint: "green",
+    icon: `<svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="10" cy="10" r="7"/><circle cx="10" cy="10" r="2.2" fill="currentColor" stroke="none"/></svg>`,
+    title: "Foundations",
+    description: "What Stanford iGEM and synthetic biology are, how bioengineers think, and the core cell and DNA biology everything else builds on."
+  },
+  {
+    tint: "purple",
+    icon: `<svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M6 3 Q13 6.5 6 10 Q-1 13.5 6 17"/><path d="M14 3 Q7 6.5 14 10 Q21 13.5 14 17"/></svg>`,
+    title: "Design & Engineering",
+    description: "Go from an open research question to a real genetic circuit and plasmid design, then walk through the wet-lab workflow that turns it into results."
+  },
+  {
+    tint: "blue",
+    icon: `<svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="8"/><path d="M6.5 10.2l2.4 2.4 4.6-5"/></svg>`,
+    title: "Beyond the Bench",
+    description: "See how synthetic biology becomes a real venture — intellectual property, funding, and the ethical questions that shape what gets built."
   }
-  mountEl.innerHTML = MODULES_META.map((m, i) => `
-    <a class="explore-card tint-${EXPLORE_TINTS[i % EXPLORE_TINTS.length]}" href="signup.html">
+];
+
+function renderExploreGrid(mountEl) {
+  mountEl.innerHTML = EXPLORE_CATEGORIES.map(c => `
+    <a class="explore-card tint-${c.tint}" href="signup.html">
       <span class="explore-card-arrow">${ARROW_ICON}</span>
-      <div class="explore-card-icon">${MODULE_ICONS[i % MODULE_ICONS.length]}</div>
-      <h3>${escapeHtml(m.title)}</h3>
-      <p>${escapeHtml(m.description)}</p>
+      <div class="explore-card-icon">${c.icon}</div>
+      <h3>${escapeHtml(c.title)}</h3>
+      <p>${escapeHtml(c.description)}</p>
     </a>
   `).join("");
 }
@@ -214,16 +225,18 @@ function renderCurriculumStats() {
   document.getElementById("stat-lessons").textContent = lessonCount;
 }
 
-// Real question from Module 1 — kept in sync by hand since this is just a preview copy.
+// Representative of the biology-vs-engineering distinction Module 1 opens
+// with — kept in sync by hand since this is just a preview copy, not pulled
+// live from a real module page.
 const TRIAL_QUESTION = {
-  prompt: "\"Prometheus: a large language model for synthetic biology\" (NJU, 2024) belongs to which iGEM village?",
+  prompt: "Which of these is an example of synthetic biology?",
   options: [
-    { text: "Space", correct: false },
-    { text: "Software & AI", correct: true },
-    { text: "Biomanufacturing", correct: false },
-    { text: "Foundational Advance", correct: false }
+    { text: "Cross-breeding two plant varieties for a better crop yield", correct: false },
+    { text: "Engineering E. coli to produce human insulin", correct: true },
+    { text: "Observing how a bacterial population naturally resists an antibiotic", correct: false },
+    { text: "Sequencing an organism's genome to identify its species", correct: false }
   ],
-  explanation: "Prometheus is a large language model project, which falls under the Software & AI village — one of the five villages in iGEM's Advancements area."
+  explanation: "Synthetic biology is about deliberately redesigning an organism to do something new and useful — like engineering E. coli to manufacture human insulin, which is how most insulin is actually produced today. The other options are examples of observation, classification, or traditional breeding, not engineering."
 };
 
 function renderTrialQuiz(mountEl) {
