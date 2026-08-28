@@ -446,16 +446,16 @@ a:hover { text-decoration: underline; }
 .module-hero {
   background: #fff;
   border-bottom: 1px solid var(--border);
-  padding: 26px 24px 22px;
+  padding: 16px 24px 14px;
   position: relative;
 }
-.breadcrumb { font-size: 0.82rem; color: var(--ink-soft); margin-bottom: 8px; }
-.module-hero h1 { margin: 0 0 8px; font-size: 1.8rem; font-weight: 800; letter-spacing: -0.6px; color: var(--charcoal); }
-.module-hero .module-chip-row { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
-.module-hero .lede { color: var(--ink-soft); max-width: 700px; margin: 0 0 14px; }
+.breadcrumb { font-size: 0.78rem; color: var(--ink-soft); margin-bottom: 6px; }
+.module-hero h1 { margin: 0 0 6px; font-size: 1.4rem; font-weight: 800; letter-spacing: -0.5px; color: var(--charcoal); }
+.module-hero .module-chip-row { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+.module-hero .lede { color: var(--ink-soft); max-width: 700px; margin: 0 0 10px; font-size: 0.88rem; }
 .module-progress-bar-wrap { display: flex; align-items: center; gap: 14px; max-width: 520px; }
-.module-progress-bar-wrap .progress-track { flex: 1; height: 12px; }
-.module-progress-bar-wrap .pct { font-weight: 700; font-size: 0.9rem; min-width: 70px; }
+.module-progress-bar-wrap .progress-track { flex: 1; height: 10px; }
+.module-progress-bar-wrap .pct { font-weight: 700; font-size: 0.85rem; min-width: 60px; }
 
 .video-block {
   background: var(--card);
@@ -517,6 +517,7 @@ a:hover { text-decoration: underline; }
 .page-dot.done { background: var(--syn-green); }
 .page-dot.current { background: var(--syn-purple); width: 15px; height: 15px; }
 
+#page-viewport { scroll-margin-top: 80px; }
 .page-card {
   background: #fff;
   border: 1px solid var(--border);
@@ -730,6 +731,21 @@ a:hover { text-decoration: underline; }
   font-size: 0.82rem;
   color: var(--ink-soft);
   margin: -8px 0 14px;
+}
+
+/* ---------- Raw sequence display (Module 4 TATA-box activity, etc.) ---------- */
+.sequence-block {
+  display: block;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  word-break: break-all;
+  background: #f4f4f2;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin: 10px 0;
+  color: var(--ink);
 }
 
 /* ---------- Short-answer ---------- */
@@ -1426,7 +1442,10 @@ a:hover { text-decoration: underline; }
   pointer-events: none;
   z-index: 500;
 }
-.celebrate-btn { font-size: 1.1rem; line-height: 1; padding: 8px 14px; }
+.celebration-card { text-align: center; padding: 48px 28px; }
+.celebration-mascot { height: 130px; width: auto; margin: 0 auto 18px; display: block; }
+.celebration-card h2 { font-size: 1.6rem; margin: 0 0 8px; }
+.celebration-card p { color: var(--ink-soft); margin: 0 0 22px; }
 
 /* ---------- Landing hero (split layout, about.html) ---------- */
 /* ---------- Centered hero variant (Stanford iGEM Team page) ---------- */

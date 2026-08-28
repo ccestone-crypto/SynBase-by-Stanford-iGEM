@@ -42,7 +42,7 @@ const MODULES_META = [
     title: "Genetic Circuit Design",
     description: "The DNA parts that make up a genetic circuit — promoters, terminators, and translation initiation sequences — plus logic gates, activators, repressors, and feedback loops.",
     href: "modules/module4.html",
-    sectionCount: 27
+    sectionCount: 28
   },
   {
     id: "module5",
@@ -74,6 +74,6 @@ const MODULES_META = [
     title: "Ethics and Broader Applications",
     description: "The ethics of synthetic biology — biosafety, biosecurity, and bioethics — through real case studies, plus who actually reviews and funds research.",
     href: "modules/module8.html",
-    sectionCount: 32
+    sectionCount: 34
   }
 ];

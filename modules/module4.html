@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Module 4: Genetic Circuit Design — SynBase</title>
-<link rel="stylesheet" href="../css/style.css?v=74">
+<link rel="stylesheet" href="../css/style.css?v=76">
 </head>
 <body>
 
@@ -19,9 +19,9 @@
   <div class="page-footer-nav" id="page-footer-nav"></div>
 </div>
 
-<script src="../js/modules-meta.js?v=14"></script>
+<script src="../js/modules-meta.js?v=16"></script>
 <script src="../js/progress.js?v=25"></script>
-<script src="../js/quiz-engine.js?v=19"></script>
+<script src="../js/quiz-engine.js?v=29"></script>
 <script>
 const PART1 = "Part 1: Components that Determine Transcription";
 const PART2 = "Part 2: Components that Determine Translation";
@@ -63,8 +63,7 @@ const MODULE = {
           <li><strong>High GC content</strong> (eukaryotic): promoter regions rich in CpG sites (a C followed by a G) tend to be easier for transcription factors to bind, since they're less likely to be tightly packaged with histones. Bacterial promoters tend to run the opposite way — higher AT content, lower GC content.</li>
         </ul>
         <img class="topic-image" src="../assets/img/curriculum/module4_promoter_motifs.png" alt="Motifs of promoters: the TATA box (eukaryotic, usually 35 bases upstream), the Pribnow box (bacterial, usually 10 bases upstream), and high GC content (eukaryotic) shown with diagrams of RNA polymerase binding and CpG site frequency">
-        <p>A real, commonly used mammalian promoter is the CMV promoter — you'll work with it again in Module 5, and you'll get to examine a real promoter sequence yourself in the activity below.</p>
-        <img class="topic-image" src="../assets/img/curriculum/module4_cmv_promoter_sequence.png" alt="A real CMV promoter DNA sequence from Addgene, with the TATA box highlighted in red near the end of the sequence">
+        <p>A real, commonly used mammalian promoter is the CMV promoter — you'll work with it again in Module 5. Next, you'll get to examine a real CMV promoter sequence yourself and find its TATA box.</p>
       `
     },
     {
@@ -76,20 +75,38 @@ const MODULE = {
       }
     },
     {
-      id: "4.5p", type: "practice", part: PART1, title: "Practice: Identifying Bacterial Promoters",
-      question: {
-        prompt: "Which of the following is not known to be a bacterial promoter?",
-        options: [
-          { text: "lac", correct: false },
-          { text: "tac", correct: false },
-          { text: "BAD", correct: false },
-          { text: "CMV", correct: true }
-        ],
-        explanation: "lac, tac, and BAD are all common bacterial promoters. CMV is a mammalian promoter — you'll see it again in Module 5 when we build a real plasmid."
+      id: "4.5s", type: "shortanswer", part: PART1, title: "Activity: Find the TATA Box",
+      shortAnswer: {
+        prompt: "Below is a real CMV promoter sequence from Addgene — the same promoter you'll see again on real plasmids in Module 5. Skim through it and find the TATA box.<br><br><span class=\"sequence-block\">CGTTACATAACTTACGGTAAATGGCCCGCCTGGCTGACCGCCCAACGACCCCCGCCCATTGACGTCAATAATGACGTATGTTCCCATAGTAACGCCAATAGGGACTTTCCATTGACGTCAATGGGTGGAGTATTTACGGTAAACTGCCCACTTGGCAGTACATCAAGTGTATCATATGCCAAGTACGCCCCCTATTGACGTCAATGACGGTAAATGGCCCGCCTGGCATTATGCCCAGTACATGACCTTATGGGACTTTCCTACTTGGCAGTACATCTACGTATTAGTCATCGCTATTACCATGGTGATGCGGTTTTGGCAGTACATCAATGGGCGTGGATAGCGGTTTGACTCACGGGGATTTCCAAGTCTCCACCCCATTGACGTCAATGGGAGTTTGTTTTGGCACCAAAATCAACGGGACTTTCCAAAATGTCGTAACAACTCCGCCCCATTGACGCAAATGGGCGGTAGGCGTGTACGGTGGGAGGTCTATATAAGCAGAGCT</span><br><br>Type the 7-base TATA box motif you found (it should closely match the consensus sequence from the previous page).",
+        acceptedAnswers: ["TATATAA"],
+        explanation: "The TATA box sits right near the end of the sequence: ...GGTGGGAGGTC<strong>TATATAA</strong>GCAGAGCT — just upstream of where transcription actually starts, exactly where the consensus sequence predicts it should be."
       }
     },
     {
-      id: "4.6p", type: "practice", part: PART1, title: "Practice: Eukaryotic Promoter Motifs",
+      id: "4.6r", type: "read", part: PART1, title: "Terminator Motifs",
+      html: `
+        <p>Terminators have their own motifs, too:</p>
+        <ul>
+          <li><strong>Polyadenylation signal</strong> (eukaryotic): AATAAA in DNA (AAUAAA in RNA); a protein complex called CPSF binds here and cleaves the RNA.</li>
+          <li><strong>Hairpin</strong> (bacterial): the newly made RNA folds back on itself, physically blocking RNA polymerase and stopping transcription.</li>
+        </ul>
+        <img class="topic-image" src="../assets/img/curriculum/module4_terminator_motifs.png" alt="Motifs of terminators: the polyadenylation signal (eukaryotic), showing RNA polymerase cleavage and poly-A tail addition, and the hairpin (bacterial), showing RNA folding back on itself">
+        <p>A common real mammalian terminator is the SV40 poly(A) signal — you'll see it again when we design plasmids in Module 5.</p>
+      `
+    },
+    {
+      id: "4.7r", type: "read", part: PART1, title: "Promoters and Terminators by Cell Type",
+      html: `
+        <p>Now that you've seen what promoters and terminators look like, here's a reference list you'll come back to when you start designing your own plasmid in Module 5:</p>
+        <ul>
+          <li><strong>Promoters</strong> — Bacterial: lac, tac, BAD. Plant: CaMV, Ubi, NOS. Mammalian: CMV, EF-1alpha, TRE.</li>
+          <li><strong>Terminators</strong> — Bacterial: T7, tonB. Plant: NOS, CaMV 35S. Mammalian: poly-A signals like bGH (Bovine Growth Hormone) and SV40.</li>
+        </ul>
+        <img class="topic-image" src="../assets/img/curriculum/module4_promoters_terminators_by_celltype.png" alt="Examples of promoters and terminators by cell type: bacterial (lac, tac, BAD promoters; T7, tonB terminators), plant (CaMV, Ubi, NOS promoters; NOS, CaMV 35S terminators), and mammalian (CMV, EF-1alpha, TRE promoters; bGH, SV40 poly-A terminators)">
+      `
+    },
+    {
+      id: "4.8p", type: "practice", part: PART1, title: "Practice: Eukaryotic Promoter Motifs",
       question: {
         prompt: "Which of the following are motifs of a eukaryotic promoter? Select all that apply.",
         multi: true,
@@ -103,19 +120,20 @@ const MODULE = {
       }
     },
     {
-      id: "4.7r", type: "read", part: PART1, title: "Terminator Motifs",
-      html: `
-        <p>Terminators have their own motifs, too:</p>
-        <ul>
-          <li><strong>Polyadenylation signal</strong> (eukaryotic): AATAAA in DNA (AAUAAA in RNA); a protein complex called CPSF binds here and cleaves the RNA.</li>
-          <li><strong>Hairpin</strong> (bacterial): the newly made RNA folds back on itself, physically blocking RNA polymerase and stopping transcription.</li>
-        </ul>
-        <img class="topic-image" src="../assets/img/curriculum/module4_terminator_motifs.png" alt="Motifs of terminators: the polyadenylation signal (eukaryotic), showing RNA polymerase cleavage and poly-A tail addition, and the hairpin (bacterial), showing RNA folding back on itself">
-        <p>A common real mammalian terminator is the SV40 poly(A) signal — you'll see it again when we design plasmids in Module 5.</p>
-      `
+      id: "4.9p", type: "practice", part: PART1, title: "Practice: Identifying Bacterial Promoters",
+      question: {
+        prompt: "Which of the following is not known to be a bacterial promoter?",
+        options: [
+          { text: "lac", correct: false },
+          { text: "tac", correct: false },
+          { text: "BAD", correct: false },
+          { text: "CMV", correct: true }
+        ],
+        explanation: "lac, tac, and BAD are all common bacterial promoters. CMV is a mammalian promoter — you'll see it again in Module 5 when we build a real plasmid."
+      }
     },
     {
-      id: "4.8p", type: "practice", part: PART1, title: "Practice: Plant Terminators",
+      id: "4.10p", type: "practice", part: PART1, title: "Practice: Plant Terminators",
       question: {
         prompt: "Which of the following is a plant terminator?",
         options: [
@@ -128,18 +146,7 @@ const MODULE = {
       }
     },
     {
-      id: "4.9r", type: "read", part: PART1, title: "Promoters and Terminators by Cell Type",
-      html: `
-        <p>Now that you've seen what promoters and terminators look like, here's a reference list you'll come back to when you start designing your own plasmid in Module 5:</p>
-        <ul>
-          <li><strong>Promoters</strong> — Bacterial: lac, tac, BAD. Plant: CaMV, Ubi, NOS. Mammalian: CMV, EF-1alpha, TRE.</li>
-          <li><strong>Terminators</strong> — Bacterial: T7, tonB. Plant: NOS, CaMV 35S. Mammalian: poly-A signals like bGH (Bovine Growth Hormone) and SV40.</li>
-        </ul>
-        <img class="topic-image" src="../assets/img/curriculum/module4_promoters_terminators_by_celltype.png" alt="Examples of promoters and terminators by cell type: bacterial (lac, tac, BAD promoters; T7, tonB terminators), plant (CaMV, Ubi, NOS promoters; NOS, CaMV 35S terminators), and mammalian (CMV, EF-1alpha, TRE promoters; bGH, SV40 poly-A terminators)">
-      `
-    },
-    {
-      id: "4.10p", type: "practice", part: PART1, title: "Practice: True Statements About Promoters",
+      id: "4.11p", type: "practice", part: PART1, title: "Practice: True Statements About Promoters",
       question: {
         prompt: "Which of the following are true about promoters? Select all that apply.",
         multi: true,
@@ -153,13 +160,13 @@ const MODULE = {
       }
     },
     {
-      id: "4.11f", type: "freeresponse", part: PART1, title: "Discussion Forum Activity #1",
+      id: "4.12f", type: "freeresponse", part: PART1, title: "Discussion Forum Activity #1",
       freeResponse: {
         prompt: "Your task: look up specific promoter and terminator sequences from Addgene.<br>1. Click on one of these Addgene links: <a href=\"https://www.addgene.org/browse/sequence/487909/\" target=\"_blank\" rel=\"noopener\">#1</a> / <a href=\"https://www.addgene.org/browse/sequence/324340/\" target=\"_blank\" rel=\"noopener\">#2</a> / <a href=\"https://www.addgene.org/177036/\" target=\"_blank\" rel=\"noopener\">#3</a><br>2. Write down the names of every promoter and terminator described, and their length. Use the same labels the source uses.<br>3. Write down the first and last few bases of each region."
       }
     },
     {
-      id: "4.12r", type: "read", part: PART2, title: "Start/Stop Codons and the Coding Sequence",
+      id: "4.13r", type: "read", part: PART2, title: "Start/Stop Codons and the Coding Sequence",
       html: `
         <p>Promoters and terminators control transcription — turning a DNA sequence into RNA. But how does the cell know which part of that RNA to actually turn into protein?</p>
         <p>Codons — the three-base sequences you learned about in Module 2 — are the answer. The start codon, AUG (or ATG in DNA), always codes for methionine and marks where translation begins. Three codons — UAA, UAG, and UGA (TAA, TAG, TGA in DNA) — don't code for any amino acid at all; they're stop codons that signal translation to end. The coding sequence is everything in between — the actual protein-coding instructions.</p>
@@ -167,14 +174,14 @@ const MODULE = {
       `
     },
     {
-      id: "4.13r", type: "read", part: PART2, title: "Translation Initiation: Kozak vs. Shine-Dalgarno",
+      id: "4.14r", type: "read", part: PART2, title: "Translation Initiation: Kozak vs. Shine-Dalgarno",
       html: `
         <p>Before translation can start, the ribosome has to find the right spot on the mRNA — and different cell types use different signals to mark it.</p>
         <p>Plant and mammalian cells use a Kozak sequence right before the start codon — GCCGCCACCATG is a reliable one. Bacterial cells instead rely on a Shine-Dalgarno sequence, AGGAGG, positioned about 8 base pairs upstream of the start codon. Same job — flag the ribosome's landing spot — different sequence depending on the organism.</p>
       `
     },
     {
-      id: "4.14p", type: "practice", part: PART2, title: "Practice: Finding the Stop Codon",
+      id: "4.15p", type: "practice", part: PART2, title: "Practice: Finding the Stop Codon",
       question: {
         prompt: "Refer to a codon table. Where does translation stop in this sequence? AUGUCACAUCGUAGUGGUGACGCCAUCACUAAUAGACUUUAUUAACAUCAC",
         options: [
@@ -187,7 +194,7 @@ const MODULE = {
       }
     },
     {
-      id: "4.15p", type: "practice", part: PART2, title: "Practice: Codons for Valine",
+      id: "4.16p", type: "practice", part: PART2, title: "Practice: Codons for Valine",
       question: {
         prompt: "Which of the following codons codes for Valine? Select all that apply.",
         multi: true,
@@ -201,7 +208,7 @@ const MODULE = {
       }
     },
     {
-      id: "4.16p", type: "practice", part: PART2, title: "Practice: Identifying a Kozak Sequence",
+      id: "4.17p", type: "practice", part: PART2, title: "Practice: Identifying a Kozak Sequence",
       question: {
         prompt: "Which of the following is an acceptable, well-formed Kozak sequence?",
         options: [
@@ -214,27 +221,27 @@ const MODULE = {
       }
     },
     {
-      id: "4.17r", type: "read", part: PART3, title: "What Is a Logic Gate?",
+      id: "4.18r", type: "read", part: PART3, title: "What Is a Logic Gate?",
       html: `
         <p>A genetic circuit can have more than one input. Logic gates describe which combinations of those inputs lead to a particular output. "True," here, could mean an input being present, being above some concentration, or whatever the bioengineer designing the circuit decides — as long as the rule holds, it counts as a logic gate. We'll cover two: AND-gates and OR-gates.</p>
       `
     },
     {
-      id: "4.18r", type: "read", part: PART3, title: "AND-Gates",
+      id: "4.19r", type: "read", part: PART3, title: "AND-Gates",
       html: `
         <p>An AND-gate requires two inputs to both be true before it produces an output. Stanford iGEM's own 2026 team built one: an AND-gate that only expresses a YAP/TAZ inhibitor when both ADAM12 and POSTN mRNA — two genes upregulated in keloid (overgrown scar) fibroblasts — are detected. Jiang et al. built a similar AND-gate that only activates a sensor when both IL6 and EGFP are detected.</p>
         <img class="topic-image" src="../assets/img/curriculum/module4_and_gate.png" alt="Two AND-gate examples: an AND-gate with POSTN and ADAM12 mRNA that inhibits the YAP/TAZ pathway to restore healthy wound healing, and an AND-gate with IL6 and EGFP from Jiang et al. (2023) showing RADARS fold activation">
       `
     },
     {
-      id: "4.19r", type: "read", part: PART3, title: "OR-Gates",
+      id: "4.20r", type: "read", part: PART3, title: "OR-Gates",
       html: `
         <p>An OR-gate only needs one of two inputs to be true. In an example from Wong et al. (2015), adding either arabinose or rhamnose — not necessarily both — was enough to trigger red fluorescence.</p>
         <img class="topic-image" src="../assets/img/curriculum/module4_and_or_gate_diagram.png" alt="Wong et al. (2015) half-adder genetic circuit diagram with a truth table for the arabinose/rhamnose AND/OR example">
       `
     },
     {
-      id: "4.20p", type: "practice", part: PART3, title: "Practice: The Arabinose/Rhamnose AND & OR Gate",
+      id: "4.21p", type: "practice", part: PART3, title: "Practice: The Arabinose/Rhamnose AND & OR Gate",
       question: {
         prompt: "Explain how this AND & OR gate works with arabinose and rhamnose (example from Wong et al., 2015).",
         options: [
@@ -247,7 +254,7 @@ const MODULE = {
       }
     },
     {
-      id: "4.21r", type: "read", part: PART4, title: "Activators and Repressors",
+      id: "4.22r", type: "read", part: PART4, title: "Activators and Repressors",
       html: `
         <p>Not every circuit is either fully on or fully off — some genes get turned up or down by regulatory proteins that bind to their promoters.</p>
         <p>Activators increase gene expression. Cyclic AMP (cAMP) is a classic example: when it binds its promoter, a protein called CAP also binds, boosting RNA polymerase activity.</p>
@@ -256,7 +263,7 @@ const MODULE = {
       `
     },
     {
-      id: "4.22p", type: "practice", part: PART4, title: "Practice: How Repressors Respond to Their Target Molecule",
+      id: "4.23p", type: "practice", part: PART4, title: "Practice: How Repressors Respond to Their Target Molecule",
       question: {
         prompt: "A repressor protein binds an operator and blocks RNA polymerase from transcribing a gene. What happens when the repressor's target molecule (like tryptophan) becomes available and binds the repressor?",
         options: [
@@ -269,14 +276,14 @@ const MODULE = {
       }
     },
     {
-      id: "4.23r", type: "read", part: PART4, title: "Feedback Loops",
+      id: "4.24r", type: "read", part: PART4, title: "Feedback Loops",
       html: `
         <p>Feedback loops happen when a circuit's own output changes its future input. A positive feedback loop increases input — Becskei et al. showed this with a circuit where more GFP expression drove even more expression of a gene called tetR. A negative feedback loop decreases input — Becskei and Serrano showed the opposite pattern, where more TetR-EGFP expression suppressed a target called tetO-1.</p>
         <img class="topic-image" src="../assets/img/curriculum/module4_feedback_loops.png" alt="Positive feedback loop (increases input), shown with the Becskei et al. (2001) rtTA-GFP fusion protein reporter plasmids; negative feedback loop (decreases input), shown with the Becskei and Serrano (2000) TetR-EGFP construct">
       `
     },
     {
-      id: "4.24p", type: "practice", part: PART4, title: "Practice: Positive or Negative Feedback?",
+      id: "4.25p", type: "practice", part: PART4, title: "Practice: Positive or Negative Feedback?",
       question: {
         prompt: "A circuit's output protein binds back to its own promoter and shuts transcription down as output levels rise. Is this a positive or negative feedback loop?",
         options: [
@@ -289,7 +296,7 @@ const MODULE = {
       }
     },
     {
-      id: "4.25m", type: "matching", part: PART4, title: "Module 4 Recap",
+      id: "4.26m", type: "matching", part: PART4, title: "Module 4 Recap",
       matching: {
         instructions: "Match the term to its definition.",
         pairs: [
@@ -303,7 +310,7 @@ const MODULE = {
       }
     },
     {
-      id: "4.26o", type: "ordering", part: PART4, title: "Arrange a Genetic Circuit's Parts",
+      id: "4.27o", type: "ordering", part: PART4, title: "Arrange a Genetic Circuit's Parts",
       ordering: {
         prompt: "A genetic circuit is read in one direction, from the 5' end to the 3' end. Arrange these four parts in the order they appear in a working circuit.",
         items: [
@@ -316,7 +323,7 @@ const MODULE = {
       }
     },
     {
-      id: "4.27f", type: "freeresponse", part: PART4, title: "Discussion Forum Activity #2",
+      id: "4.28f", type: "freeresponse", part: PART4, title: "Discussion Forum Activity #2",
       freeResponse: {
         prompt: "You're given the following parts to build a genetic circuit that expresses GFP (green fluorescent protein) in mammalian cells (HEK 293): a Kozak sequence (ribosome binding site), a start and stop codon, a promoter, and a poly-A tail terminator.<br><br>In 1–2 sentences, explain how these parts should be arranged relative to each other and to the GFP gene, and what role each part plays in getting GFP expressed.<br><br>Then, take a step back: if the need you identified in Module 3 required detecting or reporting something inside a cell, how might a circuit like this one be part of your solution?"
       }

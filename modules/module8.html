@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Module 8: Ethics and Broader Applications — SynBase</title>
-<link rel="stylesheet" href="../css/style.css?v=74">
+<link rel="stylesheet" href="../css/style.css?v=76">
 </head>
 <body>
 
@@ -19,9 +19,9 @@
   <div class="page-footer-nav" id="page-footer-nav"></div>
 </div>
 
-<script src="../js/modules-meta.js?v=14"></script>
+<script src="../js/modules-meta.js?v=16"></script>
 <script src="../js/progress.js?v=25"></script>
-<script src="../js/quiz-engine.js?v=19"></script>
+<script src="../js/quiz-engine.js?v=29"></script>
 <script>
 const MODULE = {
   id: "module8",
@@ -179,11 +179,17 @@ const MODULE = {
     {
       id: "8.15f", type: "freeresponse", title: "What Makes Germline Editing Different?", part: "Part 3: Case Studies Beyond the Individual Participant",
       freeResponse: {
-        prompt: "What makes germline editing ethically different from editing cells in an individual patient?<br><br>Consider:<ul><li>Who can consent?</li><li>Who experiences the risks?</li><li>Who receives the benefits?</li><li>Could the change be passed on to future generations?</li><li>What happens if an unintended change cannot easily be reversed?</li><li>Who should get to decide when this technology is acceptable?</li></ul>The Belmont Report gives us a framework for thinking about research involving human participants. But synthetic biology can create another kind of problem: What about when the science affects people who never volunteered to participate at all?"
+        prompt: "What makes germline editing ethically different from editing cells in an individual patient?<br><br>Consider:<ul><li>Who can consent?</li><li>Who experiences the risks?</li><li>Who receives the benefits?</li><li>Could the change be passed on to future generations?</li><li>What happens if an unintended change cannot easily be reversed?</li><li>Who should get to decide when this technology is acceptable?</li></ul>"
       }
     },
     {
-      id: "8.16r", type: "read", title: "Gain-of-Function Research and H5N1", part: "Part 3: Case Studies Beyond the Individual Participant",
+      id: "8.16r", type: "read", title: "Beyond Individual Consent", part: "Part 3: Case Studies Beyond the Individual Participant",
+      html: `
+        <p>The Belmont Report gives us a framework for thinking about research involving human participants. But synthetic biology can create another kind of problem: what about when the science affects people who never volunteered to participate at all?</p>
+      `
+    },
+    {
+      id: "8.17r", type: "read", title: "Gain-of-Function Research and H5N1", part: "Part 3: Case Studies Beyond the Individual Participant",
       html: `
         <p>H5N1 is an influenza A virus that primarily infects birds, though it can also infect mammals, including humans. In 2012, researchers published experiments studying what changes could make H5N1 more transmissible.</p>
         <p>Importantly, the experiments did not demonstrate ordinary airborne transmission between humans. Instead, researchers produced an H5N1 virus capable of airborne transmission between ferrets, which are commonly used as an animal model for influenza transmission.</p>
@@ -193,7 +199,7 @@ const MODULE = {
       `
     },
     {
-      id: "8.17p", type: "practice", title: "Areas of Concern in Gain-of-Function Research", part: "Part 3: Case Studies Beyond the Individual Participant",
+      id: "8.18p", type: "practice", title: "Areas of Concern in Gain-of-Function Research", part: "Part 3: Case Studies Beyond the Individual Participant",
       question: {
         prompt: "Which areas of concern are involved here? Select all that apply.",
         multi: true,
@@ -206,13 +212,19 @@ const MODULE = {
       }
     },
     {
-      id: "8.18f", type: "freeresponse", title: "Safeguards for High-Risk Research", part: "Part 3: Case Studies Beyond the Individual Participant",
+      id: "8.19f", type: "freeresponse", title: "Safeguards for High-Risk Research", part: "Part 3: Case Studies Beyond the Individual Participant",
       freeResponse: {
-        prompt: "Notice that the Belmont Report is less helpful here.<br><br>There is no single research participant whose autonomy explains the whole problem. Instead, the risks could extend to laboratory workers, surrounding communities, and potentially the broader public.<br><br>Imagine you are responsible for deciding whether a high-risk biological experiment should be allowed to move forward. What safeguards would you require?<br><br>Some things you might consider:<ul><li>Physical containment</li><li>Biological safety mechanisms</li><li>Training requirements</li><li>Independent review</li><li>Restrictions on who can access materials</li><li>Restrictions on sensitive information</li><li>Risk-benefit analysis before the experiment begins</li><li>Plans for responding to an accident</li><li>Reporting and transparency requirements</li></ul>There is no single safeguard that can remove all risk. Instead, biosafety and biosecurity generally rely on layers of protection: laboratory practices, physical containment, institutional oversight, and broader policy."
+        prompt: "Notice that the Belmont Report is less helpful here.<br><br>There is no single research participant whose autonomy explains the whole problem. Instead, the risks could extend to laboratory workers, surrounding communities, and potentially the broader public.<br><br>Imagine you're on an institutional biosafety committee deciding whether to approve a gain-of-function experiment like the H5N1 study you just read about — research specifically designed to make a dangerous pathogen more transmissible. What safeguards would you require before letting it move forward?<br><br>Some things you might consider:<ul><li>Physical containment</li><li>Biological safety mechanisms</li><li>Training requirements</li><li>Independent review</li><li>Restrictions on who can access materials</li><li>Restrictions on sensitive information</li><li>Risk-benefit analysis before the experiment begins</li><li>Plans for responding to an accident</li><li>Reporting and transparency requirements</li></ul>"
       }
     },
     {
-      id: "8.19r", type: "read", title: "Gray Areas: CAR-T Cell Therapy", part: "Part 3: Case Studies Beyond the Individual Participant",
+      id: "8.20r", type: "read", title: "Layers of Protection", part: "Part 3: Case Studies Beyond the Individual Participant",
+      html: `
+        <p>There is no single safeguard that can remove all risk. Instead, biosafety and biosecurity generally rely on layers of protection: laboratory practices, physical containment, institutional oversight, and broader policy.</p>
+      `
+    },
+    {
+      id: "8.21r", type: "read", title: "Gray Areas: CAR-T Cell Therapy", part: "Part 3: Case Studies Beyond the Individual Participant",
       html: `
         <p>Not every ethical problem comes from research that went obviously wrong. Sometimes a technology, like CAR-T cell therapy, works extremely well.</p>
         <p>CAR-T cell therapy is a form of cancer treatment in which a patient's own T cells are collected and genetically engineered to express a chimeric antigen receptor, or CAR.</p>
@@ -220,13 +232,13 @@ const MODULE = {
       `
     },
     {
-      id: "8.20f", type: "freeresponse", title: "CAR-T: Ethical Gray Areas", part: "Part 3: Case Studies Beyond the Individual Participant",
+      id: "8.22f", type: "freeresponse", title: "CAR-T: Ethical Gray Areas", part: "Part 3: Case Studies Beyond the Individual Participant",
       freeResponse: {
         prompt: "What are some ethical gray areas in CAR-T cell therapy?"
       }
     },
     {
-      id: "8.21r", type: "read", title: "CAR-T: Access and Risk", part: "Part 3: Case Studies Beyond the Individual Participant",
+      id: "8.23r", type: "read", title: "CAR-T: Access and Risk", part: "Part 3: Case Studies Beyond the Individual Participant",
       html: `
         <p>Two major areas include:</p>
         <h4>Access</h4>
@@ -238,7 +250,7 @@ const MODULE = {
       `
     },
     {
-      id: "8.22r", type: "read", title: "Who Actually Decides Whether Research Can Happen?", part: "Part 4: Oversight and Governance",
+      id: "8.24r", type: "read", title: "Who Actually Decides Whether Research Can Happen?", part: "Part 4: Oversight and Governance",
       html: `
         <p>So, who actually reviews all of this?</p>
         <p>The answer depends on what kind of research you are doing, and there is no single committee that decides whether all scientific research is ethical.</p>
@@ -246,7 +258,7 @@ const MODULE = {
       `
     },
     {
-      id: "8.23m", type: "matching", title: "Which Committee Reviews Which Research", part: "Part 4: Oversight and Governance",
+      id: "8.25m", type: "matching", title: "Which Committee Reviews Which Research", part: "Part 4: Oversight and Governance",
       matching: {
         instructions: "Match the type of research with the committee that would most likely review it:",
         pairs: [
@@ -257,7 +269,7 @@ const MODULE = {
       }
     },
     {
-      id: "8.24r", type: "read", title: "Institutional Review Boards", part: "Part 4: Oversight and Governance",
+      id: "8.26r", type: "read", title: "Institutional Review Boards", part: "Part 4: Oversight and Governance",
       html: `
         <p>If you are conducting research involving human participants, you may need review from an Institutional Review Board, or IRB. The purpose of an IRB is to protect the rights and welfare of people participating in research.</p>
         <p>Under U.S. federal regulations, an IRB must have at least five members with different backgrounds. It must include:</p>
@@ -279,7 +291,7 @@ const MODULE = {
       `
     },
     {
-      id: "8.25r", type: "read", title: "Institutional Animal Care and Use Committees", part: "Part 4: Oversight and Governance",
+      id: "8.27r", type: "read", title: "Institutional Animal Care and Use Committees", part: "Part 4: Oversight and Governance",
       html: `
         <p>What if your experiment involves animals instead?</p>
         <p>Research institutions covered by U.S. Public Health Service policy use an Institutional Animal Care and Use Committee, or IACUC, to oversee animal care and use.</p>
@@ -289,7 +301,7 @@ const MODULE = {
       `
     },
     {
-      id: "8.26r", type: "read", title: "Institutional Biosafety Committees", part: "Part 4: Oversight and Governance",
+      id: "8.28r", type: "read", title: "Institutional Biosafety Committees", part: "Part 4: Oversight and Governance",
       html: `
         <p>And finally, what if you are engineering DNA?</p>
         <p>The NIH Guidelines for Research Involving Recombinant or Synthetic Nucleic Acid Molecules establish safety and containment practices for covered research involving recombinant or synthetic nucleic acids.</p>
@@ -299,7 +311,7 @@ const MODULE = {
       `
     },
     {
-      id: "8.27m", type: "matching", title: "Committees Across a Project's Lifecycle", part: "Part 4: Oversight and Governance",
+      id: "8.29m", type: "matching", title: "Committees Across a Project's Lifecycle", part: "Part 4: Oversight and Governance",
       matching: {
         instructions: "Imagine you're developing an immune cell therapy where you: 1) genetically modify human cells, 2) test the therapy in mice, then 3) begin a clinical trial in humans. Which committee might be involved at each step? Match each step to the committee:",
         pairs: [
@@ -310,13 +322,13 @@ const MODULE = {
       }
     },
     {
-      id: "8.28r", type: "read", title: "FDA Oversight of Clinical Trials", part: "Part 4: Oversight and Governance",
+      id: "8.30r", type: "read", title: "FDA Oversight of Clinical Trials", part: "Part 4: Oversight and Governance",
       html: `
         <p>Depending on the product being tested, a human clinical trial may also require oversight from the Food and Drug Administration, or FDA. For example, an Investigational New Drug application includes information about proposed clinical protocols and commitments to obtain informed consent and IRB review.</p>
       `
     },
     {
-      id: "8.29r", type: "read", title: "Who Decides What Research Gets Funded?", part: "Part 4: Oversight and Governance",
+      id: "8.31r", type: "read", title: "Who Decides What Research Gets Funded?", part: "Part 4: Oversight and Governance",
       html: `
         <p>Approval is also different from funding.</p>
         <p>A project may be ethically acceptable but never receive the money needed to conduct it.</p>
@@ -331,7 +343,7 @@ const MODULE = {
       `
     },
     {
-      id: "8.30m", type: "matching", title: "Other Rules That Shape Research", part: "Part 4: Oversight and Governance",
+      id: "8.32m", type: "matching", title: "Other Rules That Shape Research", part: "Part 4: Oversight and Governance",
       matching: {
         instructions: "Committees are also not the only form of oversight. Depending on what you are doing, researchers may have to follow different laws, regulations, and federal policies. Match each rule to its definition:",
         pairs: [
@@ -343,7 +355,7 @@ const MODULE = {
       }
     },
     {
-      id: "8.31r", type: "read", title: "Putting It All Together", part: "Part 5: Conclusion",
+      id: "8.33r", type: "read", title: "Putting It All Together", part: "Part 5: Conclusion",
       html: `
         <p>At the beginning of this module, we separated three ideas:</p>
         <ul>
@@ -368,7 +380,7 @@ const MODULE = {
       `
     },
     {
-      id: "8.32f", type: "freeresponse", title: "Closing Reflection", part: "Part 5: Conclusion",
+      id: "8.34f", type: "freeresponse", title: "Closing Reflection", part: "Part 5: Conclusion",
       freeResponse: {
         prompt: "Imagine your team has developed a new synthetic biology technology. Before moving forward, what questions would you want your team to answer?<br><br>Consider:<ul><li>Who could benefit?</li><li>Who could be harmed?</li><li>Who is taking on the risks?</li><li>Who has the ability to consent?</li><li>Who might be affected without consenting?</li><li>Who will actually have access to the technology?</li><li>What could happen accidentally?</li><li>How could the technology be deliberately misused?</li><li>Who should have a voice in deciding whether the project moves forward?</li></ul>"
       }

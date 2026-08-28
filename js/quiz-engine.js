@@ -66,6 +66,7 @@
 // no `part` are all treated as a single unlabeled group.
 
 let CURRENT_PAGE_INDEX = 0;
+let scrollWaitToken = 0;
 
 function renderModulePage(MODULE) {
   const headerMount = document.getElementById("site-header");
@@ -262,14 +263,73 @@ function renderPageAt(MODULE, index, isInitial = false) {
   if (isInitial) {
     window.scrollTo(0, 0);
   } else {
-    const navMount = document.getElementById("page-nav-mount");
-    const headerEl = document.getElementById("site-header");
-    const headerH = headerEl ? headerEl.offsetHeight : 0;
-    const top = navMount.getBoundingClientRect().top + window.scrollY - headerH - 12;
-    window.scrollTo({ top: Math.max(top, 0) });
+    // Scroll to the page card itself (past the hero AND the part-label/dot
+    // row), so a page turn lands the student looking at the content, not at
+    // navigation chrome they've already seen. scroll-margin-top on the card
+    // (see style.css) keeps this from landing underneath the sticky header —
+    // scrollIntoView respects it natively, which is far less fragile than
+    // computing the header's height by hand.
+    //
+    // Images in the new content load asynchronously and reserve no height
+    // until they do, so the page can still be growing for a bit after the
+    // innerHTML swap — scrolling before that's done clamps to a too-small
+    // scroll range that never corrects itself once the page finishes
+    // growing. Wait for every image to actually resolve (not just a fixed
+    // number of animation frames, which can't tell "nothing has happened
+    // yet" apart from "already settled"), then give layout a few more
+    // frames to flush before measuring. The token guard drops this chain
+    // if another page render supersedes it (e.g. clicking Continue again
+    // before this one finished) instead of scrolling a stale target.
+    const myScrollToken = ++scrollWaitToken;
+    const finalScroll = (framesLeft = 6) => {
+      if (myScrollToken !== scrollWaitToken) return;
+      if (framesLeft <= 0) { el.scrollIntoView({ block: "start" }); return; }
+      requestAnimationFrame(() => finalScroll(framesLeft - 1));
+    };
+    const pendingImgs = Array.from(el.querySelectorAll("img")).filter(img => !img.complete);
+    if (!pendingImgs.length) {
+      finalScroll();
+    } else {
+      let remaining = pendingImgs.length;
+      let done = false;
+      const settle = () => {
+        remaining--;
+        if (remaining <= 0 && !done) { done = true; finalScroll(); }
+      };
+      pendingImgs.forEach(img => {
+        img.addEventListener("load", settle, { once: true });
+        img.addEventListener("error", settle, { once: true });
+      });
+      setTimeout(() => { if (!done) { done = true; finalScroll(); } }, 1500);
+    }
   }
 
   renderPageFooterNav(MODULE, index);
+}
+
+// A dedicated screen shown after a module's real last page, instead of
+// navigating straight to the next module — its own moment rather than a
+// button sharing space with the lesson content. Skipped for the very last
+// module, which goes straight to congratulations.html's own bigger version.
+function renderCelebrationScreen(MODULE, nextModule) {
+  document.getElementById("page-nav-mount").innerHTML = "";
+  document.getElementById("page-footer-nav").innerHTML = "";
+
+  const el = document.getElementById("page-viewport");
+  el.innerHTML = `
+    <article class="page-card celebration-card">
+      <img class="celebration-mascot" src="../assets/img/site/Mascot Panels - transparent bg/204-achievement.png" alt="A cheerful DNA mascot holding a large star">
+      <h2>Module ${MODULE.number} complete!</h2>
+      <p>Nice work finishing <strong>${MODULE.title}</strong>. Ready for what's next?</p>
+      <button type="button" class="btn" data-celebration-continue>Continue to Module ${nextModule.number}: ${nextModule.title} &rarr;</button>
+    </article>
+  `;
+  window.scrollTo(0, 0);
+  runMiniConfetti();
+
+  el.querySelector("[data-celebration-continue]").addEventListener("click", () => {
+    location.href = `${nextModule.id}.html`;
+  });
 }
 
 // Smaller, self-contained version of congratulations.html's confetti burst —
@@ -355,15 +415,12 @@ function renderPageFooterNav(MODULE, index) {
 
   mount.innerHTML = `
     <button type="button" class="btn secondary" data-page-back ${isFirst ? "disabled" : ""}>&larr; Back</button>
-    ${isLast ? `<button type="button" class="btn secondary celebrate-btn" data-celebrate-btn title="Celebrate!">🎉</button>` : ""}
     <button type="button" class="btn" data-page-continue ${needsAnswer ? "disabled" : ""} ${needsAnswer ? 'title="Answer the question correctly to continue"' : ""}>${continueLabel}</button>
   `;
 
   mount.querySelector("[data-page-back]").addEventListener("click", () => {
     if (!isFirst) renderPageAt(MODULE, index - 1);
   });
-  const celebrateBtn = mount.querySelector("[data-celebrate-btn]");
-  if (celebrateBtn) celebrateBtn.addEventListener("click", () => runMiniConfetti());
   mount.querySelector("[data-page-continue]").addEventListener("click", async () => {
     let syncPromise = null;
     if (page.type === "read" && !isSectionComplete(MODULE.id, page.id)) {
@@ -381,7 +438,7 @@ function renderPageFooterNav(MODULE, index) {
     // persisted server-side before the next page's own unlock check reads it.
     if (syncPromise) await syncPromise;
     if (nextModule) {
-      location.href = `${nextModule.id}.html`;
+      renderCelebrationScreen(MODULE, nextModule);
     } else {
       location.href = "../congratulations.html";
     }
