@@ -116,7 +116,7 @@ const SYLLABUS = [
     single: "Hello! You're about to embark on a course built by the 2026 Stanford iGEM team, piece by piece, to give you a comprehensive introduction to synthetic biology — 8 modules, with learning checks and interactive activities scattered throughout. Completing it also unlocks application to the Stanford iGEM Bioengineering Research Program (SiBRP), a free summer program for high schoolers and incoming college freshmen."
   },
   {
-    chip: "1", title: "Introduction to iGEM & Bioengineering", time: "Est. completion time: 30–40 min",
+    chip: "1", title: "Introduction to iGEM & Bioengineering",
     live: true, moduleId: "module1",
     objectives: [
       "Understand what Stanford iGEM is and how it connects to the wider iGEM community",
@@ -130,7 +130,7 @@ const SYLLABUS = [
     ]
   },
   {
-    chip: "2", title: "Core Concepts in Molecular and Cellular Biology", time: "Est. completion time: 2–2.5 hrs",
+    chip: "2", title: "Core Concepts in Molecular and Cellular Biology",
     live: true, moduleId: "module2",
     objectives: [
       "Describe basic cell structure across bacterial, mammalian, and plant cells",
@@ -146,7 +146,7 @@ const SYLLABUS = [
     ]
   },
   {
-    chip: "3", title: "Biodesign & Literature Review", time: "Est. completion time: 1.5 hrs",
+    chip: "3", title: "Biodesign & Literature Review",
     live: true, moduleId: "module3",
     objectives: [
       "Apply the biodesign framework to identify and narrow down a real-world need",
@@ -162,7 +162,7 @@ const SYLLABUS = [
     ]
   },
   {
-    chip: "4", title: "Genetic Circuit Design", time: "Est. completion time: 1.5 hrs",
+    chip: "4", title: "Genetic Circuit Design",
     live: true, moduleId: "module4",
     objectives: [
       "Identify the components that control transcription: promoters and terminators",
@@ -178,7 +178,7 @@ const SYLLABUS = [
     ]
   },
   {
-    chip: "5", title: "Plasmid DNA Design", time: "Est. completion time: 1.5–2 hrs",
+    chip: "5", title: "Plasmid DNA Design",
     live: true, moduleId: "module5",
     objectives: [
       "Describe the two parts of a plasmid: backbone and insert",
@@ -194,7 +194,7 @@ const SYLLABUS = [
     ]
   },
   {
-    chip: "6", title: "Experimental Workflows", time: "Est. completion time: 1 hr",
+    chip: "6", title: "Experimental Workflows",
     live: true, moduleId: "module6",
     objectives: [
       "Outline the full wet-lab workflow from ordering plasmids to visualizing results",
@@ -208,7 +208,7 @@ const SYLLABUS = [
     ]
   },
   {
-    chip: "7", title: "Entrepreneurship in Bioengineering", time: "Est. completion time: 1 hr",
+    chip: "7", title: "Entrepreneurship in Bioengineering",
     live: true, moduleId: "module7",
     objectives: [
       "Assess the competitive landscape and articulate a unique value proposition",
@@ -224,7 +224,7 @@ const SYLLABUS = [
     ]
   },
   {
-    chip: "8", title: "Ethics & Broader Applications", time: "Est. completion time: 1.5 hrs",
+    chip: "8", title: "Ethics & Broader Applications",
     live: true, moduleId: "module8",
     objectives: [
       "Apply the Belmont Report's three ethical principles to real case studies",
@@ -256,7 +256,6 @@ function renderSyllabus(mountEl) {
             <span class="unit-title">${escapeHtml(m.title)}${m.note ? " " + escapeHtml(m.note) : ""}</span>
           </span>
         </span>
-        ${m.time ? `<span class="unit-progress"><span class="unit-progress-pct">${escapeHtml(m.time.replace("Est. completion time: ", ""))}</span></span>` : ""}
       </summary>
       <div class="unit-body">
         ${m.single ? `<p class="unit-desc">${escapeHtml(m.single)}</p>` : `
@@ -265,7 +264,6 @@ function renderSyllabus(mountEl) {
           <h4 class="syllabus-subhead">Topics</h4>
           <ul class="syllabus-list">${m.topics.map(t => `<li>${escapeHtml(t)}</li>`).join("")}</ul>
         `}
-        ${m.live ? `<a class="btn small" href="signup.html">${m.intro ? "Start Module 0" : "Start Unit " + escapeHtml(m.chip)}</a>` : ""}
       </div>
     </details>
   `).join("");
