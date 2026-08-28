@@ -66,7 +66,11 @@ function markSectionComplete(moduleId, sectionId) {
 
 function moduleProgress(moduleId, sectionCount) {
   const mod = PROGRESS_CACHE[moduleId] || { sections: {} };
-  const completed = Object.keys(mod.sections || {}).filter(k => mod.sections[k]).length;
+  // Clamped to sectionCount: a module's pages can be renumbered between a
+  // student's visits, which can leave old, no-longer-existing section ids
+  // marked complete alongside their current replacements — without this,
+  // that stale overlap could push completed past total and show >100%.
+  const completed = Math.min(sectionCount, Object.keys(mod.sections || {}).filter(k => mod.sections[k]).length);
   return { completed, total: sectionCount, pct: Math.round((completed / sectionCount) * 100) };
 }
 
