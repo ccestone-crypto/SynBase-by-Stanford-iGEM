@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin — SynBase</title>
-<link rel="stylesheet" href="css/style.css?v=78">
+<link rel="stylesheet" href="css/style.css?v=79">
 </head>
 <body>
 
@@ -19,6 +19,7 @@
 </section>
 
 <main class="container">
+  <div class="admin-stats-row" id="education-stats"></div>
   <div class="admin-table-wrap">
     <table class="admin-table" id="admin-table">
       <thead>
@@ -41,6 +42,7 @@
       <button type="button" class="app-tab" data-app-panel="ta">TA Application</button>
       <button type="button" class="app-tab" data-app-panel="portfolio">Beyond SiBRP</button>
       <button type="button" class="app-tab" data-app-panel="speakers">Speaker Series</button>
+      <button type="button" class="app-tab" data-app-panel="feedback">Feedback <span class="app-subtab-count" id="feedback-count">0</span></button>
     </div>
 
     <!-- ===== SiBRP Application ===== -->
@@ -228,6 +230,12 @@
 
       <div id="speaker-admin-list" style="margin-top:24px;"></div>
     </div>
+
+    <!-- ===== Feedback ===== -->
+    <div class="app-panel" id="app-panel-feedback" style="display:none;">
+      <p class="app-panel-note">Submitted from the "?" widget students see on every page. Marking one reviewed just hides it from this list.</p>
+      <div id="feedback-list"></div>
+    </div>
   </div>
 </main>
 
@@ -235,7 +243,7 @@
 <script src="js/portfolio-data.js?v=2"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="js/supabase-client.js?v=1"></script>
-<script src="js/progress.js?v=28"></script>
+<script src="js/progress.js?v=29"></script>
 <script>
 function calcModuleProgress(progress, moduleId, sectionCount) {
   const mod = (progress && progress[moduleId]) || { sections: {} };
@@ -298,10 +306,34 @@ async function loadUsers() {
     email: p.email,
     isAdmin: !!p.is_admin,
     taEligible: !!p.ta_eligible,
+    educationLevel: p.education_level,
     createdAt: p.created_at,
     progress: progressByUser[p.id] || {}
   }));
+  renderEducationStats(users);
   renderUsers(users);
+}
+
+const EDUCATION_LEVEL_LABELS = {
+  middle_school: "Middle School",
+  high_school: "High School",
+  college: "College",
+  beyond: "Beyond College"
+};
+
+function renderEducationStats(users) {
+  const el = document.getElementById("education-stats");
+  const counts = { middle_school: 0, high_school: 0, college: 0, beyond: 0, unknown: 0 };
+  users.forEach(u => {
+    counts[u.educationLevel && counts.hasOwnProperty(u.educationLevel) ? u.educationLevel : "unknown"]++;
+  });
+  el.innerHTML = `
+    <span class="admin-stat-chip">Middle School: <strong>${counts.middle_school}</strong></span>
+    <span class="admin-stat-chip">High School: <strong>${counts.high_school}</strong></span>
+    <span class="admin-stat-chip">College: <strong>${counts.college}</strong></span>
+    <span class="admin-stat-chip">Beyond College: <strong>${counts.beyond}</strong></span>
+    ${counts.unknown ? `<span class="admin-stat-chip">Unspecified: <strong>${counts.unknown}</strong></span>` : ""}
+  `;
 }
 
 function renderUsers(users) {
@@ -318,6 +350,7 @@ function renderUsers(users) {
         <td>
           <div class="admin-name">${escapeHtml(u.name)}${u.isAdmin ? '<span class="admin-badge">Admin</span>' : ""}${u.taEligible ? '<span class="admin-badge">TA Eligible</span>' : ""}</div>
           <div class="admin-email">${escapeHtml(u.email)}</div>
+          <div class="admin-education">${escapeHtml(EDUCATION_LEVEL_LABELS[u.educationLevel] || "Unspecified")}</div>
         </td>
         <td>${joined}</td>
         ${modCells}
@@ -922,6 +955,47 @@ function renderSpeakerAdminList(talks) {
   });
 }
 
+// Two separate queries + a client-side match by id, same pattern loadUsers()
+// uses for progress — feedback.user_id references auth.users, not profiles,
+// so there's no FK PostgREST could embed automatically.
+async function loadFeedback() {
+  const [{ data: rows }, { data: profiles }] = await Promise.all([
+    supabaseClient.from("feedback").select("*").eq("reviewed", false).order("created_at", { ascending: false }),
+    supabaseClient.from("profiles").select("id,name,email")
+  ]);
+  const profileById = {};
+  (profiles || []).forEach(p => { profileById[p.id] = p; });
+  const items = (rows || []).map(r => ({ ...r, submitter: profileById[r.user_id] || null }));
+  document.getElementById("feedback-count").textContent = items.length;
+  renderFeedbackAdminList(items);
+}
+
+function renderFeedbackAdminList(items) {
+  const listEl = document.getElementById("feedback-list");
+  listEl.innerHTML = items.length
+    ? items.map(f => `
+        <div class="question-row" data-feedback-id="${f.id}">
+          <div class="question-row-main">
+            <div class="question-row-prompt">${escapeHtml(f.message)}</div>
+            <span class="question-row-type">${escapeHtml(f.submitter ? `${f.submitter.name} (${f.submitter.email})` : "Unknown user")} &middot; ${escapeHtml(f.page)} &middot; ${new Date(f.created_at).toLocaleString(undefined, { year: "numeric", month: "short", day: "numeric" })}</span>
+          </div>
+          <div class="question-row-actions">
+            <button class="btn small secondary" data-review-feedback="${f.id}">Mark Reviewed</button>
+          </div>
+        </div>
+      `).join("")
+    : `<p style="color:var(--ink-soft);font-size:0.9rem;margin:0;">No unreviewed feedback right now.</p>`;
+
+  listEl.querySelectorAll("[data-review-feedback]").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      btn.disabled = true;
+      const { error } = await supabaseClient.from("feedback").update({ reviewed: true }).eq("id", btn.getAttribute("data-review-feedback"));
+      if (error) alert(error.message || "Could not update that item.");
+      loadFeedback();
+    });
+  });
+}
+
 // Mirrors server.js's extractYoutubeId() — accepts any common YouTube URL
 // shape or a bare 11-character video ID.
 function extractYoutubeId(input) {
@@ -982,7 +1056,7 @@ document.querySelectorAll("#app-top-tabs .app-tab").forEach(btn => {
     document.querySelectorAll("#app-top-tabs .app-tab").forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
     const target = btn.getAttribute("data-app-panel");
-    ["sibrp", "ta", "portfolio", "speakers"].forEach(name => {
+    ["sibrp", "ta", "portfolio", "speakers", "feedback"].forEach(name => {
       document.getElementById(`app-panel-${name}`).style.display = target === name ? "" : "none";
     });
   });
@@ -1020,6 +1094,7 @@ document.querySelectorAll(".app-subtabs").forEach(group => {
   taApplicationSection.loadApplications();
   loadProjects();
   loadSpeakerTalks();
+  loadFeedback();
 })();
 </script>
 </body>

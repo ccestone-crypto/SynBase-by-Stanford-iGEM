@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sign Up — SynBase</title>
-<link rel="stylesheet" href="css/style.css?v=78">
+<link rel="stylesheet" href="css/style.css?v=79">
 </head>
 <body>
 
@@ -32,6 +32,16 @@
       <div class="auth-field">
         <label for="confirm">Confirm Password</label>
         <input type="password" id="confirm" name="confirm" autocomplete="new-password" minlength="8" required>
+      </div>
+      <div class="auth-field">
+        <label for="education-level">I am a...</label>
+        <select id="education-level" name="education-level" required>
+          <option value="" disabled selected>Select one</option>
+          <option value="middle_school">Middle schooler</option>
+          <option value="high_school">High schooler</option>
+          <option value="college">College student</option>
+          <option value="beyond">Beyond college</option>
+        </select>
       </div>
       <button type="submit" class="btn auth-submit" id="submit-btn">Create Account</button>
     </form>
@@ -78,12 +88,21 @@
       return;
     }
 
+    const educationLevel = document.getElementById("education-level").value;
+    if (!educationLevel) {
+      showError("Please tell us what stage of school you're in.");
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Create Account";
+      return;
+    }
+
     // Note: admin status is never granted here, even if you tried to pass
     // it — see supabase/migrations/0003_fix_admin_trigger_security.sql.
+    // education_level carries no privilege, so it's fine to trust as-is.
     const { data, error } = await supabaseClient.auth.signUp({
       email: document.getElementById("email").value.trim().toLowerCase(),
       password,
-      options: { data: { name } }
+      options: { data: { name, education_level: educationLevel } }
     });
 
     if (error) {

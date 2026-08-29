@@ -255,6 +255,78 @@ function renderHeaderCore(mountEl, fromRoot, user) {
     </div>
   `;
   wireNavDropdowns(mountEl);
+  renderFeedbackWidget(user);
+}
+
+// ---------- Feedback widget ----------
+// A small "?" button, present on every page once a user is logged in
+// (feedback rows require a user_id — see supabase/migrations/0006_feedback.sql).
+// renderHeaderCore runs on every header render (including repeated ones, e.g.
+// refreshModuleProgressBar), so this rebuilds idempotently rather than
+// stacking duplicate widgets.
+function renderFeedbackWidget(user) {
+  const existing = document.getElementById("feedback-widget");
+  if (existing) existing.remove();
+  if (!user) return;
+
+  const wrap = document.createElement("div");
+  wrap.id = "feedback-widget";
+  wrap.innerHTML = `
+    <button type="button" class="feedback-toggle" id="feedback-toggle" aria-label="Give feedback">?</button>
+    <div class="feedback-panel" id="feedback-panel" hidden>
+      <div class="feedback-panel-title">Got feedback?</div>
+      <p class="feedback-panel-hint">Spotted a bug, a typo, or a question that's worded confusingly? Let us know.</p>
+      <textarea class="feedback-input" id="feedback-input" rows="4" placeholder="Type your feedback here..." maxlength="2000"></textarea>
+      <div class="feedback-actions">
+        <button type="button" class="btn small" id="feedback-submit">Send Feedback</button>
+        <span class="feedback-status" id="feedback-status"></span>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(wrap);
+
+  const toggle = document.getElementById("feedback-toggle");
+  const panel = document.getElementById("feedback-panel");
+  const input = document.getElementById("feedback-input");
+  const submitBtn = document.getElementById("feedback-submit");
+  const status = document.getElementById("feedback-status");
+
+  toggle.addEventListener("click", (e) => {
+    e.stopPropagation();
+    panel.hidden = !panel.hidden;
+    if (!panel.hidden) input.focus();
+  });
+  panel.addEventListener("click", (e) => e.stopPropagation());
+  document.addEventListener("click", () => { panel.hidden = true; });
+
+  submitBtn.addEventListener("click", async () => {
+    const message = input.value.trim();
+    if (!message) {
+      status.textContent = "Type something first.";
+      status.className = "feedback-status incorrect";
+      return;
+    }
+    submitBtn.disabled = true;
+    status.textContent = "Sending…";
+    status.className = "feedback-status";
+
+    const { error } = await supabaseClient.from("feedback").insert({
+      user_id: user.id,
+      page: location.pathname,
+      message
+    });
+
+    submitBtn.disabled = false;
+    if (error) {
+      status.textContent = "Couldn't send — please try again.";
+      status.className = "feedback-status incorrect";
+      return;
+    }
+    input.value = "";
+    status.textContent = "Thanks! Sent.";
+    status.className = "feedback-status correct";
+    setTimeout(() => { panel.hidden = true; status.textContent = ""; }, 1500);
+  });
 }
 
 function renderHeader(mountEl, fromRoot) {

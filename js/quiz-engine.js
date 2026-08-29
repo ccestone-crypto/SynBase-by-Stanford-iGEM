@@ -744,6 +744,7 @@ function freeResponseTemplate(page) {
     <div class="free-response-box" data-fr-for="${page.id}">
       <div class="free-response-label"><span class="fr-badge">Post to see what classmates wrote</span></div>
       <p class="free-response-question">${fr.prompt}</p>
+      <p class="free-response-note">Please be mindful that this is a community space. Responses will be periodically reviewed.</p>
       <textarea class="free-response-input" data-fr-input rows="5" placeholder="Type your response here..." maxlength="4000"></textarea>
       <div class="free-response-actions">
         <button type="button" class="btn small" data-fr-submit>Post Response</button>
