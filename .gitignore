@@ -22,6 +22,9 @@ assets/video/*.mp4
 .DS_Store
 Thumbs.db
 
+# Firebase CLI's local deploy cache (machine-specific, regenerated on deploy)
+.firebase/
+
 # Unrelated scratch apps living in this same folder — not part of SynBase
 /journal/
 /scrapbook/

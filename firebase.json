@@ -1,0 +1,20 @@
+{
+  "hosting": {
+    "public": ".",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**",
+      "data.db",
+      "notes/**",
+      "journal/**",
+      "scrapbook/**",
+      "todo/**",
+      "shared/**",
+      "supabase/**"
+    ],
+    "redirects": [
+      { "source": "/", "destination": "/home.html", "type": 302 }
+    ]
+  }
+}
