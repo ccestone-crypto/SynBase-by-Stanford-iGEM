@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin — SynBase</title>
-<link rel="stylesheet" href="css/style.css?v=79">
+<link rel="stylesheet" href="css/style.css?v=80">
 </head>
 <body>
 
@@ -33,6 +33,7 @@
       <tbody id="admin-table-body"></tbody>
     </table>
   </div>
+  <div class="admin-pagination" id="admin-pagination"></div>
 </main>
 
 <main class="container narrow">
@@ -247,7 +248,11 @@
 <script>
 function calcModuleProgress(progress, moduleId, sectionCount) {
   const mod = (progress && progress[moduleId]) || { sections: {} };
-  const completed = Object.keys(mod.sections || {}).filter(k => mod.sections[k]).length;
+  // Clamped to sectionCount: a module's pages can be renumbered between a
+  // student's visits, which can leave old, no-longer-existing section ids
+  // marked complete alongside their current replacements — without this,
+  // that stale overlap pushes completed past total and shows over 100%.
+  const completed = Math.min(sectionCount, Object.keys(mod.sections || {}).filter(k => mod.sections[k]).length);
   return Math.round((completed / sectionCount) * 100);
 }
 
@@ -256,7 +261,7 @@ function calcOverall(progress) {
   MODULES_META.forEach(m => {
     const mod = (progress && progress[m.id]) || { sections: {} };
     total += m.sectionCount;
-    completed += Object.keys(mod.sections || {}).filter(k => mod.sections[k]).length;
+    completed += Math.min(m.sectionCount, Object.keys(mod.sections || {}).filter(k => mod.sections[k]).length);
   });
   return total ? Math.round((completed / total) * 100) : 0;
 }
@@ -283,6 +288,10 @@ function renderModuleColumnHeaders() {
 // progress row (progress_sections_select_own_or_admin) — one query each,
 // grouped client-side, rather than one round trip per student like the old
 // server-side loop would've needed anyway.
+const USERS_PER_PAGE = 6;
+let ALL_USERS = [];
+let usersPage = 0;
+
 async function loadUsers() {
   const [{ data: profiles, error: pErr }, { data: sections }] = await Promise.all([
     supabaseClient.from("profiles").select("*").order("created_at", { ascending: true }),
@@ -300,7 +309,7 @@ async function loadUsers() {
     progressByUser[row.user_id][row.module_id].sections[row.section_id] = true;
   });
 
-  const users = (profiles || []).map(p => ({
+  ALL_USERS = (profiles || []).map(p => ({
     id: p.id,
     name: p.name,
     email: p.email,
@@ -310,8 +319,8 @@ async function loadUsers() {
     createdAt: p.created_at,
     progress: progressByUser[p.id] || {}
   }));
-  renderEducationStats(users);
-  renderUsers(users);
+  renderEducationStats(ALL_USERS);
+  renderUsers();
 }
 
 const EDUCATION_LEVEL_LABELS = {
@@ -336,12 +345,38 @@ function renderEducationStats(users) {
   `;
 }
 
-function renderUsers(users) {
-  const body = document.getElementById("admin-table-body");
-  if (!users.length) {
-    body.innerHTML = `<tr><td colspan="${ADMIN_TABLE_COLSPAN}">No accounts yet.</td></tr>`;
+function renderUsersPagination() {
+  const el = document.getElementById("admin-pagination");
+  const totalPages = Math.max(1, Math.ceil(ALL_USERS.length / USERS_PER_PAGE));
+  if (usersPage > totalPages - 1) usersPage = totalPages - 1;
+  if (usersPage < 0) usersPage = 0;
+
+  if (ALL_USERS.length <= USERS_PER_PAGE) {
+    el.innerHTML = "";
     return;
   }
+
+  el.innerHTML = `
+    <button class="btn small secondary" id="admin-users-prev" ${usersPage === 0 ? "disabled" : ""}>&larr; Previous</button>
+    <span class="admin-pagination-label">Page ${usersPage + 1} of ${totalPages}</span>
+    <button class="btn small secondary" id="admin-users-next" ${usersPage >= totalPages - 1 ? "disabled" : ""}>Next &rarr;</button>
+  `;
+  document.getElementById("admin-users-prev").addEventListener("click", () => { usersPage--; renderUsers(); });
+  document.getElementById("admin-users-next").addEventListener("click", () => { usersPage++; renderUsers(); });
+}
+
+function renderUsers() {
+  const body = document.getElementById("admin-table-body");
+  if (!ALL_USERS.length) {
+    body.innerHTML = `<tr><td colspan="${ADMIN_TABLE_COLSPAN}">No accounts yet.</td></tr>`;
+    renderUsersPagination();
+    return;
+  }
+  const totalPages = Math.max(1, Math.ceil(ALL_USERS.length / USERS_PER_PAGE));
+  if (usersPage > totalPages - 1) usersPage = totalPages - 1;
+  if (usersPage < 0) usersPage = 0;
+  const start = usersPage * USERS_PER_PAGE;
+  const users = ALL_USERS.slice(start, start + USERS_PER_PAGE);
   body.innerHTML = users.map(u => {
     const joined = new Date(u.createdAt).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
     const modCells = MODULES_META.map(m => `<td>${pctCell(calcModuleProgress(u.progress, m.id, m.sectionCount))}</td>`).join("");
@@ -408,6 +443,8 @@ function renderUsers(users) {
       loadUsers();
     });
   });
+
+  renderUsersPagination();
 }
 
 function escapeHtml(str) {
