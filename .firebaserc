@@ -1,6 +1,6 @@
 {
   "projects": {
-    "SynBase": "synbase-stanford-igem"
+    "default": "synbase-stanford-igem"
   },
   "targets": {
     "synbase-stanford-igem": {
