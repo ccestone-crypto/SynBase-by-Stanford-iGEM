@@ -2,6 +2,14 @@
   "projects": {
     "SynBase": "synbase-stanford-igem"
   },
-  "targets": {},
+  "targets": {
+    "synbase-stanford-igem": {
+      "hosting": {
+        "synbase-target": [
+          "synbase"
+        ]
+      }
+    }
+  },
   "etags": {}
 }

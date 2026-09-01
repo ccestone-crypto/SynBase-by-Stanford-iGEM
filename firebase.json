@@ -1,5 +1,6 @@
 {
   "hosting": {
+    "target": "synbase-target",
     "public": ".",
     "ignore": [
       "firebase.json",
