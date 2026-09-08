@@ -834,6 +834,9 @@ a:hover { text-decoration: underline; }
   padding: 2px 9px;
 }
 .free-response-question { font-weight: 600; margin: 0 0 12px; font-size: 0.98rem; color: var(--charcoal); }
+.free-response-done { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+.free-response-done p { margin: 0; color: var(--ink-soft); font-size: 0.9rem; }
+.fr-badge-done { color: #fff; background: var(--syn-green); border-color: var(--syn-green); }
 .free-response-note { font-size: 0.78rem; font-style: italic; color: var(--ink-soft); margin: -6px 0 12px; }
 .free-response-input {
   width: 100%;

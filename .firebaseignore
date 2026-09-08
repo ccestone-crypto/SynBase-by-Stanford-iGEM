@@ -1,0 +1,11 @@
+firebase.json
+**/.*
+**/node_modules/**
+server/**
+supabase/**
+notes/**
+journal/**
+scrapbook/**
+todo/**
+shared/**
+*.log

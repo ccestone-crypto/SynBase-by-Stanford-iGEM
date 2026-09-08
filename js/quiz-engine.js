@@ -249,7 +249,7 @@ function renderPageAt(MODULE, index, isInitial = false) {
       <article class="page-card page-practice">
         <div class="quiz-label">Reflection</div>
         <h2>${page.title}</h2>
-        ${freeResponseTemplate(page)}
+        ${freeResponseTemplate(page, MODULE.id)}
       </article>
     `;
     wireFreeResponse(MODULE, page, index);
@@ -738,11 +738,37 @@ function wireMatching(MODULE, page, index) {
 }
 
 // ---------- Free-response / discussion-board pages ----------
-function freeResponseTemplate(page) {
+// Temporarily off: free_responses' RLS select policy has a self-referencing
+// subquery that Postgres rejects as infinite recursion (error 42P17) — every
+// read from that table currently fails, board or not (writes are unaffected,
+// so students can still submit their own reflection). See
+// supabase/migrations/0007_fix_free_responses_recursion.sql for the fix;
+// flip this back to true once that migration has been run.
+const DISCUSSION_BOARD_ENABLED = false;
+
+// While DISCUSSION_BOARD_ENABLED is off, a free-response answer can't be
+// edited (see wireFreeResponse) — so a page the student has already
+// completed shows a static "already submitted" state instead of a blank,
+// resubmittable box that would just dead-end into a duplicate-row error.
+// isSectionComplete/progress_sections is a separate table from
+// free_responses, so this stays reliable even while free_responses reads
+// are broken.
+function freeResponseTemplate(page, moduleId) {
   const fr = page.freeResponse;
+  if (!DISCUSSION_BOARD_ENABLED && isSectionComplete(moduleId, page.id)) {
+    return `
+      <div class="free-response-box" data-fr-for="${page.id}">
+        <p class="free-response-question">${fr.prompt}</p>
+        <div class="free-response-done">
+          <span class="fr-badge fr-badge-done">Response submitted</span>
+          <p>You've already submitted a response for this reflection — thanks for sharing your thoughts!</p>
+        </div>
+      </div>
+    `;
+  }
   return `
     <div class="free-response-box" data-fr-for="${page.id}">
-      <div class="free-response-label"><span class="fr-badge">Post to see what classmates wrote</span></div>
+      ${DISCUSSION_BOARD_ENABLED ? `<div class="free-response-label"><span class="fr-badge">Post to see what classmates wrote</span></div>` : ""}
       <p class="free-response-question">${fr.prompt}</p>
       <p class="free-response-note">Please be mindful that this is a community space. Responses will be periodically reviewed.</p>
       <textarea class="free-response-input" data-fr-input rows="5" placeholder="Type your response here..." maxlength="4000"></textarea>
@@ -750,10 +776,12 @@ function freeResponseTemplate(page) {
         <button type="button" class="btn small" data-fr-submit>Post Response</button>
         <span class="free-response-status" data-fr-status></span>
       </div>
-      <div class="discussion-board" data-fr-board>
-        <div class="discussion-board-label">Recent Class Responses</div>
-        <div class="discussion-board-list" data-fr-board-list></div>
-      </div>
+      ${DISCUSSION_BOARD_ENABLED ? `
+        <div class="discussion-board" data-fr-board>
+          <div class="discussion-board-label">Recent Class Responses</div>
+          <div class="discussion-board-list" data-fr-board-list></div>
+        </div>
+      ` : ""}
     </div>
   `;
 }
@@ -807,20 +835,25 @@ function wireFreeResponse(MODULE, page, index) {
   if (!box) return;
   const input = box.querySelector("[data-fr-input]");
   const submitBtn = box.querySelector("[data-fr-submit]");
+  // Nothing to wire up when freeResponseTemplate rendered the read-only
+  // "already submitted" state instead of the form.
+  if (!submitBtn) return;
   const status = box.querySelector("[data-fr-status]");
   const boardList = box.querySelector("[data-fr-board-list]");
 
   // Prefill from a previous attempt, if any, so students can see and revise
   // their last answer instead of starting from a blank box every visit.
-  renderBoardLocked(boardList);
-  loadFreeResponse(MODULE.id, page.id)
-    .then(data => {
-      if (data && data.response) {
-        input.value = data.response.answer || "";
-        renderBoardEntries(boardList, data.board);
-      }
-    })
-    .catch(() => {});
+  if (DISCUSSION_BOARD_ENABLED) {
+    renderBoardLocked(boardList);
+    loadFreeResponse(MODULE.id, page.id)
+      .then(data => {
+        if (data && data.response) {
+          input.value = data.response.answer || "";
+          renderBoardEntries(boardList, data.board);
+        }
+      })
+      .catch(() => {});
+  }
 
   submitBtn.addEventListener("click", async () => {
     const answer = input.value.trim();
@@ -840,17 +873,37 @@ function wireFreeResponse(MODULE, page, index) {
     status.className = "free-response-status";
 
     try {
-      const { error } = await supabaseClient.from("free_responses").upsert(
-        { user_id: CURRENT_USER.id, module_id: MODULE.id, section_id: page.id, answer, updated_at: new Date().toISOString() },
-        { onConflict: "user_id,module_id,section_id" }
-      );
+      let error;
+      if (DISCUSSION_BOARD_ENABLED) {
+        ({ error } = await supabaseClient.from("free_responses").upsert(
+          { user_id: CURRENT_USER.id, module_id: MODULE.id, section_id: page.id, answer, updated_at: new Date().toISOString() },
+          { onConflict: "user_id,module_id,section_id" }
+        ));
+      } else {
+        // Plain insert instead of upsert: ON CONFLICT (and a plain UPDATE)
+        // both need to read the existing row first, which currently hits
+        // free_responses' broken recursive select policy — see the
+        // DISCUSSION_BOARD_ENABLED note above. A brand-new insert doesn't
+        // need to read anything first, so it isn't affected. A duplicate
+        // (23505) shouldn't normally happen since freeResponseTemplate
+        // hides this form once the page is already complete — treat it as
+        // "already submitted" rather than an error if it does (e.g. a
+        // double-click race).
+        ({ error } = await supabaseClient.from("free_responses").insert(
+          { user_id: CURRENT_USER.id, module_id: MODULE.id, section_id: page.id, answer, updated_at: new Date().toISOString() }
+        ));
+        if (error && error.code === "23505") error = null;
+      }
       if (error) throw new Error(error.message);
 
-      const { board } = await loadFreeResponse(MODULE.id, page.id);
-
-      status.textContent = "Posted! Revise and resubmit anytime.";
+      status.textContent = DISCUSSION_BOARD_ENABLED ? "Posted! Revise and resubmit anytime." : "Posted! Thanks for sharing.";
       status.className = "free-response-status correct";
-      renderBoardEntries(boardList, board);
+      if (DISCUSSION_BOARD_ENABLED) {
+        const { board } = await loadFreeResponse(MODULE.id, page.id);
+        renderBoardEntries(boardList, board);
+      } else {
+        submitBtn.disabled = true;
+      }
 
       if (!isSectionComplete(MODULE.id, page.id)) {
         markSectionComplete(MODULE.id, page.id);
@@ -862,7 +915,6 @@ function wireFreeResponse(MODULE, page, index) {
     } catch (err) {
       status.textContent = err.message || "Couldn't post your response. Please try again.";
       status.className = "free-response-status incorrect";
-    } finally {
       submitBtn.disabled = false;
     }
   });
