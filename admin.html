@@ -50,6 +50,7 @@
       <button type="button" class="app-tab" data-app-panel="portfolio">Beyond SiBRP</button>
       <button type="button" class="app-tab" data-app-panel="speakers">Speaker Series</button>
       <button type="button" class="app-tab" data-app-panel="feedback">Feedback <span class="app-subtab-count" id="feedback-count">0</span></button>
+      <button type="button" class="app-tab" data-app-panel="discussion">Discussion Responses <span class="app-subtab-count" id="discussion-count">0</span></button>
     </div>
 
     <!-- ===== SiBRP Application ===== -->
@@ -242,6 +243,18 @@
     <div class="app-panel" id="app-panel-feedback" style="display:none;">
       <p class="app-panel-note">Submitted from the "?" widget students see on every page. Marking one reviewed just hides it from this list.</p>
       <div id="feedback-list"></div>
+    </div>
+
+    <!-- ===== Discussion Responses ===== -->
+    <div class="app-panel" id="app-panel-discussion" style="display:none;">
+      <p class="app-panel-note">Every free-response answer students have submitted, with who wrote it (students only ever see each other's answers anonymously). Deleting one removes it from the discussion board and from that student's saved answer; their progress is not affected.</p>
+      <div class="response-toolbar">
+        <select id="discussion-module-filter"><option value="">All modules</option></select>
+        <input type="text" class="response-search" id="discussion-search" placeholder="Search by name, email, or response text...">
+        <button type="button" class="btn small secondary" id="discussion-export-csv-btn">Export as CSV</button>
+      </div>
+      <div id="discussion-list"></div>
+      <div class="admin-pagination" id="discussion-pagination"></div>
     </div>
   </div>
 </main>
@@ -1039,6 +1052,149 @@ function renderFeedbackAdminList(items) {
   });
 }
 
+// ---------- Discussion responses (all free-response answers) ----------
+const DISCUSSION_PER_PAGE = 20;
+let ALL_DISCUSSION = [];
+let discussionPage = 0;
+
+// PostgREST caps a single request at 1000 rows by default, and this table
+// grows by one row per student per free-response page — page through it.
+async function fetchAllFreeResponses() {
+  const rows = [];
+  for (let from = 0; ; from += 1000) {
+    const { data, error } = await supabaseClient.from("free_responses").select("*")
+      .order("updated_at", { ascending: false }).range(from, from + 999);
+    if (error) throw error;
+    rows.push(...data);
+    if (data.length < 1000) break;
+  }
+  return rows;
+}
+
+async function loadDiscussion() {
+  const listEl = document.getElementById("discussion-list");
+  try {
+    const [rows, { data: profiles }] = await Promise.all([
+      fetchAllFreeResponses(),
+      supabaseClient.from("profiles").select("id,name,email")
+    ]);
+    const profileById = {};
+    (profiles || []).forEach(p => { profileById[p.id] = p; });
+    ALL_DISCUSSION = rows.map(r => ({ ...r, author: profileById[r.user_id] || null }));
+    document.getElementById("discussion-count").textContent = ALL_DISCUSSION.length;
+    renderDiscussion();
+  } catch (e) {
+    listEl.innerHTML = `<p style="color:var(--ink-soft);font-size:0.9rem;margin:0;">Could not load responses.</p>`;
+  }
+}
+
+function moduleLabel(moduleId) {
+  const m = MODULES_META.find(x => x.id === moduleId);
+  return m ? `Module ${m.number}: ${m.title}` : moduleId;
+}
+
+function filteredDiscussion() {
+  const moduleId = document.getElementById("discussion-module-filter").value;
+  const q = document.getElementById("discussion-search").value.trim().toLowerCase();
+  return ALL_DISCUSSION.filter(r => {
+    if (moduleId && r.module_id !== moduleId) return false;
+    if (!q) return true;
+    const a = r.author;
+    return (r.answer || "").toLowerCase().includes(q)
+      || (a && ((a.name || "").toLowerCase().includes(q) || (a.email || "").toLowerCase().includes(q)));
+  });
+}
+
+function renderDiscussion() {
+  const listEl = document.getElementById("discussion-list");
+  const items = filteredDiscussion();
+  const totalPages = Math.max(1, Math.ceil(items.length / DISCUSSION_PER_PAGE));
+  if (discussionPage > totalPages - 1) discussionPage = totalPages - 1;
+  if (discussionPage < 0) discussionPage = 0;
+  const pageItems = items.slice(discussionPage * DISCUSSION_PER_PAGE, (discussionPage + 1) * DISCUSSION_PER_PAGE);
+
+  listEl.innerHTML = pageItems.length
+    ? pageItems.map(r => `
+        <div class="question-row">
+          <div class="question-row-main">
+            <div class="question-row-prompt" style="white-space:pre-wrap;">${escapeHtml(r.answer)}</div>
+            <span class="question-row-type">${escapeHtml(r.author ? `${r.author.name} (${r.author.email})` : "Unknown user")} &middot; ${escapeHtml(moduleLabel(r.module_id))} &middot; page ${escapeHtml(r.section_id)} &middot; ${new Date(r.updated_at).toLocaleString(undefined, { year: "numeric", month: "short", day: "numeric" })}</span>
+          </div>
+          <div class="question-row-actions">
+            <button class="btn small secondary" data-delete-response="${escapeHtml(r.user_id)}|${escapeHtml(r.module_id)}|${escapeHtml(r.section_id)}">Delete</button>
+          </div>
+        </div>
+      `).join("")
+    : `<p style="color:var(--ink-soft);font-size:0.9rem;margin:0;">No responses match.</p>`;
+
+  listEl.querySelectorAll("[data-delete-response]").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      if (!confirm("Delete this response? It disappears from the discussion board and from the student's saved answer.")) return;
+      const [userId, moduleId, sectionId] = btn.getAttribute("data-delete-response").split("|");
+      btn.disabled = true;
+      const { error } = await supabaseClient.from("free_responses").delete()
+        .eq("user_id", userId).eq("module_id", moduleId).eq("section_id", sectionId);
+      if (error) alert(error.message || "Could not delete that response.");
+      loadDiscussion();
+    });
+  });
+
+  const pagEl = document.getElementById("discussion-pagination");
+  if (items.length <= DISCUSSION_PER_PAGE) {
+    pagEl.innerHTML = "";
+    return;
+  }
+  pagEl.innerHTML = `
+    <button class="btn small secondary" id="discussion-prev" ${discussionPage === 0 ? "disabled" : ""}>&larr; Previous</button>
+    <span class="admin-pagination-label">Page ${discussionPage + 1} of ${totalPages} (${items.length} responses)</span>
+    <button class="btn small secondary" id="discussion-next" ${discussionPage >= totalPages - 1 ? "disabled" : ""}>Next &rarr;</button>
+  `;
+  document.getElementById("discussion-prev").addEventListener("click", () => { discussionPage--; renderDiscussion(); });
+  document.getElementById("discussion-next").addEventListener("click", () => { discussionPage++; renderDiscussion(); });
+}
+
+function exportDiscussionCsv() {
+  function csvEscape(value) {
+    let str = value == null ? "" : String(value);
+    if (/^[=+\-@]/.test(str)) str = `'${str}`;
+    return /[",\r\n]/.test(str) ? `"${str.replace(/"/g, '""')}"` : str;
+  }
+  const headers = ["Name", "Email", "Module", "Page", "Response", "Last Updated"];
+  const lines = [headers.map(csvEscape).join(",")];
+  filteredDiscussion().forEach(r => {
+    lines.push([
+      r.author ? r.author.name : "",
+      r.author ? r.author.email : "",
+      moduleLabel(r.module_id),
+      r.section_id,
+      r.answer,
+      new Date(r.updated_at).toLocaleString()
+    ].map(csvEscape).join(","));
+  });
+  const blob = new Blob(["\ufeff" + lines.join("\r\n")], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `synbase-discussion-responses-${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+(function initDiscussionControls() {
+  const moduleSel = document.getElementById("discussion-module-filter");
+  MODULES_META.forEach(m => {
+    const opt = document.createElement("option");
+    opt.value = m.id;
+    opt.textContent = `Module ${m.number}: ${m.title}`;
+    moduleSel.appendChild(opt);
+  });
+  moduleSel.addEventListener("change", () => { discussionPage = 0; renderDiscussion(); });
+  document.getElementById("discussion-search").addEventListener("input", () => { discussionPage = 0; renderDiscussion(); });
+  document.getElementById("discussion-export-csv-btn").addEventListener("click", exportDiscussionCsv);
+})();
+
 // Mirrors server.js's extractYoutubeId() — accepts any common YouTube URL
 // shape or a bare 11-character video ID.
 function extractYoutubeId(input) {
@@ -1099,7 +1255,7 @@ document.querySelectorAll("#app-top-tabs .app-tab").forEach(btn => {
     document.querySelectorAll("#app-top-tabs .app-tab").forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
     const target = btn.getAttribute("data-app-panel");
-    ["sibrp", "ta", "portfolio", "speakers", "feedback"].forEach(name => {
+    ["sibrp", "ta", "portfolio", "speakers", "feedback", "discussion"].forEach(name => {
       document.getElementById(`app-panel-${name}`).style.display = target === name ? "" : "none";
     });
   });
@@ -1137,6 +1293,7 @@ document.querySelectorAll(".app-subtabs").forEach(group => {
   taApplicationSection.loadApplications();
   loadProjects();
   loadSpeakerTalks();
+  loadDiscussion();
   loadFeedback();
 })();
 </script>
