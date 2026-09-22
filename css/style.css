@@ -1593,6 +1593,9 @@ a:hover { text-decoration: underline; }
 /* ---------- Primary CTA band (Start Learning / See How It Works) ---------- */
 .cta-band { background: #fff; padding: 12px 24px 20px; }
 .cta-band-row { display: flex; justify-content: center; flex-wrap: wrap; gap: 20px; max-width: 780px; margin: 0 auto; }
+.cta-band-main { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.cta-band-label { margin: 0; font-size: 0.95rem; font-weight: 600; color: var(--ink-soft); }
+.cta-band-label strong { color: var(--syn-green-dark); }
 .btn-lg {
   flex: 1;
   min-width: 220px;

@@ -8,7 +8,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="assets/img/site/favicon-32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="assets/img/site/favicon-16.png">
 <link rel="apple-touch-icon" sizes="180x180" href="assets/img/site/favicon-180.png">
-<link rel="stylesheet" href="css/style.css?v=83">
+<link rel="stylesheet" href="css/style.css?v=84">
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-4XQ5Y1N331"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag("js",new Date());gtag("config","G-4XQ5Y1N331");</script>
 </head>
@@ -34,11 +34,13 @@
   </div>
 </section>
 
-<!-- Primary calls to action, sized to lead the page -->
+<!-- Primary call to action, sized to lead the page -->
 <section class="cta-band">
   <div class="cta-band-row">
-    <a class="btn btn-lg" href="signup.html">Start Learning</a>
-    <a class="btn btn-lg secondary" href="#how-it-works">See How It Works</a>
+    <div class="cta-band-main">
+      <p class="cta-band-label" id="learner-count-label" hidden></p>
+      <a class="btn btn-lg" href="signup.html">Start Learning!</a>
+    </div>
   </div>
 </section>
 
@@ -217,6 +219,17 @@ function renderExploreGrid(mountEl) {
   `).join("");
 }
 
+// get_user_count() is a SECURITY DEFINER function (see
+// supabase/migrations/0011_public_user_count.sql) so this works for a
+// logged-out visitor even though profiles itself isn't publicly readable.
+async function renderLearnerCount() {
+  const { data, error } = await supabaseClient.rpc("get_user_count");
+  if (error || typeof data !== "number") return;
+  const el = document.getElementById("learner-count-label");
+  el.innerHTML = `Join <strong>${data.toLocaleString()}</strong> learner${data === 1 ? "" : "s"} around the world`;
+  el.hidden = false;
+}
+
 function renderCurriculumStats() {
   const lessonCount = MODULES_META.reduce((sum, m) => sum + (COURSE_OUTLINE[m.id] || []).length, 0);
   // Full planned curriculum size (see curriculum.html's syllabus), not just the
@@ -278,6 +291,7 @@ function renderTrialQuiz(mountEl) {
 (async () => {
   await renderPublicHeader(document.getElementById("site-header"), true);
   renderCurriculumStats();
+  renderLearnerCount();
   renderExploreGrid(document.getElementById("explore-grid"));
   renderTrialQuiz(document.getElementById("trial-quiz"));
 })();
