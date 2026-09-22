@@ -55,7 +55,8 @@ async function loadCurrentUser(authUser) {
     name: profile.name,
     email: profile.email,
     isAdmin: !!profile.is_admin,
-    taEligible: !!profile.ta_eligible
+    taEligible: !!profile.ta_eligible,
+    avatar: profile.avatar || null
   };
 }
 
@@ -239,9 +240,10 @@ function headerActionsHtml(prefix, user) {
   }
   const overall = overallProgress();
   const initial = escapeHtml((user.name || "?").trim().charAt(0).toUpperCase() || "?");
+  const avatarSrc = user.avatar ? avatarUrl(user.avatar, !prefix) : null;
   return `
     <span class="header-progress-pill">Overall: ${overall.pct}%</span>
-    <a class="header-avatar" href="${prefix}profile.html" title="${escapeHtml(user.name)}">${initial}</a>
+    <a class="header-avatar" href="${prefix}profile.html" title="${escapeHtml(user.name)}">${avatarSrc ? `<img src="${avatarSrc}" alt="">` : initial}</a>
   `;
 }
 
