@@ -335,6 +335,8 @@ async function loadUsers() {
     isAdmin: !!p.is_admin,
     taEligible: !!p.ta_eligible,
     educationLevel: p.education_level,
+    country: p.country,
+    usState: p.us_state,
     createdAt: p.created_at,
     progress: progressByUser[p.id] || {}
   }));
@@ -405,6 +407,7 @@ function renderUsers() {
           <div class="admin-name">${escapeHtml(u.name)}${u.isAdmin ? '<span class="admin-badge">Admin</span>' : ""}${u.taEligible ? '<span class="admin-badge">TA Eligible</span>' : ""}</div>
           <div class="admin-email">${escapeHtml(u.email)}</div>
           <div class="admin-education">${escapeHtml(EDUCATION_LEVEL_LABELS[u.educationLevel] || "Unspecified")}</div>
+          <div class="admin-education">${escapeHtml(u.country ? (u.usState ? `${u.country} — ${u.usState}` : u.country) : "Location unspecified")}</div>
         </td>
         <td>${joined}</td>
         ${modCells}

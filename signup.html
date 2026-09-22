@@ -49,6 +49,14 @@
           <option value="beyond">Beyond college</option>
         </select>
       </div>
+      <div class="auth-field">
+        <label for="country">Country</label>
+        <select id="country" name="country" required></select>
+      </div>
+      <div class="auth-field" id="us-state-field" style="display:none;">
+        <label for="us-state">State</label>
+        <select id="us-state" name="us-state"></select>
+      </div>
       <button type="submit" class="btn auth-submit" id="submit-btn">Create Account</button>
     </form>
 
@@ -56,12 +64,29 @@
   </div>
 </div>
 
+<script src="js/location-data.js?v=1"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="js/supabase-client.js?v=2"></script>
 <script>
   const form = document.getElementById("signup-form");
   const errorEl = document.getElementById("auth-error");
   const submitBtn = document.getElementById("submit-btn");
+
+  const countrySelect = document.getElementById("country");
+  const stateField = document.getElementById("us-state-field");
+  const stateSelect = document.getElementById("us-state");
+
+  countrySelect.innerHTML = `<option value="" disabled selected>Select one</option>`
+    + COUNTRIES.map(c => `<option value="${c}">${c}</option>`).join("");
+  stateSelect.innerHTML = `<option value="" disabled selected>Select one</option>`
+    + US_STATES.map(s => `<option value="${s}">${s}</option>`).join("");
+
+  countrySelect.addEventListener("change", () => {
+    const isUS = countrySelect.value === "United States";
+    stateField.style.display = isUS ? "" : "none";
+    stateSelect.required = isUS;
+    if (!isUS) stateSelect.value = "";
+  });
 
   function showError(msg) {
     errorEl.textContent = msg;
@@ -102,13 +127,30 @@
       return;
     }
 
+    const country = countrySelect.value;
+    if (!country) {
+      showError("Please tell us what country you're in.");
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Create Account";
+      return;
+    }
+    const isUS = country === "United States";
+    const usState = isUS ? stateSelect.value : "";
+    if (isUS && !usState) {
+      showError("Please tell us what state you're in.");
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Create Account";
+      return;
+    }
+
     // Note: admin status is never granted here, even if you tried to pass
     // it — see supabase/migrations/0003_fix_admin_trigger_security.sql.
-    // education_level carries no privilege, so it's fine to trust as-is.
+    // education_level/country/us_state carry no privilege, so it's fine to
+    // trust them as-is (see supabase/migrations/0009_signup_location.sql).
     const { data, error } = await supabaseClient.auth.signUp({
       email: document.getElementById("email").value.trim().toLowerCase(),
       password,
-      options: { data: { name, education_level: educationLevel } }
+      options: { data: { name, education_level: educationLevel, country, us_state: usState || null } }
     });
 
     if (error) {
